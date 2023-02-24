@@ -53,7 +53,7 @@ With my efforts I hope to help Hollywood-MAL to grow its userbase because it des
 
 ### SUPPORT
 
-Support is granted for all my Patrons and for people asking on the official [Hollywood-MAL forum]((https://forums.hollywood-mal.com/).
+Support is granted for all my Patrons and for people asking on the official [Hollywood-MAL forum](https://forums.hollywood-mal.com/).
 
 Patrons can also be able to ask for examples or explanations that are not included in the documentation.
 
