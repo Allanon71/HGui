@@ -16,7 +16,7 @@ My Patreon page : https://www.patreon.com/Allanon71
 
 HGui is released as free software but donations are welcome.
 
-### ![_HGui.png](C:\Users\Fabio.NB-FABIO\Dropbox\+HWLibs\%23%23%20GitHub_Repos%20%23%23\HGui\_HGui.png)
+### ![_HGui.png](https://github.com/Allanon71/HGui/blob/main/_HGui.png)
 
 ### SETUP
 
