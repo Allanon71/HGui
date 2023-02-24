@@ -1,0 +1,91 @@
+/*******************************************************************************
+HGUI : Tutorial 209 - Part 1 : Window's Menu                 v1.1 : 27/05/2016 *
+********************************************************************************
+Windows can have their own system menu placed on the top bar, just below the 
+window's title bar. In our previous tutorials we haven't defined any the window's
+menu so it was hidden, let's see in this first part about menus how we can make 
+use of them.
+
+First of all HGui offers three menu types:
+- Window's menus : the one placed right below the title bar
+- Window's context menus : the one opened when the user right click on any
+                           inactive areas (boxes, labels, and so on...)
+- Gadget's context menus : a custom menu that belongs to an active gadget (like
+                           a button) and that is shown when the user right click
+                           on it.
+This last type of menu will be analyzed later, when we will talk about gadgets.
+In this tutorial we will se the first two menu types related to the windows.
+
+For this first part we will define a very basic menu without callback functions,
+just to understand the basics.
+********************************************************************************/
+
+;---| INCLUDE THE LIBRARIES DEFINITIONS |---------------------------------------
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+/*******************************************************************************
+ MENU DEFINITION
+ Creating a menu can be quiet complex on the first times because of the tree 
+ structure that menus must have, you can define window's menu in two way, at 
+ creation time or at runtime, now we will see how to create a menu at creation
+ time.
+ In the <option> table you have to setup a tag called <menu> that have the
+ following structure:
+   <menu>         The menu structure
+      <item0>        First menu entry
+         <type>      The gadget type (#BOX, #BUTTON, ...)
+         <params>    The gadget parameters needed for its creation
+         <size>      The menu width (optional)
+         <callback>  A function called when this item is selected (optional)
+         <submenu>   A sub menu attached to this item (optional)
+      <item1>        Second menu entry
+         ...
+
+ Below there is a menu definition, you will see things never seen before so 
+ don't  be scared!
+ *******************************************************************************/
+
+; Let's define a table with the tipical menu structure, don't be scared by the
+; table tree structure!
+Local myMenu =
+       { { type = #HGUI_BUTTON_GADGET,
+           params = { Caption = "File" },
+           submenu = {
+              { type = #HGUI_BUTTON_GADGET,
+                params = { Caption = "Open file" } },
+              { type = #HGUI_BUTTON_GADGET,
+                params = { Caption = "Save file" } },
+              { type = #HGUI_BUTTON_GADGET,
+                 params = { Caption = "Quit" } }
+            } },
+         { type = #HGUI_BUTTON_GADGET,
+           params = { Caption = "Edit" },
+           submenu = {
+              { type = #HGUI_BUTTON_GADGET,
+                params = { Caption = "Copy" } },
+              { type = #HGUI_BUTTON_GADGET,
+                params = { Caption = "Cut" } },
+              { type = #HGUI_BUTTON_GADGET,
+                 params = { Caption = "Paste" } }
+            } },
+         { type = #HGUI_BUTTON_GADGET,
+           params = { Caption = "Help" } },
+         { type = #HGUI_BUTTON_GADGET,
+           params = { Caption = "About" } }
+         }
+
+; Time to create a window
+Local myWin1 = HGui.Window:new(
+                 { title = "Window's Menu : (1) Basics",
+                   name  = "win3",
+                   position   = { x = #CENTER, y = #CENTER },
+                   size       = { w = 600, h = 400 },
+                   ; Here is how we can attach a window menu at creation time
+                   menu       = myMenu })
+
+
+
+Repeat
+   WaitEvent()
+Forever

@@ -1,0 +1,151 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>HGui.Window:new()</h1>
+
+    <p><span class="text-big"><code>winObj = HGui.Window:new(options)</code></span>
+    </p>
+    <p>Create a new HGui window.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>options </strong>: A table with all the parameters you want to
+        use to create the new window:
+        <ul>
+          <li><strong>title</strong> : Window's title</li>
+          <li><strong>name</strong> : Unique window's name, if you omit this argument
+            an unique name, random-like, will be assigned to the window for you.</li>
+          <li><strong>position</strong> : Optional table that defines the window's position
+            in the host screen, it must have the following fields:
+            <ul>
+              <li><strong>x</strong> : Horizontal position in pixels. Defaults to <code>#CENTER</code>.</li>
+              <li><strong>y</strong> : Vertical position in pixels. Defaults to <code>#CENTER</code>.</li>
+            </ul>
+          </li>
+          <li><strong>size</strong> :Optional table that tdefines the window's size,
+            it must have the following fields:
+            <ul>
+              <li><strong>w</strong> : Width in pixels. Defaults to 320 pixels.</li>
+              <li><strong>h</strong> : Height in pixels. Defaults to 200 pixels.</li>
+            </ul>
+          </li>
+          <li><strong>sizemax</strong> : Maximum size the window can be resized to. Defaults
+            to the host screen size.
+            <ul>
+              <li><strong>w</strong> : Width in pixels. Defaults to 320.</li>
+              <li><strong>h</strong> : Height in pixels. Defaults to 200.</li>
+            </ul>
+          </li>
+          <li><strong>sizemin</strong> : Minimum size the window can be resize to. Defaults
+            to the normal <code>size</code>.
+            <ul>
+              <li><strong>w</strong> : Width in pixels. Defaults to 320.</li>
+              <li><strong>h</strong> : Height in pixels. Defaults to 200.</li>
+            </ul>
+          </li>
+          <li><strong>cacheroot</strong> : Cache root gadget (<code>True|False</code>)</li>
+          <li><strong>bgcolor</strong> : Background color</li>
+          <li><strong>background</strong> : Image file name used to fill the background</li>
+          <li><strong>bgtexture</strong> : Image file used as tile to fill the background</li>
+          <li><strong>bggradient</strong> : Table used to define a multi-color gradient
+            to fill the background
+            <ul>
+              <li><strong>type</strong> : Gradient type : <code>#LINEAR</code>, <code>#RADIAL</code>,<code> #CONICAL</code>
+              </li>
+              <li><strong>angle</strong> : Gradient angle in degrees</li>
+              <li><strong>colors</strong> : Gradient colors definition, it's atable composed
+                by pairs [color]-[position]. Color is an RBG color value and position is
+                a number in the 0-1 range. Note that the first color must have the position
+                0 and the last one the position 1.</li>
+            </ul>
+          </li>
+          <li><strong>hotkeys</strong> : A table with window's action hotkeys
+            <ul>
+              <li><strong>hide</strong> : A key associated to the <code>winObject:hide()</code> method</li>
+              <li><strong>show</strong> : A key associated to the <span style="background-color:rgb(51,51,51);color:rgb(255,255,255);"><code>winObject:show</code></span><code>()</code> method</li>
+              <li><strong>activate</strong> : A key associated to the <code>winObject:activate()</code> method</li>
+              <li><strong>close</strong> : A key associated to the <code>winObject:close()</code> method</li>
+              <li><strong>open</strong> : A key associated to the <code>winObject:open()</code> method</li>
+              <li><strong>customhotkeys</strong> : A table with custom hotkeys you can assign
+                with your own function, each definition is a subtable with the following
+                items:
+                <ul>
+                  <li><strong>qualifier</strong> : Key qualifier (<code>LCONTROL</code>, <code>RCONTROL</code>,
+                    etc...)</li>
+                  <li><strong>key</strong> : Assigned key</li>
+                  <li><strong>event</strong> : Event (<code>OnKeyDown</code>, etc, ...)</li>
+                  <li><strong>callback</strong> : Callback function</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li><strong>flags</strong> : Window's flags
+            <ul>
+              <li><strong>resizeable</strong> : Resizeable window? (<code>True|False</code>)</li>
+              <li><strong>closeable</strong> : Closeable window? (<code>True|False</code>)</li>
+              <li><strong>moveable </strong>: Moveable window? (<code>True|False</code>)</li>
+              <li><strong>borderless </strong>: Borderless window? (<code>True|False</code>)</li>
+              <li><strong>modal </strong>: Modal window? (<code>True|False</code>)</li>
+              <li><strong>hidefromtaskbar </strong>: Hide from the taskbar (<code>True|False</code>)</li>
+              <li><strong>hideable </strong>: Hideable window? (<code>True|False</code>)</li>
+              <li><strong>autoclose </strong>: <code>False</code> to receive the event but
+                to keep the window opened, you have to close it in your callback function.</li>
+            </ul>
+          </li>
+          <li><strong>events </strong>: Callback functions table
+            <ul>
+              <li><strong>onclose </strong>: Called when the window is closed</li>
+              <li><strong>onmove </strong>: Called when the window is move</li>
+              <li><strong>onactivate </strong>: Called when the window get the focus</li>
+              <li><strong>ondeactivate </strong>: Called when the window lost the focus</li>
+              <li><strong>onhide </strong>: Called when the window is hided</li>
+              <li><strong>onshow </strong>: Called when the window is showed</li>
+              <li><strong>onsize </strong>: Called when the window is resized</li>
+              <li><strong>ondrop </strong>: Called when the a file is dropped into the window</li>
+              <li><strong>dontopen </strong>: TRUE to create the window without opening</li>
+              <li><strong>contextual </strong>: Contextual menu (same structure as <code>.menu</code> field)</li>
+              <li><strong>menu </strong>: Top menu definition, please have a look at <a href="winObjmenuSet().html"><code>:menuSet()</code></a> method
+                for detailed informations.</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <ul>
+      <li><strong><u>winObject </u></strong><u>: The window object created or </u><code><u>False</u></code><u> if an error has occured.</u>
+      </li>
+    </ul>
+    <p><u>NOTES</u>
+    </p>
+    <p>All parameters are optional you can open a window without specifying any
+      parameters at all.</p>
+    <p><strong>About the window background</strong>
+      <br>The window background can be set with only one of the four possible ways:&nbsp;</p>
+    <ul>
+      <li><strong>bgcolor</strong> : Background color</li>
+      <li><strong>background</strong> : Image file name used to fill the background</li>
+      <li><strong>bgtexture</strong> : Image file used as tile to fill the background</li>
+      <li><strong>bggradient</strong> : Table used to define a multi-color gradient
+        to fill the background</li>
+    </ul>
+    <p><strong>About Modal Windows</strong>
+      <br>Modal windows are simulated, the last opened modal window listens to the <code>OnDeactivate</code> event
+      and when it is detected the Window will reactivate itself keeping itself
+      on the front.</p>
+    <p><u>EXAMPLES</u>&nbsp;</p>
+    <p><u>SEE ALSO</u>
+    </p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

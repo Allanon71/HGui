@@ -1,0 +1,143 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>Quick Tutorial</h1>
+
+    <p>This is a very quick tutorial to let you start using HGui.</p>
+    <p>&nbsp;</p>
+    <p><span class="text-big"><strong>HOW TO INSTALL HGui and it's related modules</strong></span>
+    </p>
+    <ol>
+      <li>Head your browser at my GitHub page → <a href="https://github.com/Allanon71/Hollywood-MAL-Libraries">https://github.com/Allanon71/Hollywood-MAL-Libraries</a>
+      </li>
+      <li>Click on the green button “Code” and a menu will open</li>
+      <li>On your LOCAL tab press the “Download ZIP” button to download the entire
+        repository on your local machine.</li>
+      <li>Once the download ends open the archive and uncompress the contents where
+        you prefer</li>
+      <li>Open the file <code>+Includes.hws</code> and edit the line <code>Const #INC_PATH = ""</code>,
+        you have to specify the absolute location where you have uncompressed the
+        archive, for example it could be something like this:&nbsp;
+        <br><code>C:/MyHollywoodStuff/Libs/AllanonLibs/</code>
+      </li>
+      <li>Save the edited file</li>
+      <li>You are ready!</li>
+    </ol>
+    <p>&nbsp;</p>
+    <p><span class="text-big"><strong>INCLUDING HGui</strong></span>
+    </p>
+    <p>To work with HGui the first step in your code should to include the library
+      into your source, if the previous step was correct (installation) it's
+      enough to add these two lines into your source code:</p><pre><code class="language-text-plain">@INCLUDE "&lt;path-where-you-have-extracted-the-archive&gt;/+Includes.hws"
+@INCLUDE #INC_HGUI</code></pre>
+    <p>Inside the file <code>+Includes.hws</code> you will find some constants
+      you can use to include my libraries into your projects, even without using
+      HGui. For example, if you would want to use only the Date &amp; Time library
+      you'd only need to:</p><pre><code class="language-text-plain">@INCLUDE "&lt;path-where-you-have-extracted-the-archive&gt;/+Includes.hws"
+@INCLUDE #INC_DATETIME</code></pre>
+    <p>&nbsp;</p>
+    <p><span class="text-big"><strong>HELLO WORLD WITH HGui</strong></span>
+    </p>
+    <p>Tutorial <strong>T304 - Hello World.hws</strong>
+    </p>
+    <p><strong><u>NOTE</u></strong>
+      <br><strong>This example expects that you have not changed the examples directory, they should be in </strong><code>&lt;path-where-you-have-extracted-the-archive&gt;/Examples/HGui</code> that's
+      why at the beginning of the code we are referring to the <code>+Includes.hws</code> file
+      two directories up.</p>
+    <p>Let's start including HGui</p><pre><code class="language-text-plain">@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI</code></pre>
+    <p>Now we are going to create a window to contain our ‘Hello World’ text,
+      you can see that we are specifying a few arguments to:
+      <br>- Setup the window's title
+      <br>- Setup the window's name, it is used internally
+      <br>- Specify how the window should be positioned</p><pre><code class="language-text-plain">Local myWin = HGui.Window:new(
+   { title = "Hello World!",
+     name  = "myWindow",
+     position   = { x = #CENTER, y = #CENTER }
+     })</code></pre>
+    <p>The following &nbsp;command it's not really needed because we are going
+      to add only a simple label gadget, but it's a good practice to switch off
+      auto rendering while building GUIs because if not disabled, everytime you
+      add a new gadget, a window refresh will be issued causing flickering which
+      is not so nice to see.</p><pre><code class="language-text-plain">HGui.SetAutoRendering(False)</code></pre>
+    <p>Now it's time to create our label gadget that will be used to show the
+      “Hello World!” string:</p><pre><code class="language-text-plain">Local myLabel = HGui.Gadget:new(#HGUI_LABEL_GADGET, { caption = "Hello World!" })</code></pre>
+    <p>Just creating a gadget it's not enough, we need to tell HGui where we
+      have to place it, this task is accomplished using the <code>:layoutSet()</code> method,
+      as you can see we are using the method with the <strong>root gadget</strong> of
+      our window. The root gadget is a special gadget created for you when a
+      window is created, it is the root of every gadget you are going to place
+      in the window's gui.</p><pre><code class="language-text-plain">mywin.rootgadget:layoutSet({ gadgets = { myLabel } }, True )</code></pre>
+    <p>Now let's enable the auto rendering feature:</p><pre><code class="language-text-plain">HGui.SetAutoRendering(True)</code></pre>
+    <p>To be sure that all has been rendered correctly let's force a window refresh:</p><pre><code class="language-text-plain">myWin:Render()</code></pre>
+    <p>Is it simple enough? :D</p>
+    <p>Last step is to enter a neverending loop because HGui is event driven
+      and we do not need to listen manually for events:</p><pre><code class="language-text-plain">Repeat
+  WaitEvent()
+Forever</code></pre>
+    <p>Open your task manager and see how CPU time this program takes, it should
+      be very low.</p>
+    <p><span class="text-big"><strong>EXAMPLES</strong></span>
+    </p>
+    <p>HGui comes with some <strong>examples</strong> and <strong>tests</strong> you
+      can use to start learning how to build your GUIs, they are full of comments
+      about how things work so you should understand how to work with HGui easily
+      but if you are in troubles feel free to contact me via my <strong>Patreon</strong> page
+      or using Hollywood's official forum.</p>
+    <p>Tests and examples can be found in the directory <code>/examples/HGui/</code>
+    </p>
+    <p><span class="text-big"><strong>SUPPORT ME ON PATREON</strong></span>
+    </p>
+    <p>Let me say it clearly: HGui is free for all, I enjoyed to code it and
+      I learned tons of things coding this big project. I coded it mainly for
+      me and for my applications as a self-challange but I realized that limiting
+      this library only for my personal use was a pity… Hollywood coders could
+      have learned something using it or simply looking at how I implemented
+      stuff so I decided to make it public.&nbsp;
+      <br>What wasn't really fun was writing this guide due to the amount of methods,
+      functions and classes so what I ask is just a little thanks for the time
+      I spent writing docs &amp; examples, nothing more.
+      <br>So, If you want say thanks and have the possibility to donate some bucks,
+      please join my Patreon page and support my work, you will have access to
+      more in-depth docs &amp; examples as an additional reward :)</p>
+    <p><a href="https://www.patreon.com/Allanon71">https://www.patreon.com/Allanon71</a>
+    </p>
+    <p>If you don't want to join Patreon but you prefer to donate some bucks
+      via PayPal please donate to : <a href="mailto:hijoe@tin.it">hijoe@tin.it</a>
+    </p>
+    <p>&nbsp;</p>
+    <p><span class="text-big"><strong>LINKS</strong></span>
+    </p>
+    <ul>
+      <li>My Patreon page : <a href="https://www.patreon.com/Allanon71">https://www.patreon.com/Allanon71</a>
+      </li>
+      <li>My Personal website : <a href="https://www.a-mc.biz">https://www.a-mc.biz</a>
+      </li>
+      <li>Hollywood's official forum : <a href="https://forums.hollywood-mal.com/">https://forums.hollywood-mal.com/</a>
+      </li>
+      <li>My GitHub page : <a href="https://github.com/Allanon71">https://github.com/Allanon71</a>
+      </li>
+    </ul>
+    <p><strong>SOCIALS</strong>
+    </p>
+    <ul>
+      <li>Find me on Facebook : <a href="https://www.facebook.com/Allanon71">https://www.facebook.com/Allanon71</a>
+      </li>
+      <li>Find me on Twitter : <a href="https://twitter.com/Allanon71">https://twitter.com/Allanon71</a>
+      </li>
+      <li>Find me on Mastodon : &nbsp; &nbsp;<a href="@allanon@mastodon.uno">@allanon@mastodon.uno</a>
+      </li>
+    </ul>
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

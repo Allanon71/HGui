@@ -1,0 +1,47 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>winObj:Close()</h1>
+
+    <p><span class="text-big"><code>winObj:Close()</code></span>
+    </p>
+    <p>Close this window if it's currently opened.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <p><u>OUTPUT</u>
+    </p>
+    <ul>
+      <li><strong>result</strong> : <code>False</code> if the window is already closed.</li>
+    </ul>
+    <p><u>NOTES</u>
+    </p>
+    <p style="margin-left:40px;">Along with the closing operation all event handlers will be disabled.&nbsp;</p>
+    <p
+    style="margin-left:40px;">As soon as the window is closed another one will be activated following
+      the current windows order stack.</p>
+      <p style="margin-left:40px;">Hidden windows cannot be closed directly.</p>
+      <p><u>EXAMPLES</u>&nbsp;</p>
+      <p><u>SEE ALSO</u>
+      </p>
+      <p>result = HGui.Window:close()</p>
+      <p>
+        <br>Close the window if it's currently opened.
+        <br>-----------------------------------------------------------
+        <br>OUTPUT
+        <br>&nbsp;result : FALSE if the window is already closed.</p>
+      <p>NOTES
+        <br>&nbsp;Along with the closing all event handlers will be disabled. As soon
+        as the window is closed another one will be activated following the current
+        window's order.
+        <br>&nbsp;Hidden windows cannot be closed directly.</p>
+  </body>
+
+</html>

@@ -1,0 +1,69 @@
+/*
+********************
+* HGui Test Script *
+* Fabio Falcucci   *
+*    Feb-2023      *
+********************
+  This script is used as a test and to show how it's possible to use the
+helper function 
+  HGui.Theme.Generate_Text()
+to generate a text skin.
+
+For further informations about the text skin system have a look
+at the CText object.
+-------------------
+
+HGui.Theme.Generate_Text(size, style, color, alignment, edge, shadow, margins)
+  Generate a cText skin.
+*/
+
+; INCLUDE THE LIBRARIES DEFINITIONS
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; Creates a new HGui window
+Local myWin = HGui.Window:new(
+                { title = "HGui.Theme.SetGlobalTheme()",
+                  name  = "myWindow",
+                  position = { x = #CENTER, y = #CENTER }
+                  })
+                   
+; Disable auto-rendering to avoid flickering
+HGui.SetAutoRendering(False)
+
+; Creates one label and one button
+Local myLabel  = HGui.Gadget:new(#HGUI_LABEL_GADGET, { caption = { "Press the button", "to change the button skins", "with a random text skin set" } })
+Local myButton = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { caption = { "Click me!"},
+    actions = {
+      onpushed =
+        Function(gadObj)
+          ; Change the text skin everytime the button is pushed
+          ; This is not really random because only the size is randomized, but you can see how it
+          ; works.
+          Local size = Rnd(40)+15
+          gadObj:set({
+            look = { 
+              ntext = HGui.Theme.Generate_Text(size, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, False),
+              ptext = HGui.Theme.Generate_Text(size, #ANTIALIAS+#BOLD, $668800, #HGUI_ALIGN_CENTER, True, False),
+              htext = HGui.Theme.Generate_Text(size, #ANTIALIAS, $66AA66, #HGUI_ALIGN_CENTER, True, True),
+              dtext = HGui.Theme.Generate_Text(size, #ANTIALIAS, $DDDDDD, #HGUI_ALIGN_CENTER, False, False)
+              }},
+            True)
+        EndFunction }
+      })
+
+
+; Let's arrange the gadgets into the window
+mywin.rootgadget:layoutSet({ gadgets = { myLabel, myButton },
+                             weights = { 0.30, 0.70 },
+                             gap     = 1
+                             }, True )
+                             
+; Finally enable the auto-rendering and refresh the window
+HGui.SetAutoRendering(True)
+myWin:Render()
+                 
+Repeat
+   WaitEvent()
+Forever

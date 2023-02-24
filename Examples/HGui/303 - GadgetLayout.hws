@@ -1,0 +1,118 @@
+/*******************************************************************************
+HGUI : Tutorial 303 - Gadget Layout                          v1.2 : 10/02/2023 *
+********************************************************************************
+The core method to adjust the layout of your inteface elements is the Gadget
+method is:
+  :setLayout()
+Now we will see some more detailed informations about the previous example so
+you can have an overview of this important method.
+As said this method allow you to set gadget's children and this means that the
+caller object (any type) can have one or more dependant gadgets of any
+type.
+Child gadgets can also have childrens defined with this method and this allow the
+programmer to build interfaces with an hierarchycal structure.
+Three layout type are available: vertical, horizontal and grid.
+The first mode will arrange children vertically, the second mode will arrange
+children horizontally while the third mode will arrange children as a grid.
+Now let's see some more details in the example.
+*******************************************************************************/
+
+; Nothing new here...
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+Local myWin = HGui.Window:new(
+                { title = "Layout",
+                  name  = "myWindow",
+                  position   = { x = 200, y = 200 },
+                  size       = { w = 600, h = 400 },
+                  background = "Resources/background.jpg" ; Image
+                  })
+                   
+HGui.SetAutoRendering(True)
+
+; Let's define some gagets (please note the caption field which allow you to
+; define the text inside your gadgets), if you want to set a multiline text
+; pass each line of text in a table of strings like in the last button definition.
+Local myBox = HGui.Gadget:new(#HGUI_BOX_GADGET, { name = "box" })
+Local myButton1 = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { caption = "button 1" })
+Local myButton2 = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { caption = "button 2" })
+Local myButton3 = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { caption = "button 3" })
+Local myButton4 = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { caption = { "button", "4" }})
+
+; THIS IS NEW! As a good practice you should start to build the GUI from the
+; window's root gadget but it's not mandatory.
+mywin.rootgadget:layoutSet({ gadgets = { myBox },
+                             weights = { 1 },
+                             gap     = 0,
+                             borders = { top = 20, bottom = 20, left = 20, right = 20 } }, True )
+
+; And now let's see in details the :setLayout() method's arguments.
+myBox:layoutSet({
+; :: GADGET field.
+; You see: we are telling myBox to get myButton1-4 as children, so these four
+; buttons will be placed inside myBox. Using borders we can also put children
+; outside the father but we will discuss it later.
+  gadgets = { myButton1, myButton2, myButton3, myButton4 },
+  
+; ::WEIGHTS field.
+; This field accepts a table where you can specify each child weight. This
+; field will let you balance each gadget size without caring of the available
+; space in the parent gadget. You can use the following value types to achieve
+; the best layout:
+; 0 < weight <= 1   The value is interpreted as percentual of the available
+;                   space. The size is dynamic, meaning that if the father
+;                   changes the size also its childs will be resized.
+; -1 <= weight < 0  The value is interpreted as percentual of the available
+;                   space. The size is fixed, meaning that if the father
+;                   changes the size its child will maintain their original
+;                   sizes.
+; weight > 1        The value is intended as a fixed pixel size.
+; Remember that the sum of all percentual sizes (absoulte values for negative
+; ones), must be 1 or you could have empty spaces or overflows.
+; Below you can see that the third gadget (myButton3) have a -40% weight that
+; will be fixed forever even if you try to resize the window (try it!).
+; If you do not specify the weight the available space will be equally
+; distributed for each gadget.
+  weights = { 0.20, 0.20, -0.40, 0.20 },
+
+;::TYPE field.
+; With this field you can set the layout to use to arrange your gadgets:
+; - #HGUI_VERTICAL_LAYOUT     All gadgets will be arranged vertically
+; - #HGUI_HORIZONTAL_LAYOUT   All gadgets will be arranged horizontally
+; - #HGUI_GRID_LAYOUT         All gadgets will be arranged in a grid
+; If you do not specify this field the system will arrange you gadgets
+; using the vertical layout.
+  type    = #HGUI_VERTICAL_LAYOUT,
+  
+;::GAP field.
+; The gap field indicate the distance in pixels between each gadget.
+  gap     = 2,
+;::BORDERS field.
+; The borders field is a table used to specify the borders between
+; the childs and the parent gadget, it's like an internal border.
+; It's expressed in pixels and can have any value you want
+; including negative values.
+  borders = { top = 10, bottom = 10, left = 10, right = 10 }
+  
+; ADDITIONAL FIELDS:
+; If you use the #HGUI_GRID_LAYOUT you also have to specify the
+; grid size declaring the rows or the columns the grid should have.
+;  rows = 4  <-- Example
+  }, 
+  
+; ARGUMENT 2 : Update
+; This field force an update of the layouts, you can defer the update
+; later if you want, or you can force an update during the layout
+; definition setting this flag to TRUE.
+  True )
+                             
+; Restore the AutoRendering flag to True
+HGui.SetAutoRendering(True)
+
+; Force a window refresh
+myWin:Render()
+                   
+Repeat
+   WaitEvent()
+Forever

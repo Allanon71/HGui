@@ -1,0 +1,150 @@
+/*******************************************************************************
+HGUI : Tutorial 310 - Gadget's Contextual Menu               v1.0 : 24.05.2016 *
+********************************************************************************
+Gadgets can have a contextual menù that is opened whenever the user click on the
+gadget's body with the right mouse button.
+********************************************************************************/
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+/*******************************************************************************
+ MENU DEFINITION
+ The contextual menu structure is the same as the window's top menu.
+ Creating a menu it's quiet complex because of the tree structure that menus
+ have, you can define window's menu in two way, at creation time or at runtime,
+ now we will see how to create a menu at creation time.
+ In the <option> table you have to setup a tag called <menu> that have the
+ following structure:
+   <menu>         The menu structure
+      <item0>        First menu entry
+         <type>      The gadget type (#BOX, #BUTTON, ...)
+         <params>    The gadget parameters needed for its creation
+         <size>      The menu width (optional)
+         <callback>  A function called when this item is selected (optional)
+         <submenu>   A sub menu attached to this item (optional)
+      <item1>        Second menu entry
+         ...
+ *******************************************************************************/
+Function handleAutomaticBackup(gadget)
+  ; Cambia l'impostazione del menù invertendo lo stato dello switch
+  If gadget.menuDef.params.value = 0
+    gadget.menuDef.params.value = 1
+  Else
+    gadget.menuDef.params.value = 0
+  EndIf
+EndFunction
+
+Local myMenu =
+       { { type = #HGUI_BUTTON_GADGET,
+           params = { Caption = "File" },
+           submenu = {
+              { type = #HGUI_BUTTON_GADGET,
+                params = { Caption = "Open file" } },
+              { type = #HGUI_BUTTON_GADGET,
+                params = { Caption = "Process as" },
+                submenu = {
+                   { type = #HGUI_BUTTON_GADGET,
+                     size = 20,
+                     params = { Caption = "Text file" } },
+                   { type = #HGUI_BUTTON_GADGET,
+                     size = 20,
+                     params = { Caption = "Project file" } },
+                   { type = #HGUI_BUTTON_GADGET,
+                     size = 20,
+                     params = { Caption = "Document file" } },
+                   { type = #HGUI_VDIVIDER_GADGET,
+                     size = 5,
+                     params = {} },
+                   { type = #HGUI_SWITCH_GADGET,
+                     size = 20,
+                     params = { Caption = "Compress file (OFF)", Value = 0 } },
+                   { type = #HGUI_SLIDER_GADGET,
+                     size = 15,
+                     params = { name = "VertSlider",
+                                range = { 1, 200 }, value = 1,
+                                cursorsize = 0.1,
+                                orientation = #HGUI_HORIZONTAL_LAYOUT } }
+                 }
+               },
+               { type = #HGUI_BUTTON_GADGET,
+                 params = { Caption = "Utilities" },
+                 submenu = {
+                    { type = #HGUI_BUTTON_GADGET,
+                      params = { Caption = "Clean" } },
+                    { type = #HGUI_BUTTON_GADGET,
+                      params = { Caption = "Backup" } },
+                    { type = #HGUI_BUTTON_GADGET,
+                      params = { Caption = "Restore" } },
+                    { type = #HGUI_VDIVIDER_GADGET,
+                      params = {} },
+                    { type = #HGUI_SWITCH_GADGET,
+                      params = { Caption = "Automatic backup (OFF)", Value = 0 },
+                      callback = handleAutomaticBackup },
+                    { type = #HGUI_SWITCH_GADGET,
+                      params = { Caption = "Automatic Restore (ON)", Value = 1 } },
+                    { type = #HGUI_BUTTON_GADGET,
+                      params = { Caption = "Sign" } },
+                    { type = #HGUI_BUTTON_GADGET,
+                      params = { Caption = "Upload" } },
+                    { type = #HGUI_BUTTON_GADGET,
+                      params = { Caption = "Encode" } }
+                   }
+                 },
+               { type = #HGUI_VDIVIDER_GADGET,
+                 params = {} },
+               { type = #HGUI_BUTTON_GADGET,
+                 params = { Caption = "Close" } },
+               { type = #HGUI_BUTTON_GADGET,
+                 params = { Caption = "Exit" } },
+             }
+           },
+         { type = #HGUI_BUTTON_GADGET,
+           params = { Caption = "Project" } },
+         { type = #HGUI_BUTTON_GADGET,
+           params = { Caption = "Edit" } },
+         { type = #HGUI_BUTTON_GADGET,
+           params = { Caption = "Another entry on the top..." }
+           }
+   }
+
+   Local myMenu2 =
+       { { type = #HGUI_BUTTON_GADGET,
+           params = { Caption = "ATTACHED TO THE WINDOW" } },
+         { type = #HGUI_BUTTON_GADGET,
+           params = { Caption = "Project" } },
+         { type = #HGUI_BUTTON_GADGET,
+           params = { Caption = "Edit" } },
+         { type = #HGUI_BUTTON_GADGET,
+           params = { Caption = "Another entry on the top..." }
+           }
+   }
+   
+Local myWin = HGui.Window:new(
+                { title = "Hello World!",
+                  name  = "myWindow",
+                  position   = { x = #CENTER, y = #CENTER },
+                  contextual = myMenu2
+                  })
+                   
+HGui.SetAutoRendering(False)
+
+; We only need to define a label with the Hello World text inside.
+Local myLabel  = HGui.Gadget:new(#HGUI_LABEL_GADGET,  { caption = { "This is the classic", "Hello World program", "modified to show the Contextual Menus", "Right click on the button to open the menu..." } })
+Local myButton = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { caption = { "Hello World!", "(right click on me)" },
+    name = "myButton",
+    contextual = myMenu
+    })
+
+; Attach the label to the window
+mywin.rootgadget:layoutSet({ gadgets = { myLabel, myButton },
+                             weights = { 0.70, 0.30 },
+                             gap     = 1
+                             }, True )
+                             
+HGui.SetAutoRendering(True)
+myWin:Render()
+                 
+Repeat
+   WaitEvent()
+Forever

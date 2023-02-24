@@ -1,0 +1,88 @@
+/*******************************************************************************
+* HGUI : Tutorial 201 - First Window                         v1.2 : 09/02/2023 *
+********************************************************************************
+In this second tutorial we are going to see how to open your first HGui 
+window, details will be explained in the next tutorials.
+********************************************************************************/
+
+;::: INCLUDE THE LIBRARIES DEFINITIONS :::::::::::::::::::::::::::::::::::::::::
+@INCLUDE "../../+Includes.hws"          ; Path relative to this application
+@INCLUDE #INC_HGUI                      ; Include the HGui library
+
+/*******************************************************************************
+NOTE:
+You can enable/disable the HGui debug output using the Debug library commands:
+    DBG.Console.Enable()                : Enable the debug output
+    DBG.Console.AddChannel()            : Add a debug output channel
+    DBG.Console.RemoveChannel()         : Remove a debug output channel
+    DBG.Console.Disable()               : Disable the debug output
+
+These commands manages the debug output to the console, please refer to the
+Debug library for further informations and features.
+
+Let's see how you can enable the debug output of the HGui library.
+********************************************************************************/
+
+DBG.Console.Enable(True, True)  ; The first 'True' parameter means that you also
+                                ; want to log the time in milliseconds, if you
+                                ; don't need  this information set it to 'False'
+                                ; The second argument specify if you want colored
+                                ; messages or not, this is very useful and nice
+                                ; if your console can handle ANSI sequences.
+
+DBG.Console.AddChannel(HGui.WChannel)   ; This command will add the HGui debug
+                                        ; output channel to the visible output. 
+
+; You can also use the following command (added recently) to enable the
+; debug output:
+;   HGui.Debug.Enable(channels)
+; Where channels is a table that accepts one or more of the following entries:
+;   main = True|False       To enable the main channel
+;   windows = True|False    To enable the windows channel
+;
+; The above code could be written also with:
+;   HGui.Debug.Enable({ main = True, windows = True })
+
+/*******************************************************************************
+Now it's time to open your first window but without specifing too much stuff.
+Most of the functions & methods in HGui allow you to call them without
+parameters like in this case where default values will be used for all the 
+missing options.
+********************************************************************************/
+Local myFirstWindow = HGui.Window:new(
+                        { title = "My First Window!" }
+                        )
+
+/*******************************************************************************
+As you can see the window's method 'new' will return a window object that you
+can use later for many purposes (like calling other methods for example), even
+if there are functions to retrieve the window objects by name, the best option
+is to save the window's object somewhere in your source.
+In this case we have created a window using all default values but the window's
+title, the created object has been saved in 'myFistWindow' variable even if it's
+useless since our tutorial ends here.
+
+NOTE:
+If the creation fails for some reason instead of the object, the value 'false'
+will be returned.
+
+So it's good practice to check the result before going on with your code with
+something like this:
+  | If Not(myFirstWindow)
+  |   ; handle the error here
+  |  
+  | EndIf
+  
+NOTE:
+  Even if we haven't specified much, our window is able to listen to event!
+********************************************************************************/
+
+Repeat
+   WaitEvent()
+Forever
+
+/*******************************************************************************
+ -> Try to switch off the debug output.
+ -> Try to click inside the window, hide it and show it to see how window's
+    events are detected and reported to the console window.
+********************************************************************************/

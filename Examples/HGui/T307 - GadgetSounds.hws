@@ -1,0 +1,48 @@
+/*******************************************************************************
+HGUI : Tutorial 307 - Gadget's sounds                        v1.0 : 11/09/2017 *
+********************************************************************************
+Using the previous tutorial as a base we will see how you can add sounds to your
+gadget's events easily.
+*******************************************************************************/
+
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; Let's preload a sound to play when the button's events are raised
+Local mySound = LoadSample(Nil, "Resources/sound.wav")
+
+Local myWin = HGui.Window:new(
+                { title = "Hello World!",
+                  name  = "myWindow",
+                  position   = { x = #CENTER, y = #CENTER }
+                  })
+                   
+HGui.SetAutoRendering(True)
+
+; Nothing new here... the label...
+Local myLabel  = HGui.Gadget:new(#HGUI_LABEL_GADGET, 
+  { name = "myLabel", 
+    caption = { "This an evolution of the classic", "Hello World program", "with the HGui library", "for Hollywood!", "", "Button sounds demonstration." } })
+    
+; ... and the button, but this time we are attaching the sound to its events
+Local myButton = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+                    { caption = { "Hello World!", "(Interact with me!)"},
+                      ; Let's attach the sound
+                      sounds = { onover   = mySound,
+                                 onout    = mySound,
+                                 onpushed = mySound,
+                                 ondown   = mySound }
+                      })
+
+; Let's build the interface layout
+mywin.rootgadget:layoutSet({ gadgets = { myLabel, myButton },
+                             weights = { 0.70, 0.30 },
+                             gap     = 1
+                             }, True )
+                             
+HGui.SetAutoRendering(True)
+myWin:Render()
+                 
+Repeat
+   WaitEvent()
+Forever

@@ -1,0 +1,36 @@
+/*******************************************************************************
+HGUI : Tutorial 305 - Hello World 2                          v1.0 : 11/09/2017 *
+********************************************************************************
+Now we will expand a bit our Hello World program.
+We will use a label to describe the program and a button the user can click
+even if right now no event will be raised.
+*******************************************************************************/
+
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+Local myWin = HGui.Window:new(
+                { title = "Hello World!",
+                  name  = "myWindow",
+                  position   = { x = #CENTER, y = #CENTER }
+                  })
+                   
+HGui.SetAutoRendering(False)
+
+; We only need to define a label with some text inside...
+Local myLabel  = HGui.Gadget:new(#HGUI_LABEL_GADGET, { caption = { "This is the classic", "Hello World program", "using [b]HGui[/b] library", "for Hollywood!", "", "(I'm a label)" } })
+; ...and a button witht the 'Hello World!' text.
+Local myButton = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { caption = { "Hello World!", "(click me, I'm a button!)"}})
+
+; Let's attach the gadgets to the window
+mywin.rootgadget:layoutSet({ gadgets = { myLabel, myButton },
+                             weights = { 0.70, 0.30 },
+                             gap     = 1
+                             }, True )
+                             
+HGui.SetAutoRendering(True)
+myWin:Render()
+                 
+Repeat
+   WaitEvent()
+Forever

@@ -1,0 +1,42 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>Button gadget</h1>
+
+    <p>For common methods have a look <a href="../Common%20Methods.html">here</a>,</p>
+    <p>&nbsp;</p>
+    <p><span class="text-big"><strong>BUTTON GADGET METHODS</strong></span>
+    </p>
+    <ul>
+      <li><span class="text-big"><code>gadObj:Aligns(align, refresh)</code></span>
+        <br>Set the button's alignments for each states separately if you pass a tablewith
+        single states fields (<code>normal</code>, <code>pushed</code>, <code>disabled</code>, <code>hilighted</code>),
+        or, if &nbsp; &nbsp;you pass an alignment constant, it will be applied
+        to all states. Constants are defined <a href="../../Constants.txt">here</a>.
+        <br>- <strong>align</strong>: A table like this:
+        <br><code>{ normal = #HGUI_ALIGN_LEFT, pushed = #HGUI_ALIGN_RIGHT, etc… }</code>
+        <br>or an alignment constant that will be applied to all button states.
+        <br>- <strong>refresh</strong>: <code>True</code> to refresh the gadget when
+        finished
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:setCaptions(texts, refresh)</code></span>
+        <br>Set the button's caption for each states separately if you pass a table
+        with single states fields (<code>normal</code>, <code>pushed</code>, <code>disabled</code>, <code>hilighted</code>),
+        or, if &nbsp;pass a string, it will sets the given caption on all states.
+        <br>If you pass a table of string with a numeric index than it will be interpreted
+        as a multiline string to apply to all states.
+        <br>- <strong>table</strong>: A table like has been described above.
+        <br>- <strong>refresh</strong>: <code>True</code> to refresh the gadget when
+        finished</li>
+    </ul>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

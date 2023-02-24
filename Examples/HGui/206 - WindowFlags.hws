@@ -1,0 +1,79 @@
+/*******************************************************************************
+HGUI : Tutorial 206 - Window's Flags                         v1.2 : 09/02/2023 *
+********************************************************************************
+Let's see how can we create new windows setting their flags.
+Every  window  can be  manipulated at creation time setting a subtable called
+'flags', this table can be populated with the following boolean switches:
+   - resizeable      <true> to allow window resize events
+   - closeable       <true> to allow window close events
+   - moveable        <true> to allow window move events
+   - borderless      <true> to enable borderless windows
+   - modal           <true> to create modal windows (always on top)
+   - hideable        <true> to allow windows to be hidden
+   - hidefromtaskbar <true> to hide the window from the taskbar
+   - autoclose       <false> to receive the event but to keep the window opened,
+                     you have to close it in your callback function manually.
+
+** To quit this program you have to hit CTRL-C **
+
+********************************************************************************/
+
+;::: INCLUDE THE LIBRARIES DEFINITIONS :::::::::::::::::::::::::::::::::::::::::
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+;DBG.Console.Enable(True)
+;DBG.Console.AddChannel(HGui.DebugChannel)
+
+/*******************************************************************************
+Now we will create some windows to illustrate the flags.
+********************************************************************************/
+
+; Window creation
+Local myWin1 = HGui.Window:new(
+                 { title    = "W1 : Can't be resized!",
+                   name     = "win1",
+                   position = { x = 20, y = 20 },
+                   size     = { w = 300, h = 300 },
+                   Flags    = { resizeable = False },
+                   })
+
+Local myWin2 = HGui.Window:new(
+                 { title    = "W2 : Can't be moved!",
+                   name     = "win2",
+                   position = { x = 50, y = 50 },
+                   size     = { w = 300, h = 300 },
+                   Flags    = { moveable = False },
+                   })
+
+Local myWin3 = HGui.Window:new(
+                 { title    = "W3 : Can't be closed!",
+                   name     = "win3",
+                   position = { x = 80, y = 80 },
+                   size     = { w = 300, h = 300 },
+                   Flags    = { closeable = False, autoclose = False },
+                   })
+
+Local myWin4 = HGui.Window:new(
+                 { title    = "W4 : Borderless!",
+                   name     = "win4",
+                   position = { x = 110, y = 110 },
+                   size     = { w = 300, h = 300 },
+                   Flags    = { borderless = True },
+                   })
+
+Local myWin5 = HGui.Window:new(
+                 { title    = "W5 : Can't be hided/iconified!",
+                   name     = "win5",
+                   position = { x = 140, y = 140 },
+                   size     = { w = 300, h = 300 },
+                   Flags    = { hideable = False },
+                   })
+
+Repeat
+  WaitEvent()
+Forever
+
+/*******************************************************************************
+ -> Try to combine flags in a single window.
+********************************************************************************/

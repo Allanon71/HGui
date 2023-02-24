@@ -1,0 +1,42 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>HGui.gadgetSetTextCache()</h1>
+
+    <p><span class="text-big"><code>HGui.gadgetSetTextCache(value)</code></span>
+    </p>
+    <p>Set the gadget text cache ON or OFF, all new gadgets created will respect
+      the new setting.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>value </strong>: <code>TRUE</code> to activate the cache system, <code>FALSE</code> to
+        deactivate it.</li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <p><u>NOTES</u>
+    </p>
+    <p>If you want to switch the cache for all existing gadgets just re-apply
+      the theme.</p>
+    <p>With gadgets that need frequently text updates you should disable the
+      text cache because, if enabled, each time a text is changed the full skin
+      cache will be rebuilt (for all states).</p>
+    <p>Note that the cache system consumes more memory but the rendering is faster.</p>
+    <p>&nbsp;Only the gadget text (not the graphics) is affected by this setting.&nbsp;</p>
+    <p><u>EXAMPLES</u>&nbsp;</p><pre><code class="language-text-plain"> ; Disable the text cache system
+ HGui.gadgetSetTextCache(False)</code></pre>
+    <p><u>SEE ALSO</u>
+    </p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

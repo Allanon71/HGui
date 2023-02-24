@@ -1,0 +1,1700 @@
+/********************************************************************
+ * HELPER LIBRARY                                                   *
+ * Author : Fabio Falcucci (Allanon)                                *
+ * License : Freeware                                           *
+ * Version : 1.6 -> 1.7                                                   *
+ * Release : 12.02.2019 -> 07.05.2020                                            *
+ *-------------------------------------------------------------------
+   Helper library is an include file for Hollywood that adds several
+ common task functions.
+ 
+   This include objects and methods to handle efficiently strings,
+ colors, some basic functions to handle HTML code and many more.
+ 
+CONTENTS
+========
+:: BUFFERED STRING OBJECT ::
+HL.BufferedString:AddChar()
+HL.BufferedString:AddString()
+HL.BufferedString:Get()
+HL.BufferedString:New()
+HL.BufferedString:PrepareForRead()
+HL.BufferedString:Read()
+HL.BufferedString:Set()
+
+:: COLOR OBJECT ::
+HL.Color:Brighten()
+HL.Color:Clone()
+HL.Color:Darken()
+HL.Color:New()
+HL.Color:fromARGB()
+HL.Color:fromValue()
+HL.Color:toARGB()
+HL.Color:toRGB()
+HL.GetRndColor()
+
+:: STRINGS ::
+HL.Capitalize()
+HL.CutBetweenLimits()
+HL.CutStringLeft()
+HL.CutStringRight()
+HL.GetBetweenLimits()
+HL.GetReversedDateTime()
+HL.GetRndName()
+HL.SizeString()
+
+:: NUMBERS ::
+HL.RoundBig()
+HL.Value2Perc()
+HL.FormatNum(v, i, d)
+
+:: CONVERSIONS ::
+HL.Convert.BytesTo()
+HL.Convert.ForTextout()
+HL.Convert.HTML2Hollywood()
+HL.Convert.HTMLAmper2UTF8()
+HL.Convert.HTMLTag2HollywoodTag()
+HL.Convert.Unicode2UTF8()
+
+:: INPUT ::
+HL.Input.CheckJoystick()
+HL.Input.CheckKeyboard()
+HL.WaitForAction()
+
+:: MISC ::
+HL.IsNil()
+HL.IsNotNil()
+HL.LineHook.Enable()
+HL.LineHook.Disable()
+HL.NBWait()
+HL.ParseRunArgs()
+HL.RestartApp()
+
+---- LATEST CHANGES ------------------------------------------------
+--------------------------------------------------------------------
+19/09/2020
+  ADD : HL.RoundBig() now accept a third parameter to round up or down
+03/09/2020
+  ADD : HL.FormatNum(v, i, d)
+07/08/2020
+  ADD : HL.RestartApp()
+04/07/2020
+  ADD : HL.Capitalize(txt)
+17/06/2020
+  ADD : HL.NBWait(ms)
+06/05/2020
+  ADD : HL.RoundBig(value, decimals)
+--------------------------------------------------------------------
+23/02/2019
+  ADD : Added 761 Ampersands symbols
+12.02/2019
+  FIX : Fixed a bug in HL.Convert.HTMLAmper2UTF8() function
+02.06.2018
+  NEW : HL.BufferedString:PrepareForRead()
+  NEW : HL.BufferedString:Read()
+07.04.2017
+  NEW : HL.GetBetweenLimits(txt, sLimit, eLimit, caseSense)
+        Added <caseSense> for the tags search (default = False)
+  FIX : HL.CutBetweenLimits(txt, sLimit, eLimit, tags) Fixed
+16.02.2017
+  NEW : #HL_AUTO Added to HL.Convert.BytesTo()
+  
+20.12.2016
+  NEW : Added HL.LineHook.Enable() / .Disable() to allow nested
+        uses of this function.
+
+13.12.2016
+  FIX : Fixed a bug in HL.WaitForAction(), when a joystick was detected
+        the timeout will never be reached.
+*********************************************************************/
+
+;---[ MAIN DATA STRUCTURES ]---------------------------------------------------
+Global HL = {}
+       HL.Version  = "1.5"
+       HL.Build    = "01/10/2016"
+       HL.Convert  = {}
+       HL.RndNames = {}      
+       HL.HTML_Tags = {
+           ["<div>"]   = "\n",
+           ["</div>"]  = "",
+           ["<br>"]    = "\n",
+           ["<b>"]     = "[b]",
+           ["</b>"]    = "[/b]",
+           ["<i>"]     = "[i]",
+           ["</i>"]    = "[/i]",
+           ["<u>"]     = "[u]",
+           ["</u>"]    = "[/u]",
+           ["<em>"]    = "[b]",
+           ["</em>"]   = "[/b]",
+           ["<small>"]  = "",
+           ["</small>"] = "",
+           ["<strong>"]  = "[u]",
+           ["</strong>"] = "[/u]",
+           ["<sub>"]   = "",
+           ["</sub>"]  = "",
+           ["<sup>"]   = "",
+           ["</sup>"]  = "",
+           ["<ins>"]   = "",
+           ["</ins>"]  = "",
+           ["<del>"]   = "",
+           ["</del>"]  = "",
+           ["<mark>"]  = "[b][u]",
+           ["</mark>"] = "[/u][/b]",
+           ["<p>"]     = "",
+           ["</p>"]    = "",
+           ["<span>"]  = "",
+           ["</span>"] = "" }
+           
+       HL.HTML_Amper = {
+           ; https://www.toptal.com/designers/htmlarrows/arrows/
+           ; ::: ARROWS :::
+           ["&larr;"]   = "2190", ["&uarr;"]   = "2191", ["&rarr;"]   = "2192",
+           ["&darr;"]   = "2193", ["&harr;"]   = "2194", ["&varr;"]   = "2196",
+           ["&nwarr;"]  = "2197", ["&nearr;"]  = "2197", ["&searr;"]  = "2198",
+           ["&swarr;"]  = "2199", ["&nlarr;"]  = "219a", ["&nrarr;"]  = "219b",
+           ["&larrw;"]  = "219c", ["&rarrw;"]  = "219d", ["&Larr;"]   = "219e",
+           ["&Uarr;"]   = "219f", ["&Rarr;"]   = "21a0", ["&Darr;"]   = "21a1",
+           ["&larrtl;"] = "21a2", ["&rarrtl;"] = "21a3", ["&mapstoleft;"] = "21a4",
+           ["&mapstoup;"] = "21a5", ["&mapstoright;"] = "21a6", ["&mapstodown;"] = "21a7",
+           ["&larrhk;"] = "21a9", ["&rarrhk;"] = "21aa", ["&larrlp;"] = "21ab",
+           ["&rarrlp;"] = "21ac", ["&harrw;"]  = "21ad", ["&nharr;"]  = "21ae",
+           ["&lsh;"]    = "21b0", ["&rhs;"]    = "21b1", ["&ldsh;"]   = "21b2",
+           ["&rdsh;"]   = "21b3", ["&crarr;"]  = "21b5", ["&cularr;"] = "21b6",
+           ["&curarr;"] = "21b7", ["&olarr;"]  = "21ba", ["&ararr;"]  = "21bb",
+           ["&lharu;"]  = "21bc", ["&lhard;"]  = "21bd", ["&uharr;"]  = "21be",
+           ["&uharl;"]  = "21bf", ["&rharu;"]  = "21c0", ["&rhard;"]  = "21c1",
+           ["&dharr;"]  = "21c2", ["&dharl;"]  = "21c3", ["&rlarr;"]  = "21c4",
+           ["&udarr;"]  = "21c5", ["&lrarr;"]  = "21c6", ["&llarr;"]  = "21c7",
+           ["&uuarr;"]  = "21c8", ["&rrarr;"]  = "21c9", ["&ddarr;"]  = "21ca",
+           ["&lrhar;"]  = "21cb", ["&rlhar;"]  = "21cc", ["&nlArr;"]  = "21cd",
+           ["&nhArr;"]  = "21ce", ["&nrArr;"]  = "21cf", ["&lArr;"]   = "21d0",
+           ["&uArr;"]   = "21d1", ["&rArr;"]   = "21d2", ["&dArr;"]   = "21d3",
+           ["&hArr;"]   = "21d4", ["&vArr;"]   = "21d5", ["&nwArr;"]  = "21d6",
+           ["&neArr;"]  = "21d7", ["&seArr;"]  = "21d8", ["&swArr;"]  = "21d9",
+           ["&lAarr;"]  = "21da", ["&rAarr;"]  = "21db", ["&ziglarr;"]  = "21dc",
+           ["&zigrarr;"]  = "21dd", ["&larrb;"] = "21e4", ["&rarrb;"] = "21e5",
+           ["&duarr;"] = "21f5",  ["&loarr;"]  = "21fd",  ["&roarr;"]  = "21fe",
+           ["&hoarr;"]  = "21ff", ["&xlarr;"]  = "27f5", ["&xrarr;"]  = "27f6",
+           ["&xharr;"]  = "27f7", ["&xlArr;"]  = "27f8", ["&xrArr;"]  = "27f9",
+           ["&xhArr;"]  = "27fa", ["&xmap;"]   = "27fc", ["&dzigrarr;"]="27ff",
+           ["&nvlArr;"] = "2902", ["&nvrArr;"] = "2903", ["&nvHarr;"] = "2904",
+           ["&Map;"]    = "2905", ["&lbarr;"]  = "290c", ["&rbarr;"]  = "290d",
+           ["&lBarr;"]  = "290e", ["&rBarr;"]  = "290f", ["&RBarr;"]  = "2910",
+           ["&DDotrahd;"]="2911", ["&UpArrowBar;"]="2912",["&DownArrowBar;"]="2913",
+           ["&Rarrtl;"] = "2916", ["&latail;"] = "2919", ["&ratail;"] = "291a",
+           ["&lAtail;"] = "291b", ["&rAtail;"] = "291c", ["&larrfs;"] = "291d",
+           ["&rarrfs;"] = "291e", ["&larrbfs;"]= "291f", ["&rarrbfs;"]= "2920",
+           ["&nwarhk;"] = "2923", ["&nearhk;"] = "2924", ["&searhk;"] = "2925",
+           ["&swarhk;"] = "2926", ["&nwnear;"] = "2927", ["&nesear;"] = "2928",
+           ["&seswar;"] = "2929", ["&swnwar;"] = "292a", ["&rarrc;"]  = "2933",
+           ["&cudarrr;"]= "2935", ["&ldca;"]   = "2936", ["&rdca;"]   = "2937",
+           ["&cudarrl;"]= "2938", ["&larrpl;"] = "2939", ["&curarrm;"]= "293c",
+           ["&cularrp;"]= "293d", ["&rarrpl;"] = "2945", ["&harrcir;"]= "2948",
+           ["&Uarrocir;"]="2949", ["&lurdshar;"]="294a", ["&ldrushar;"]="294b",
+           ["&LeftRightVector;"]="294e", ["&RightUpDownVector;"]="294f", ["&DownLeftRightVector;"]="2950",
+           ["&LeftUpDownVector;"]="2951", ["&LeftVectorBar;"]="2952", ["&RightVectorBar;"]="2953",
+           ["&RightUpVectorBar;"]="2954", ["&RightDownVectorBar;"]="2955", ["&DownLeftVectorBar;"]="2956",
+           ["&DownRightVectorBar;"]="2957", ["&LeftUpVectorBar;"]="2958", ["&LeftDownVectorBar;"]="2959",
+           ["&LeftTeeVector;"]="295a", ["&RightTeeVector;"]="295b", ["&RightUpTeeVector;"]="295c",
+           ["&RightDownTeeVector;"]="295d", ["&DownLeftTeeVector;"]="295e", ["&DownRightTeeVector;"]="295f",
+           ["&LeftUpTeeVector;"]="2960", ["&LeftDownTeeVector;"]="2961", ["&lHar;"]="2962",
+           ["&uHar;"]   = "2963", ["&rHar;"]   = "2964", ["&dHar;"] = "2965",
+           ["&luruhar;"]= "2966", ["&ldrdhar;"]= "2967", ["&ruluhar;"] = "2968",
+           ["&rdldhar;"] = "2969",["&lharul;"] = "296a", ["&llhard;"] = "296b",
+           ["&rharul;"] = "296c", ["&lrhard;"] = "296d", ["&udhar;"] = "296e",
+           ["&duhar;"]  = "296f", ["&RoundImplies;"] = "2970", ["&erarr;"] = "2971",
+           ["&simrarr;"] = "2972", ["&larrsim;"] = "2973", ["&rarrsim;"] = "2974",
+           ["&rarrap;"] = "2975", ["&ltlarr;"] = "2976", ["&gtrarr;"] = "2978",
+           ["&subrarr;"] = "2979", ["&suplarr;"] = "297b", ["&lfisht;"] = "297c",
+           ["&rfisht;"] = "297d", ["&ufisht;"] = "297e", ["&dfisht;"] = "297f",
+           
+           ; ::: CURRENCIES :::
+           ["&dollar;"] = "0024", ["&cent;"] = "00a2", ["&pound;"] = "00a3", ["&euro;"] = "00ac",
+           ["&yen;"] = "00a5", ["&curren;"] = "00a4",
+           
+           ; ::: LETTERS :::
+           ["&Agrave;"] = "00c0", ["&Aacute;"] = "00c1", ["&Acirc;"] = "00c2", ["&Atilde;"] = "00c3",
+           ["&Auml;"] = "00c4", ["&Aring;"] = "00c5", ["&AElig;"] = "00c6", ["&Ccedil;"] = "00c7",
+           ["&Egrave;"] = "00c8", ["&Eacute;"] = "00c9", ["&Ecirc;"] = "00ca", ["&Euml;"] = "00cb",
+           ["&Lgrave;"] = "00cc", ["&Lacute;"] = "00cd", ["&Lcirc;"] = "00ce", ["&Luml;"] = "00cf",
+           ["&ETH;"] = "00d0", ["&Ntilde;"] = "00d1", ["&Ograve;"] = "00d2", ["&Oacute;"] = "00d3",
+           ["&Ocirc;"] = "00d4", ["&Otilde;"] = "00d5", ["&Ouml;"] = "00d6", ["&Oslash;"] = "00d7",
+           ["&Ugrave;"] = "00d9", ["&Uacute;"] = "00da", ["&Ucirc;"] = "00db", ["&Uuml;"] = "00dc",
+           ["&Yacute;"] = "00dd", ["&THORN;"] = "00de", ["&szlig;"] = "00df", ["&agrave;"] = "00e0",
+           ["&aacute;"] = "00e1", ["&acirc;"] = "00e2", ["&atilde;"] = "00e3", ["&auml;"] = "00e4",
+           ["&aring;"] = "00e5", ["&aelig;"] = "00e6", ["&ccedil;"] = "00e7", ["&egrave;"] = "00e8",
+           ["&eacute;"] = "00e9", ["&ecirc;"] = "00ea", ["&euml;"] = "00eb", ["&igrave;"] = "00ec",
+           ["&iacute;"] = "00ed", ["&icirc;"] = "00ee", ["&iuml;"] = "00ef", ["&eth;"] = "00f0",
+           ["&ntilde;"] = "00f1", ["&ograve;"] = "00f2", ["&oacute;"] = "00f3", ["&ocirc;"] = "00f4",
+           ["&otilde;"] = "00f5", ["&ouml;"] = "00f6", ["&oslash;"] = "00f7", ["&ugrave;"] = "00f8",
+           ["&Uacute;"] = "00da", ["&Ucirc;"] = "00db", ["&Uuml;"] = "00dc", ["&Yacute;"] = "00dd",
+           ["&THORN;"] = "00de", ["&szlig;"] = "00df", ["&agrave;"] = "00e0", ["&aacute;"] = "00e1",
+           ["&acirc;"] = "00e2", ["&atilde;"] = "00e3", ["&auml;"] = "00e4", ["&aring;"] = "00e5",
+           ["&aelig;"] = "00e6", ["&ccedil;"] = "00e7", ["&egrave;"] = "00e8", ["&eacute;"] = "00e9",
+           ["&ecirc;"] = "00ea", ["&euml;"] = "00eb", ["&igrave;"] = "00ec", ["&iacute;"] = "00ed",
+           ["&icirc;"] = "00ee", ["&iuml;"] = "00ef", ["&eth;"] = "00f0", ["&ntilde;"] = "00f1",
+           ["&ograve;"] = "00f2", ["&oacute;"] = "00f3", ["&ocirc;"] = "00f4", ["&otilde;"] = "00f5",
+           ["&ouml;"] = "00f6", ["&oslash;"] = "00f7", ["&ugrave;"] = "00f9", ["&uacute;"] = "00fa",
+           ["&ucirc;"] = "00fb", ["&uuml;"] = "00fc", ["&yacute;"] = "00fd", ["&thorn;"] = "00fe",
+           ["&yuml;"] = "00ff", ["&Amacr;"] = "0100", ["&amacr;"] = "0101", ["&Abreve;"] = "0102",
+           ["&abreve;"] = "0103", ["&Aogon;"] = "0104", ["&aogon;"] = "0105", ["&Cacute;"] = "0106",
+           ["&cacute;"] = "0107", ["&Ccirc;"] = "0108", ["&ccirc;"] = "0109", ["&Cdot;"] = "010a",
+           ["&cdot;"] = "010b", ["&Ccaron;"] = "010c", ["&ccaron;"] = "010d", ["&Dcaron;"] = "010e",
+           ["&dcaron;"] = "010f", ["&Dstrok;"] = "0110", ["&dstrok;"] = "0111", ["&Emacr;"] = "0112",
+           ["&emacr;"] = "0113", ["&Edot;"] = "0116", ["&edot;"] = "0117", ["&Eogon;"] = "0118",
+           ["&eogon;"] = "0119", ["&Ecaron;"] = "011a", ["&ecaron;"] = "011b", ["&Gcirc;"] = "011c",
+           ["&gcirc;"] = "011d", ["&Gbreve;"] = "011e", ["&gbreve;"] = "011f", ["&Gdot;"] = "0120",
+           ["&gdot;"] = "0121", ["&Gcedil;"] = "0122", ["&Hcirc;"] = "0124", ["&hcirc;"] = "0125",
+           ["&Hstrok;"] = "0126", ["&hstrok;"] = "0127", ["&Itilde;"] = "0128", ["&itilde;"] = "0129",
+           ["&Imacr;"] = "012a", ["&imacr;"] = "012b", ["&Iogon;"] = "012e", ["&iogon;"] = "012f",
+           ["&Idot;"] = "0130", ["&imath;"] = "0131", ["&IJlig;"] = "0132", ["&ijlig;"] = "0133",
+           ["&Jcirc;"] = "0134", ["&jcirc;"] = "0135", ["&Kcedil;"] = "0136", ["&kcedil;"] = "0137",
+           ["&kgreen;"] = "0138", ["&Lacute;"] = "0139",  ["&lacute;"] = "013a", ["&Lcedil;"] = "013b",
+           ["&lcedil;"] = "013c", ["&Lcaron;"] = "013d", ["&lcaron;"] = "013e", ["&Lmidot;"] = "013f",
+           ["&lmidot;"] = "0140", ["&Lstrok;"] = "0141", ["&lstrok;"] = "0142", ["&Nacute;"] = "0143",
+           ["&nacute;"] = "0144", ["&Ncedil;"] = "0145", ["&ncedil;"] = "0146", ["&Ncaron;"] = "0147",
+           ["&ncaron;"] = "0148", ["&napos;"] = "0149", ["&ENG;"] = "014a", ["&eng;"] = "014b",
+           ["&Omacr;"] = "014c", ["&omacr;"] = "014d", ["&Odblac;"] = "0150", ["&odblac;"] = "0151",
+           ["&OElig;"] = "0152", ["&oelig;"] = "0153", ["&Racute;"] = "0154", ["&racute;"] = "0155",
+           ["&Rcedil;"] = "0156", ["&rcedil;"] = "0157", ["&Rcaron;"] = "0158", ["&rcaron;"] = "0159",
+           ["&Sacute;"] = "015a", ["&sacute;"] = "015b", ["&Scirc;"] = "015c", ["&scirc;"] = "015d",
+           ["&Scedil;"] = "015e", ["&scedil;"] = "015f", ["&Scaron;"] = "0160",  ["&scaron;"] = "0161",
+           ["&Tcedil;"] = "0162", ["&tcedil;"] = "0163", ["&Tcaron;"] = "0164", ["&tcaron;"] = "0165",
+           ["&Tstrok;"] = "0166", ["&tstrok;"] = "0167", ["&Utilde;"] = "0168", ["&utilde;"] = "0169",
+           ["&Umacr;"] = "016a", ["&umacr;"] = "016b", ["&Ubreve;"] = "016c", ["&ubreve;"] = "016d",
+           ["&Uring;"] = "016e", ["&uring;"] = "016f", ["&Udblac;"] = "0170", ["&udblac;"] = "0171",
+           ["&Uogon;"] = "0172", ["&uogon;"] = "0173", ["&Wcirc;"] = "0174", ["&wcirc;"] = "0175",
+           ["&Ycirc;"] = "0176", ["&ycirc;"] = "0177", ["&Yuml;"] = "0178", ["&Zacute;"] = "0179",
+           ["&zacute;"] = "017a", ["&Zdot;"] = "017b", ["&zdot;"] = "017c", ["&Zcaron;"] = "017d",
+           ["&zcaron;"] = "017e", ["&DownBreve;"] = "0311",
+           
+           ; ::: MATH :::
+           ["&plus;"] = "002b", ["&minus;"] = "2212", ["&times;"] = "00d7", ["&divide;"] = "00f7",
+           ["&equals;"] = "003d", ["&ne;"] = "2260", ["&plusmn;"] = "00b1", ["&not;"] = "00ac",
+           ["&lt;"] = "003c", ["&gt;"] = "003e", ["&deg;"] = "00b0", ["&sup1;"] = "00b9",
+           ["&sup2;"] = "00b2", ["&sup3;"] = "00b3", ["&fnof;"] = "0192", ["&percnt;"] = "0025",
+           ["&permil;"] = "0089", ["&pertenk;"] = "2031", ["&forall;"] = "2200", ["&comp;"] = "2201",
+           ["&part;"] = "2202", ["&exist;"] = "2203", ["&nexist;"] = "2204", ["&empty;"]  = "2205",
+           ["&nabla;"] = "2207", ["&isin;"] = "2208", ["&notin;"] = "2209", ["&ni;"] = "220b", 
+           ["&notni;"] = "220c", ["&prod;"] = "220f", ["&coprod;"] = "2210", ["&sum;"] = "2211",
+           ["&mnplus;"] = "2213", ["&plusdo;"] = "2214", ["&setminus;"] = "2216", ["&lowast;"] = "2217",
+           ["&compfn;"] = "2218", ["&radic;"] = "221a", ["&prop;"] = "221d", ["&infin;"] = "221e",
+           ["&angrt;"] = "221f", ["&ang;"] = "2220", ["&angmsd;"] = "2221", ["&angsph;"] = "2222",
+           ["&mid;"] = "2223", ["&nmid;"] = "2224", ["&parallel;"] = "2225", ["&npar;"] = "2226",
+           ["&and;"] = "2227", ["&or;"] = "2228", ["&cap;"] = "2229",  ["&cup;"] = "222a",
+           ["&int;"] = "222b", ["&Int;"] = "222c", ["&iiint;"] = "222d", ["&conint;"] = "222e",
+           ["&Conint;"] = "222f", ["&Cconint;"] = "2230", ["&cwint;"] = "2231", ["&cwconint;"] = "2232",
+           ["&awconint;"] = "2233", ["&there4;"] = "2234", ["&because;"] = "2235", ["&ratio;"] = "2236",
+           ["&Colon;"] = "2237", ["&minusd;"] = "2238", ["&mDDot;"] = "223a", ["&homtht;"] = "223b",
+           ["&sim;"] = "223c", ["&bsim;"] = "223d", ["&ac;"] = "223e", ["&acd;"] = "223f", 
+           ["&wreath;"] = "2240", ["&nsim;"] = "2241", ["&esim;"] = "2242", ["&sime;"] = "2243",
+           ["&nsime;"] = "2244", ["&cong;"] = "2245", ["&simne;"] = "2246", ["&ncong;"] = "2247",
+           ["&asymp;"] = "2248", ["&nap;"] = "2249", ["&approxeq;"] = "224a", ["&apid;"] = "224b",
+           ["&bcong;"] = "224c", ["&asympeq;"] = "224d", ["&bump;"] = "224e", ["&bumpe;"] = "224f",
+           ["&esdot;"] = "2250", ["&eDot;"] = "2251", ["&efDot;"] = "2252", ["&erDot;"] = "2253",
+           ["&colone;"] = "2254", ["&ecolon;"] = "2255", ["&ecir;"] = "2256", ["&cire;"] = "2257",
+           ["&wedgeq;"] = "2259", ["&veeeq;"] = "225a", ["&trie;"] = "225c", ["&equest;"] = "225f",
+           ["&equiv;"] = "2261", ["&nequiv;"] = "2262", ["&le;"] = "2264", ["&ge;"] = "2265",
+           ["&lE;"] = "2266", ["&gE;"] = "2267", ["&lnE;"] = "2268", ["&gnE;"] = "2269",
+           ["&Lt;"] = "226a", ["&Gt;"] = "226b", ["&between;"] = "226c", ["&NotCupCap;"] = "226d",
+           ["&nlt;"] = "226e", ["&ngt;"] = "226f", ["&nle;"] = "2270", ["&nge;"] = "2271",
+           ["&lsim;"] = "2272", ["&gsim;"] = "2273", ["&nlsim;"] = "2274", ["&ngsim;"] = "2275",
+           ["&lg;"] = "2276", ["&gl;"] = "2277", ["&ntlg;"] = "2278", ["&ntgl;"] = "2279",
+           ["&pr;"] = "227a", ["&sc;"] = "227b", ["&prcue;"] = "227c", ["&sccue;"] = "227d",
+           ["&prsim;"] = "227e", ["&scsim;"] = "227f", ["&npr;"] = "2280", ["&nsc;"] = "2281",
+           ["&sub;"] = "2282", ["&sup;"] = "2283", ["&nsub;"] = "2284", ["&nsup;"] = "2285",
+           ["&sube;"] = "2286", ["&supe;"] = "2287", ["&nsube;"] = "2288", ["&nsupe;"] = "2289",
+           ["&subne;"] = "228a", ["&supne;"] = "228b", ["&cupdot;"] = "228d", ["&uplus;"] = "228e",
+           ["&sqsub;"] = "228f", ["&sqsup;"] = "2290", ["&sqsube;"] = "2291", ["&sqsupe;"] = "2292",
+           ["&sqcap;"] = "2293", ["&sqcup;"] = "2294", ["&oplus;"] = "2295", ["&ominus;"] = "2296",
+           ["&otimes;"] = "2297", ["&osol;"] = "2298", ["&odot;"] = "2299", ["&ocir;"] = "229a",
+           ["&oast;"] = "229b", ["&odash;"] = "229d", ["&plusb;"] = "229e", ["&minusb;"] = "229f",
+           ["&timesb;"] = "22a0", ["&sdotb;"] = "22a1", ["&vdash;"] = "22a2", ["&dashv;"] = "22a3",
+           ["&top;"] = "22a4", ["&perp;"] = "22a5", ["&models;"] = "22a7", ["&vDash;"] = "22a8",
+           ["&Vdash;"] = "22a9", ["&Vvdash;"] = "22aa", ["&VDash;"] = "22ab", ["&nvdash;"] = "22ac",
+           ["&nvDash;"] = "22ad", ["&nVdash;"] = "22ae", ["&nVDash;"] = "22af", ["&prurel;"] = "22b0",
+           ["&vltri;"] = "22b2", ["&vrtri;"] = "22b3", ["&ltrie;"] = "22b4", ["&rtrie;"] = "22d5",
+           ["&origof;"] = "22b6", ["&imof;"] = "22b7", ["&mumap;"] = "22b8", ["&hercon;"] = "22b9",
+           ["&intcal;"] = "22ba", ["&veebar;"] = "22bb", ["&barvee;"] = "22bd", ["&angrtvb;"] = "22be",
+           ["&lrtri;"] = "22bf", ["&xwedge;"] = "22c0", ["&xvee;"] = "22c1", ["&xcap;"] = "22c2",
+           ["&xcup;"] = "22c3", ["&diamond;"] = "22c4", ["&sdot;"] = "22c5", ["&Star;"] = "22c6",
+           ["&divonx;"] = "22c7", ["&bowtie;"] = "22c8", ["&ltimes;"] = "22c9", ["&rtimes;"] = "22ca",
+           ["&lthree;"] = "22cb", ["&rthree;"] = "22cc", ["&bsime;"] = "22cd", ["&cuvee;"] = "22ce",
+           ["&cuwed;"] = "22cf", ["&Sub;"] = "22d0", ["&Sup;"] = "22d1", ["&Cap;"] = "22d2", 
+           ["&Cup;"] = "22d3", ["&fork;"] = "22d4", ["&epar;"] = "22d5", ["&ltdot;"] = "22d6",
+           ["&gtdot;"] = "22d7", ["&Ll;"] = "22d8", ["&Gg;"] = "22d9", ["&leg;"] = "22da",
+           ["&gel;"] = "22db", ["&cuepr;"] = "22de", ["&cuesc;"] = "22df", ["&nprcue;"] = "22e0",
+           ["&nsccue;"] = "22e1", ["&nsqsube;"] = "22e2", ["&nsqsupe;"] = "22e3", ["&lnsim;"] = "22e6",
+           ["&gnsim;"] = "22e7", ["&prnsim;"] = "22e8", ["&scnsim;"] = "22e9", ["&nltri;"] = "22ea",
+           ["&nrtri;"] = "22eb", ["&nltrie;"] = "22ec", ["&nrtrie;"] = "22ed", ["&vellip;"] = "22ee",
+           ["&ctdot;"] = "22ef", ["&utdot;"] = "22f0", ["&dtdot;"] = "22f1", ["&disin;"] = "22f2",
+           ["&isinsv;"] = "22f3", ["&isins;"] = "22f4", ["&isindot;"] = "22f5", ["&notinvc;"] = "22f6",
+           ["&notinvb;"] = "22f7", ["&isinE;"] = "22f9", ["&nisd;"] = "22fa", ["&xnis;"] = "22fb",
+           ["&nis;"] = "22fc", ["&notnivc;"] = "22fd", ["&notnivb;"] = "22fe",
+           
+           ;::: NUMBERS :::
+           ["&frac14;"] = "00bc", ["&frac12;"] = "00bd", ["&frac34;"] = "00be", ["&frac13;"] = "2153",
+           ["&frac23;"] = "2154", ["&frac15;"] = "2155", ["&frac25;"] = "2156", ["&frac35;"] = "2157",
+           ["&frac45;"] = "2158", ["&frac16;"] = "2159", ["&frac56;"] = "215a", ["&frac18;"] = "215b",
+           ["&frac38;"] = "215c", ["&frac58;"] = "215d", ["&frac78;"] = "215e",
+           
+           ;::: PUNCTUATION :::
+           ["&excl;"] = "0021", ["&quot;"] = "0022", ["&num;"] = "0023", ["&percnt;"] = "0025",
+           ["&amp;"] = "0026", ["&apos;"] = "0027", ["&lpar;"] = "0028", ["&rpar;"] = "0029",
+           ["&ast;"] = "002a", ["&comma;"] = "002c", ["&period;"] = "002e", ["&sol;"] = "002f",
+           ["&colon;"] = "003a", ["&semi;"] = "003b", ["&quest;"] = "003f", ["&commat;"] = "0040",
+           ["&lbrack;"] = "005b", ["&bsol;"] = "005c", ["&rbrack;"] = "005d", ["&Hat"] = "005e",
+           ["&lowbar;"] = "005f", ["&grave;"] = "0060", ["&lbrace;"] = "007b", ["&vert;"] = "007c",
+           ["&rbrace;"] = "007d", ["&tilde;"] = "007e", ["&nbsp;"] = "00a0", ["&iexcl;"] = "00a1",
+           ["&brvbar;"] = "00a6", ["&sect;"] = "00a7", ["&uml;"] = "00a8", ["&copy;"] = "00a9",
+           ["&ordf;"] = "00aa", ["&laquo;"] = "00ab", ["&not;"] = "00ac", ["&shy;"] = "00ad",
+           ["&reg;"] = "00ae", ["&macr;"] = "00af", ["&sup2;"] = "00b2", ["&sup3;"] = "00b3",
+           ["&acute;"] = "00b4", ["&micro;"] = "00b5", ["&para;"] = "00b6", ["&middot;"] = "00b7",
+           ["&cedil;"] = "00b8", ["&sup1;"] = "00b9", ["&ordm;"] = "00ba", ["&raquo;"] = "00bb",
+           ["&iquest;"] = "00bf", ["&hyphen;"] = "2010", ["&ndash;"] = "2013", ["&mdash;"] = "2014",
+           ["&horbar;"] = "2015", ["&Vert;"] = "2016", ["&lsquo;"] = "2018", ["&rsquo;"] = "2019",
+           ["&sbquo;"] = "201a", ["&ldquo;"] = "201c", ["&rdquo;"] = "201d", ["&bdquo;"] = "201e",
+           ["&dagger;"] = "2020", ["&Dagger;"] = "2021", ["&bull;"] = "2022", ["&nldr;"] = "2025",
+           ["&hellip;"] = "2026", ["&permil;"] = "2030", ["&pertenk;"] = "2031", ["&prime;"] = "2032",
+           ["&Prime;"] = "2033", ["&tprime;"] = "2034", ["&bprime;"] = "2035", ["&lsaquo;"] = "2039",
+           ["&rsaquo;"] = "203a", ["&oline;"] = "203e", ["&caret;"] = "2041", ["&hybull;"] = "2043",
+           ["&frasl;"] = "2044", ["&bsemi;"] = "204f", ["&qprime;"] = "2057", ["&trade;"] = "2122",
+           
+           ;::: SYMBOLS :::
+           ["&Copf;"] = "2102", ["&incare;"] = "2105", ["&gscr;"] = "210a", ["&hamilt;"] = "210b",
+           ["&Hfr;"] = "210c", ["&Hopf;"] = "210d", ["&planckh;"] = "210e", ["&planck;"] = "210f",
+           ["&Iscr;"] = "2110", ["&image;"] = "2111", ["&Lscr;"] = "2112", ["&ell;"] = "2113",
+           ["&Nopf;"] = "2115", ["&numero;"] = "2116", ["&copysr;"] = "2117", ["&weierp;"] = "2118",
+           ["&Popf;"] = "2119", ["&Qopf;"] = "211a", ["&Rscr;"] = "211b", ["&real;"] = "211c",
+           ["&Ropf;"] = "211d", ["&rx;"] = "211e", ["&Zopf;"] = "2124", ["&mho;"] = "2127",
+           ["&Zfr;"] = "2128", ["&iiota;"] = "2129", ["&bernou;"] = "212c", ["&Cfr;"] = "212d",
+           ["&escr;"] = "212f", ["&Escr;"] = "2130", ["&Fscr;"] = "2131", ["&Mscr;"] = "2133",
+           ["&oscr;"] = "2134", ["&alefsym;"] = "2135", ["&beth;"] = "2136", ["&gimel;"] = "2137",
+           ["&daleth;"] = "2138", ["&DD;"] = "2145", ["&dd;"] = "2146", ["&ee;"] = "2147",
+           ["&ii;"] = "2148", ["&starf;"] = "2605", ["&star;"] = "2606", ["&phone;"] = "260e",
+           ["&female;"] = "2640", ["&male;"] = "2642", ["&spades;"] = "2660", ["&clubs;"] = "2663",
+           ["&hearts;"] = "2665", ["&diams;"] = "2666", ["&sung;"] = "266a", ["&flat;"] = "266d",
+           ["&natural;"] = "266e", ["&sharp;"] = "266f", ["&check;"] = "2713", ["&cross;"] = "2717",
+           ["&malt;"] = "2720", ["&sext;"] = "2736", ["&VerticalSeparator;"] = "2758", ["&lbbrk;"] = "2772",
+           ["&rbbrk;"] = "2773", 
+           
+          }
+
+;---[ CONSTANTS ]--------------------------------------------------------------
+Const #HL_KILOBYTES = 1
+Const #HL_MEGABYTES = 2
+Const #HL_GIGABYTES = 3
+Const #HL_TERABYTES = 4
+Const #HL_AUTO      = 9
+
+;---[ FUNCTIONS ]--------------------------------------------------------------
+
+Function HL.Capitalize(t)
+  If StrLen(t) = 1
+    Return(UpperStr(t))
+  EndIf
+  
+  Local f = UpperStr(LeftStr(t, 1))
+  Local l = LowerStr(RightStr(t, StrLen(t)-1))
+  Return(f..l)
+EndFunction
+
+Function HL.NBWait(ms)
+  ; Non blocking wait
+  Local tid = StartTimer(Nil)
+  While GetTimer(tid) <= ms
+    CheckEvent()
+    Wait(5, #MILLISECONDS)
+  Wend
+EndFunction
+
+Function HL.IsNil(value) ; OBSOLETE
+/******************************************************************************
+result = HL.IsNil(value)  
+
+** OBSOLETE : Use native IsNil() instead. ***
+Check <value> and returns TRUE if it is NIL, otherwise returns FALSE.
+---------------------------------------------------------------------
+INPUT
+  value => Value to check against NIL.
+
+OUTPUT
+  result => TRUE if 'value' is NIL otherwise FALSE.
+******************************************************************************/
+  If GetType(value) = #NIL
+    Return(True) 
+  Else 
+    Return(False)
+  EndIf
+
+EndFunction
+
+Function HL.RestartApp()
+/********************************************************************
+HL.RestartApp()
+
+Used to restart the current HW running application.
+  
+INPUT
+  -
+OUTPUT
+  -
+NOTES
+  Tested only on Windows systems, the hws extension must be associated
+  with Hollywood.exe to work with scripts.
+********************************************************************/
+  ; Retrive plaform informations
+  Local v = GetVersion()
+  If v.Platform <> "Win32"
+    DebugPrompt("At this time only Windows systems are supported!")
+    Return()
+
+  EndIf
+
+  ; Retrieve the current app name
+  Local type, exeName = GetProgramInfo()
+  Local dq = "\""
+  
+  Switch type
+    Case #PRGTYPE_SCRIPT
+      ; Restart the script
+      Local scriptFull = exeName
+      Run(dq .. scriptFull .. dq)
+      
+    Case #PRGTYPE_PROGRAM
+      ; Restart the executable
+      Local programFull = exeName
+      Run(dq .. programFull .. dq)
+      
+    Default
+      ; Applets are not supported
+      
+  EndSwitch
+
+EndFunction
+
+Function HL.RoundBig(value, decimals, roundDown)
+/********************************************************************
+rounded = HL.RoundBug(value, decimals)
+
+Round a value to the given decimals, this function is needed to avoid
+errors like this:
+  DebugPrint(Int(40268.33971372/100000)*100000)
+  > -21474.83648
+  
+INPUT
+  value : value to convert
+  decimals : how many decimals you want
+  roundDown = To round down (default is roundUp)
+OUTPUT
+  rounded : rounded value with the specified decimals
+********************************************************************/
+  Local rounded    = Val(value)
+  Local sign       = IIf(rounded<0, -1, 1)
+  Local multiplier = 10^decimals
+  Local intPart    = Int(rounded)
+  
+  If IsNil(roundDown) Then RoundDown = False
+  Local vRound = IIf(roundDown, -0.5, 0.5)
+  
+  rounded = rounded-intPart
+
+  rounded = Cast(Abs(rounded)*multiplier+vRound, False, #INTEGER)
+  rounded = intPart + (rounded)/(multiplier*sign)
+  
+  Return(rounded)
+  
+EndFunction
+/*
+Local v = "9511.262466530"
+DebugPrint("VALUE:", FormatStr("%.10f", v))
+DebugPrint("RESUL:", FormatStr("%.10f", HL.RoundBig(v, 8)))
+DebugPrint("       0.123456789")
+DebugPrompt("?")
+*/
+
+HL.LineHook = {}
+HL.LineHook.Counter = 0
+
+Function HL.LineHook.Disable()
+/******************************************************************************
+HL.LineHook.Disable()
+
+Disable the line hook respecting the nested usage.
+******************************************************************************/
+  HL.LineHook.Counter = HL.LineHook.Counter - 1
+  
+  If HL.LineHook.Counter <= 0
+    HL.LineHook.Counter = 0
+    DisableLineHook()
+  EndIf
+
+EndFunction
+
+Function HL.LineHook.Enable()
+/******************************************************************************
+HL.LineHook.Enable()
+
+Disable the line hook respecting the nested usage.
+******************************************************************************/
+  HL.LineHook.Counter = HL.LineHook.Counter + 1
+  
+  If HL.LineHook.Counter = 1
+    EnableLineHook()
+  EndIf
+
+EndFunction
+
+Function HL.IsNotNil(value) ; OBSOLETE
+/******************************************************************************
+result = HL.IsNotNil(value)  
+
+** OBSOLETE : Use Not(IsNil()) instead **
+Check <value> and returns FALSE if it is NIL, otherwise returns TRUE
+---------------------------------------------------------------------
+INPUT
+  value => Value to check against NIL.
+OUTPUT
+  result => FALSE if 'value' is NIL otherwise TRUE.
+******************************************************************************/
+  If GetType(value) = #NIL
+    Return(False)
+  Else
+    Return(True)
+  EndIf
+
+EndFunction
+
+Function HL.Convert.BytesTo(bytes, target, decimals)
+/******************************************************************************
+converted = HL.Convert.BytesTo(bytes, target, decimals)
+
+Convertes the bytes specified in 'bytes' into the 'target' unit, the
+result will have 'decimals' decimal positions.
+---------------------------------------------------------------------
+INPUT
+  bytes => The bytes value to convert
+  target => The conversion target, can be one of the following constants :
+            -> #HL_KILOBYTES
+            -> #HL_MEGABYTES
+            -> #HL_GIGABYTES
+            -> #HL_TERABYTES
+            -> #HL_AUTO       Automatic conversion
+  decimals => How many decimals the results should have (default = 0)
+OUTPUT
+  converted => The value after the conversion.
+NOTE
+  If you use #HL_AUTO you will get a string as result with the appropriate
+  suffix.
+******************************************************************************/
+  Local result, sfx = bytes, ""
+  
+  If IsNil(decimals) Then decimals = 0
+  
+  If target = #HL_AUTO
+    If bytes/1099511627776 > 1
+      target = #HL_TERABYTES
+      sfx    = "Tb"
+    ElseIf bytes/1073741824 > 1
+      target = #HL_GIGABYTES
+      sfx    = "Gb"
+    ElseIf bytes/1048576 > 1
+      target = #HL_MEGABYTES
+      sfx    = "Mb"
+    ElseIf bytes/1024 > 1
+      target = #HL_KILOBYTES
+      sfx    = "Kb"
+    Else
+      sfx    = "b"
+    EndIf
+  EndIf
+    
+  Switch target
+    Case #HL_KILOBYTES
+      result = bytes/1024
+    Case #HL_MEGABYTES
+      result = bytes/1048576
+    Case #HL_GIGABYTES
+      result = bytes/1073741824
+    Case #HL_TERABYTES
+      result = bytes/1099511627776
+    Case #HL_AUTO
+      result = bytes
+      
+    Default
+      Return(result)
+
+  EndSwitch
+
+  Local result = ToNumber(FormatStr("%." .. decimals .. "f", result))
+  If sfx <> "" Then result = ToString(result) .. sfx
+
+  Return(result)
+  
+EndFunction
+
+Function HL.GetRndName()
+/******************************************************************************
+name = HL.GetRndName()
+
+Use this function to obtain a unique random name anytime you need it.
+---------------------------------------------------------------------
+OUTPUT
+  name => A string with an unique random name.
+NOTES
+  All returned random names are stored in the HL.RandomNames table to avoid 
+  reusing and make them unique, if you wish to reset the assigned names for
+  some reasons (for example for low memory conditions) just reset this table
+  but be aware that already assigned names could be reused.
+******************************************************************************/
+  Local rnd_name = PadNum(Rnd(999999), 6)
+   
+  While GetType(RawGet(HL.RndNames, rnd_name)) <> #NIL
+    rnd_name = PadNum(Rnd(999999), 6)
+  Wend
+
+  HL.RndNames[rnd_name] = 1
+
+  Return("rnd" .. rnd_name)
+
+EndFunction
+
+Function HL.ParseRunArgs(CaseSensitive)
+/******************************************************************************
+parsedArgs = HL.ParseRunArgs(caseSensitive)
+
+Parse command line arguments and return a table indexed with the argument
+key and with the value sets with the argument's parameter.
+The switch 'caseSensitive' defaults to TRUE, set it to FALSE to parse
+arguments and parameters without case distinctions.
+---------------------------------------------------------------------
+INPUT
+  caseSensitive => TRUE to parse case sensitive arguments and parameters.
+OUTPUT
+  parsedArgs => A table indexed with the command line arguments and
+                with values sets as the parameter values.
+NOTE
+  Keep in mind that all value will be returned as strings, it's up to
+  you to convert values in the needed format.
+  If 'caseSensitive' is TRUE all arguments will be lowercase.
+  This command is really usefull to test argument passed with the command
+  line simply testing the resulting table keys.
+******************************************************************************/
+  If HL.IsNil(caseSensitive) Then caseSensitive = False
+   
+  Local Result = {}
+  Local Args, ArgsCount = GetCommandLine()
+
+  Local index, value = NextItem(Args)
+  While GetType(index) <> #NIL
+    If Not(caseSensitive)
+      Result[value.arg] = value.param
+    Else
+      Result[LowerStr(value.arg)] = LowerStr(value.param)
+    EndIf
+      
+    index, value = NextItem(Args, index)
+  Wend
+   
+  Return(Result)
+  
+EndFunction
+
+Function HL.Safe(value) ; OBSOLETE
+/*******************************************************************************
+result = HL.Safe(value)
+
+** OBSOLETE : Use ToString() instead **
+Returns the string 'NIL' if 'value' is NIL, otherwise returns 'value' without
+any changes.
+This function is usefull to concatenate strings without worring about errors
+caused by concatenating uninitialized variables.
+---------------------------------------------------------------------
+INPUT
+  value => Value to process.
+OUTPUT
+  result => 'value' or the string 'NIL'
+*******************************************************************************/
+  If HL.IsNil(value)
+    Return("NIL")
+  Else
+    Return(value)
+  EndIf
+
+EndFunction
+
+Function HL.SizeString(txt, size)
+/*******************************************************************************
+processed = HL.SizeString(txt, size)
+
+This function is usefull to process strings and to produce easily aligned text
+columns, the string 'txt' will be processed and adapted to the 'size' length by
+adding spaces or by removing exceeding characters and adding '...' to the end to
+indicate that the string is not finished.
+---------------------------------------------------------------------
+INPUT
+  txt => Text to process.
+  size => Text length including the triple dots (if needed) or the additional
+          spaces.
+OUTPUT
+  processed => Processed text with the exact length equal to 'size'.
+*******************************************************************************/
+  Local l = StrLen(txt)
+
+  If l > size Then Return(LeftStr(txt, size-3) .. "...")
+  If l = size Then Return(txt)
+  
+  Return(txt .. RepeatStr(" ", size-l))
+
+EndFunction
+
+Function HL.Value2Perc(Range, Value)
+/*******************************************************************************
+percentual = HL.Value2Perc(range, value)
+
+Convert the given 'value' to a percentual value, the percentual will be calculated
+using the table 'range' that must have the following fields:
+  [0]      Minimum value in the range
+  [1]      Maximum value in the range
+If 'value' is out of range it will get Minimum or Maximum depending on the
+boundary it exceeds.
+---------------------------------------------------------------------
+INPUT
+  range => A table with at least two entries at index 0 and 1:
+            [0] : Lower range limit
+            [1] : Higher range limit
+  value => Value we need to convert into a percentual notation.
+OUTPUT
+   percentual => Converted value ranging from 0 to 1.
+******************************************************************************/
+  If value < Range[0]
+    value = range[0]
+  ElseIf value > Range[1]
+    value = Range[1]
+  EndIf
+
+  ; 100:x = Total:value
+  
+  If (Range[1] - Range[0]) = 0 Then Return(0)
+  Return((Value-Range[0])/(Range[1] - Range[0]))
+
+EndFunction
+
+Function HL.WaitForAction(key, delay, callback, timeout, timeout_callback, userdata)
+/*******************************************************************************
+HL.WaitForAction(key, delay, callback, timeout, to_callback, userData)
+
+This function is used to wait for an user action, the action can be a key press
+defined by 'key', the left mouse button press or any button of any connected
+joystick. It's possible to define a timeout to let the program continue without 
+user action. This routine provides callback functions to run an animation or to 
+accomplish other tasks during the wait or to call a specific function if the 
+timeout occurs.
+
+** TODO : Add timeout & current time to the 'callback' function **
+---------------------------------------------------------------------
+INPUT
+  key => Monitored key, or ANY for any key.
+  delay => Delay in milliseconds for the detection loop, every wait a call
+           to 'callback' will be made.
+  callback => Function called every loop check with the <userData> parameter.
+              If the callback function returns TRUE the wait loop will be
+              interrupted immediatly.
+  timeout => Timeout in milliseconds.
+  to_callback => Function called if the timeout is reached, the function will
+                 be called with 'userData' parameter.
+  userData => Custom user data parameter passed to the callback function.
+OUTPUT
+  result => False if a timeout occurred, otherwise True
+******************************************************************************/
+  Local t = StartTimer(Nil)
+  Local looping = True
+  Local result = False
+  Local jc = CountJoysticks()
+
+  While looping
+    Wait(delay, #MILLISECONDS)
+
+    ; Every check execute the callback function
+    If HL.IsNotNil(callback)
+      If (callback(userdata, GetTimer(t))) Then looping = False
+    EndIf
+
+    ; User action?
+    If IsLeftMouse() Or IsKeyDown(key)
+      looping = False
+      result = True
+    ElseIf jc > 0
+      For Local i = 0 To jc-1
+        If JoyFire(i)
+          looping = False
+          result = True
+          Break()
+        EndIf
+      Next
+    EndIf
+    
+    ; Timeout occurred?
+    If HL.IsNotNil(timeout)
+      If GetTimer(t) > timeout
+        looping = False
+        If HL.IsNotNil(timeout_callback)
+          timeout_callback(userdata)
+          result = False
+        EndIf
+      EndIf
+    EndIf
+
+  Wend
+
+  StopTimer(t)
+  
+  Return(result)
+
+EndFunction
+
+Function HL.CutStringLeft(text, maxLen)
+/*******************************************************************************
+cutted = HL.CutStringLeft(text, maxLen)
+
+Cut the given 'text' to the left if the string length is greater the 'maxLen'
+and prefix the string with the triple point (...) to indicate that the string
+has been shortened.
+---------------------------------------------------------------------
+INPUT
+  text => The text to process
+  maxLen => The max length the text should have excluding the triple point
+OUTPUT
+  cutted => The processed text
+******************************************************************************/
+  If StrLen(text) > maxlen
+    Return("..." .. RightStr(text, maxlen))
+  EndIf
+
+  Return(text)
+  
+EndFunction
+
+Function HL.CutStringRight(text, maxLen)
+/*******************************************************************************
+cutted = HL.CutStringRight(text, maxLen)
+
+Cut the given string to the right if the string length is greater the <maxLen>
+and add the triple point (...) suffix to indicate that the string has been shortened.
+---------------------------------------------------------------------
+INPUT
+  text => The text to process
+  maxLen => The max length the text should have excluding the triple point
+
+OUTPUT
+  cutted => The processed text
+******************************************************************************/
+  If StrLen(text) > maxlen
+    Return(LeftStr(text, maxlen) .. "...")
+  EndIf
+
+  Return(text)
+  
+EndFunction
+
+Function HL.GetBetweenLimits(txt, sLimit, eLimit, caseSense)
+/*******************************************************************************
+HL.GetBetweenLimits(txt, sLimit, eLimit, casesense)
+
+Get the text between the limiters.
+---------------------------------------------------------------------
+INPUT
+  txt => Text to process
+  sLimit => Starting limiter string
+  eLimit => Ending limiter string
+  casesense => True to make it case sensitive (default=False)
+OUTPUT
+  ttext => Results table, each entry is a string composed by the
+           starting limiter, the text between and and ending limiter.
+  tpos => Positions of the tags in the original string.
+    -> start_pos
+    -> end_pos
+*******************************************************************************/
+  Local p, sl, el = 0, StrLen(sLimit), StrLen(eLimit)
+  Local results, tpos = {}, {}
+  
+  If IsNil(casesense) Then casesense = False
+
+  Local p1 = FindStr(txt, sLimit, casesense)
+  While p1 <> -1
+    Local p2 = FindStr(txt, eLimit, casesense, p1)
+    If p2 = -1 Then Break()
+    Local t = MidStr(txt, p1+sl, p2-p1-sl)
+    InsertItem(results, t)
+    InsertItem(tpos, { start_pos = p1, end_pos = p2 + el })
+    p = p2 + el
+    p1 = FindStr(txt, sLimit, casesense, p)
+  Wend
+
+  Return(results, tpos)
+  
+EndFunction
+
+Function HL.CutBetweenLimits(txt, sLimit, eLimit, tags)
+/*******************************************************************************
+HL.CutBetweenLimits(txt, sLimit, eLimit, tags)
+
+Removes all text between the given limiter strings, limiter included.
+---------------------------------------------------------------------
+INPUT
+  txt => Text to process
+  sLimit => Starting limiter string
+  eLimit => Ending limiter string
+  tags => Where to add removed text (optional)
+OUTPUT
+  text => Processed text
+  removed => A table with all removed strings, if the 'tags' table has been
+             provided the strings will be added to it otherwise a new table
+             will be returned. Each entry is a string composed by the starting
+             limiter, the text between and and ending limiter.
+*******************************************************************************/
+  Local removed = {}
+  If Not(IsNil(tags)) Then removed = tags
+  Local p1 = FindStr(txt, sLimit, False)
+  While p1 <> -1
+    Local p2 = FindStr(txt, eLimit, False, p1)
+    If p2 = -1 Then Break()
+    InsertItem(removed, MidStr(txt, p1, p2-p1+StrLen(eLimit)))
+    txt = UnmidStr(txt, p1, p2-p1+StrLen(eLimit))
+    p1 = FindStr(txt, sLimit)
+  Wend
+  Return(txt, removed)
+  
+EndFunction
+
+Function HL.Convert.Unicode2UTF8(value)
+/*******************************************************************************
+converted = HL.Convert.Unicode2UTF8(value)
+
+Encode 'value', an hexadecimal string WITHOUT any prefixes ($, 0x), to the
+corresponding UTF8 string.
+---------------------------------------------------------------------
+INPUT
+  value => The hexadecimal value to convert without any prefix
+OUTPUT
+  converted => The encoded UTF8 string
+NOTES
+  Additional informations here : http://www.czyborra.com/utf/
+******************************************************************************/
+  Local v = ToNumber(value)
+
+  If v < $80
+    Return(Chr(v))
+  ElseIf v < $0800
+    Local v1 = $c0 | v >> 6
+    Local v2 = $80 | v & $3f
+    Return(Chr(v1) .. Chr(v2))
+  ElseIf v < $10000
+    Local v1 = $e0 | v >> 12
+    Local v2 = $80 | v >> 6 & $3f
+    Local v3 = $80 | v & $3f
+    Return(Chr(v1) .. Chr(v2) .. Chr(v3))
+  ElseIf v < $200000
+    Local v1 = $f0 | v >> 18
+    Local v2 = $80 | v >> 12 & $3f
+    Local v3 = $80 | v >> 6 & $3f
+    Local v4 = $80 & $3f
+    Return(Chr(v1) .. Chr(v2) .. Chr(v3) .. Chr(v4))
+  EndIf
+
+EndFunction
+
+Function HL.Convert.HTMLTag2HollywoodTag(html_tag)
+/*******************************************************************************
+converted = HL.Convert.HTMLTag2HollywoodTag(html_tag)
+
+Convert the given 'html_tag' into stardard text Hollywood's tags where possible.
+---------------------------------------------------------------------
+INPUT
+  html_tag => The HTML tag to convert
+OUTPUT
+  converted => The converted tag
+NOTES
+  The table 'HL.HTML_Tags' holds all supported conversions.
+******************************************************************************/
+   If GetType(RawGet(HL.HTML_Tags, html_tag)) <> #NIL
+      Return(HL.HTML_Tags[html_tag])
+   Else
+      Return(html_tag)
+   EndIf
+
+EndFunction
+
+
+Function HL.Convert.HTMLAmper2UTF8(html_amper)
+/*******************************************************************************
+converted = HL.Convert.HTMLAmper2UTF8(html_amper)
+
+Convert the given 'html_amper' into an UTF8 encoded string
+---------------------------------------------------------------------
+INPUT
+  html_amper => The HTML amper to convert
+OUTPUT
+  converted => The encoded text
+NOTES
+  The table 'HL.HTML_Amper' holds all supported conversions.
+******************************************************************************/
+   If GetType(RawGet(HL.HTML_Amper, html_amper)) <> #NIL
+      Local utf_8 = HL.HTML_Amper[html_amper]
+      Local t = ""
+      For i = 1 To StrLen(utf_8) Step 4
+         t = t .. Chr("$" .. MidStr(utf_8, i-1, 4))
+      Next
+      Return(t)
+   EndIf
+
+EndFunction
+
+Function HL.Convert.ForTextOut(text)
+/*******************************************************************************
+converted = HL.Convert.ForTextOut(text)
+
+Escape square brackes not part of Hollywood tags to avoid errors with TextOut()
+--------------------------------------------------------------------------------
+INPUT
+  text => Text to be converted
+OUTPUT
+  converted => Converted text
+*******************************************************************************/
+  Local temp = text
+  Local pos, l  = 0, StrLen(text)
+  Local found = True
+  
+  ;DebugPrint("CONVERT FOR TEXTOUT (Helpers) -> \n" .. text .. "\n\n" .. StrLen(text))
+  
+  ; Remove fixed tags
+ 
+  Local tags = { "[b]", "[/b]",
+                 "[u]", "[/u]",
+                 "[i]", "[/i]",
+                 "[color=", "[/color", 
+                 "[edge=", "[/edge", 
+                 "[shadow=", "[/shadow" }
+  ; Use a temporary string to identify all HW tags, when they are
+  ; found replaces the commands with a _
+  For Local tn = 0 To ListItems(tags)-1
+    Local pos = 0
+    Local p = FindStr(temp, tags[tn], False, pos)
+    While p <> -1
+      Local e = FindStr(temp, "]", False, p)
+      If e <> -1
+        For Local k = p To e
+          temp = LeftStr(temp, k) .. "_" .. RightStr(temp, l-k-1)
+        Next
+        pos = e-1
+      EndIf
+      
+      p = FindStr(temp, tags[tn], False, pos)
+    Wend
+  Next
+
+  ; At this point the temporary tring is cleared from all the HW tags, we need
+  ; to find the remaining square brackets and escape them on the original string.
+  For Local i = l-1 To 0 Step -1
+    If MidStr(temp, i, 1) = "["
+      text = LeftStr(text, i) .. "[" .. RightStr(text, StrLen(text)-i)
+    ElseIf MidStr(temp, i, 1) = "]"
+      text = LeftStr(text, i) .. "]" .. RightStr(text, StrLen(text)-i)
+    EndIf
+  Next
+
+  Return(text)
+  
+EndFunction
+
+Function HL.Convert.HTML2Hollywood(text)
+/*******************************************************************************
+converted = HL.Convert.HTML2Hollywood(text)
+
+Convert the given HTML 'text' into a text formatted with Hollywood tags.
+---------------------------------------------------------------------
+INPUT
+  text => The HTML text to convert
+OUTPUT
+  converted => The converted text
+NOTES
+  Currently handled HTML entities are:
+  - Slashes, Double-Slashes, Tabs
+  - HTML Tags (see HL.HTML_Tags table)
+  - HTML Ampersands (see HL.HTML_Amper table)
+  - Ordered lists
+  - Unordered lists
+******************************************************************************/
+  ; Remove Unneeded Escapes
+  text = ReplaceStr(text, "\\/", "/")                   ; Slash
+  text = ReplaceStr(text, "\\" .. Chr(34), Chr(34))     ; Double quotes
+  text = ReplaceStr(text, "\\t", "\t")                  ; Tab
+
+  ; Handle HTML Tags
+  Local pos1 = FindStr(text, "<", False)
+  While pos1 <> -1
+    Local pos2 = FindStr(text, ">", False, pos1)
+    If pos2 <> -1
+      ; Possible HTML Tag found
+      Local l = StrLen(text)
+      Local HTML_tag  = MidStr(text, pos1, pos2-pos1+1)
+      Local holly_tag = HL.Convert.HTMLTag2HollywoodTag(HTML_Tag)
+      If holly_tag = HTML_tag
+        pos1 = pos1 + StrLen(HTML_tag)
+      Else
+        ;DebugPrint("HTML TAG : ", HTML_Tag, " @ ", pos1, " --> " .. "-|" .. holly_tag .. "|-")
+        text = LeftStr(text, pos1) .. holly_tag .. RightStr(text, l-pos2-1)
+      EndIf
+    Else
+      ; Unmatching <>
+      Break
+    EndIf
+    pos1 = FindStr(text, "<", False, pos1)
+  Wend
+
+  ; Handle HTML Ampersands
+  Local pos1 = FindStr(text, "&", False)
+  While pos1 <> -1
+    Local pos2 = FindStr(text, ";", False, pos1)
+    If pos2 <> -1
+      ; Possible HTML Tag found
+      Local l = StrLen(text)
+      Local HTML_amper = MidStr(text, pos1, pos2-pos1+1)
+      ;DebugPrint("AMPER : ", HTML_Amper)
+      Local utf_8    = HL.Convert.HTMLAmper2UTF8(HTML_amper)
+      ;DebugPrint("Encoded with : ", utf_8)  
+      ;TextOut(100, 100, "-> " .. utf_8 .. " <-", { Encoding = #ENCODING_UTF8 })
+      ;WaitLeftMouse()
+      ;Local utf_8 = HL.Convert.Unicode2UTF8(unicode)
+      ;DebugPrint("HTML Amper : ", HTML_amper, " @ ", pos1, " --> " .. "-|" .. unicode .. "|->|"..utf_8.."|-")
+      text = LeftStr(text, pos1) .. utf_8 .. RightStr(text, l-pos2-1)
+      ; text = LeftStr(text, pos1) .. holly_tag .. RightStr(text, l-pos2-1)
+    Else
+      pos1 = pos1 + 1
+    EndIf
+    pos1 = FindStr(text, "&", False, pos1)
+  Wend
+
+  ; Handle Escaped Unicodes
+  Local pos = FindStr(text, "\\u", False)
+  While pos <> -1
+    Local unicode = MidStr(text, pos+2, 4)
+    Local l = StrLen(text)
+    unicode = ToNumber("$" .. unicode)
+    Local utf_8 = HL.Convert.Unicode2UTF8(unicode)
+    text = LeftStr(text, pos) .. utf_8 .. RightStr(text, l-pos-6)
+    pos = FindStr(text, "\\u", False, pos)
+  Wend
+
+  ; handle Ordered Lists
+  Local p1 = 0
+  While True
+    Local p1 = FindStr(text, "<ol>", False)
+    If p1 = -1 Then Break
+
+    Local p2 = FindStr(text, "</ol>", False, p1)
+    Local starting  = LeftStr(text, p1)
+    Local substring = MidStr(text, p1, p2-p1+5)
+    Local ending    = RightStr(text, StrLen(text)-p2-5)
+    substring = ReplaceStr(substring, "<ol>", "")
+    substring = ReplaceStr(substring, "</ol>", "")
+    substring = ReplaceStr(substring, "</li>", "")
+    Local cnt, pos = 1, 0
+    While True
+      Local p = FindStr(substring, "<li>", False, pos)
+      If p = -1 Then Break
+      substring = LeftStr(substring, p) .. ToString(cnt) .. ". " .. RightStr(substring, StrLen(substring)-4-p)
+      cnt = cnt + 1
+      pos = p     
+    Wend
+    text = starting .. substring .. ending
+
+  Wend
+
+  ; Handle unordered Lists
+  Local p1 = 0
+  While True
+    Local p1 = FindStr(text, "<ul>", False)
+    If p1 = -1 Then Break
+
+    Local p2 = FindStr(text, "</ul>", False, p1)
+    Local starting  = LeftStr(text, p1)
+    Local substring = MidStr(text, p1, p2-p1+5)
+    Local ending    = RightStr(text, StrLen(text)-p2-5)
+    substring = ReplaceStr(substring, "<ul>", "")
+    substring = ReplaceStr(substring, "</ul>", "")
+    substring = ReplaceStr(substring, "</li>", "")    
+    Local cnt, pos = 1, 0
+    While True
+      Local p = FindStr(substring, "<li>", False, pos)
+      If p = -1 Then Break
+      substring = LeftStr(substring, p) .. "* " .. RightStr(substring, StrLen(substring)-4-p)
+      cnt = cnt + 1
+      pos = p
+    Wend
+    text = starting .. substring .. ending
+
+  Wend
+
+  Return(text)
+  
+EndFunction
+
+
+/*******************************************************************************
+ CLASS BufferedString
+ This class is used to speed up string concatenation.
+ *******************************************************************************/
+ HL.BufferedString = { }
+ HL.BufferedString.dest = ""
+ HL.BufferedString.temp = ""
+ HL.BufferedString.len  = 400
+ HL.BufferedString.tlen = 0
+ HL.BufferedString.chunks = {}
+ 
+Function HL.BufferedString:PrepareForRead()
+  ;DebugPrint("Preparing text chunks...")
+  self.chunks = {}
+  Local data = self.dest .. self.temp
+  Local blocks = StrLen(data)/self.len
+  Local chunks = Int(blocks)
+  If blocks <> chunks Then chunks = chunks + 1
+  
+  ;DebugPrint("Blocks = " .. blocks)
+  ;DebugPrint("Chunks = " .. chunks)
+  For i = 0 To chunks
+    ;DebugPrint("Setting Chunk " .. i .. " (" .. i*self.len .. ", " .. self.len .. ")")
+    self.chunks[i] = MidStr(data, i*self.len, self.len)
+  Next
+EndFunction
+
+Function HL.BufferedString:Read(start, lenght)
+  If lenght = 0 Then Return("")
+  Local start_chunk = Int(start/self.len)
+  Local end_chunk   = Int((start+lenght)/self.len)
+  ;Local start_pos   = start_chunk*self.len + start
+  ;Local end_pos     = end_chunk*self.len + start + lenght
+  ;DebugPrint(":Read(" .. start .. ", " .. lenght .. ")")
+  If start_chunk = end_chunk
+    ;DebugPrint(" Read in the same chunk")
+    Local start_pos = Mod(start, self.len)
+    ;DebugPrint("  Chunk : " .. start_chunk .. ", " .. start_pos .. ", " .. lenght)
+    Return(MidStr(self.chunks[start_chunk], start_pos, lenght))
+  Else
+    ;DebugPrint(" Read in multiple chunks")
+    ;DebugPrint("  Chunks : " .. start_chunk .. " - " .. end_chunk)
+    Local start_pos = start - start_chunk*self.len
+    Local l = self.len-start_pos
+    ;DebugPrint("  On chunk " .. start_chunk .. "  : Start = " .. start_pos .. ", Lenght = " .. l)    
+    Local t = MidStr(self.chunks[start_chunk], start_pos, l)
+    lenght = lenght - l
+    For Local i = start_chunk+1 To end_chunk-1
+      ;DebugPrint("  Adding content of chunk " .. i)
+      t = t .. self.chunks[i]
+      lenght = lenght - self.len
+    Next
+    ;DebugPrint("  On chunk " .. end_chunk .. "  : Start = 0, Lenght = " .. lenght)
+    t = t .. MidStr(self.chunks[end_chunk], 0, lenght)
+    Return(t)
+  EndIf
+EndFunction
+
+Function HL.BufferedString:New()
+/*******************************************************************************
+BSObject = HL.BufferedString:New()
+
+Create a new buffered string object.
+---------------------------------------------------------------------
+OUTPUT
+  BSObject => The new created object.
+---------------------------------------------------------------------
+NOTE
+  String concatenation in Hollywood is somewhat slow so I've implemented this
+  class for speed up concatenation where there is the need to concatenate
+  character by character, for example while decoding or encoding data. This
+  trick speed up a lot this operation, in my tests I was able to process strings
+  with single character concatenation at around 18 Kb/s, using this system I was
+  able to reach 680 Kb/s.
+******************************************************************************/
+  Return(CopyTable(self))
+   
+EndFunction
+
+Function HL.BufferedString:AddChar(char)
+/*******************************************************************************
+HL.BufferedString:AddChar(char)
+
+Add the character 'char' to the buffered string object.
+---------------------------------------------------------------------
+INPUT
+  char => The character string to add to the buffered string object
+******************************************************************************/
+  self.tlen = self.tlen + 1
+  self.temp = self.temp .. char
+  If self.tlen = self.len
+    self.dest = self.dest .. self.temp
+    self.temp = ""
+    self.tlen = 0
+  EndIf
+   
+EndFunction
+
+Function HL.BufferedString:Set(string)
+  self.dest = string
+  self.temp = ""
+  self.tlen = 0
+EndFunction
+
+Function HL.BufferedString:AddString(string)
+  self.dest = self.dest .. self.temp .. string
+  self.temp = ""
+  self.tlen = 0
+EndFunction
+
+Function HL.BufferedString:Get()
+/*******************************************************************************
+HL.BufferedString:Get()
+
+Returns the current contents of the buffered string object.
+---------------------------------------------------------------------
+OUTPUT
+  contents => Current buffered string contents.
+******************************************************************************/
+  Return(self.dest .. self.temp)
+
+  EndFunction
+
+
+/*******************************************************************************
+ CLASS Color
+ This class is used to manage colors.
+ *******************************************************************************/
+HL.Color = { }
+HL.Color.r = 0
+HL.Color.g = 0
+HL.Color.b = 0
+HL.Color.a = 0
+
+Function HL.Color:New(params, alpha)
+/******************************************************************************
+ColorObj = HL.Color:New(params, alpha)
+
+Creates a new color object
+---------------------------------------------------------------------
+INPUT
+  params => An optional table with one or more members as follow:
+              r : Red component
+              g : Green component
+              b : Blue component
+              a : Transparency level
+            Or a single RGB color value, followed by an optional alpha value.
+OUTPUT
+  ColorObj => A new color object
+*******************************************************************************/
+  Local obj = CopyTable(self)
+  If Not(IsNil(params))
+    If GetType(params) = #TABLE
+      If RawGet(params, "r") <> Nil Then obj.r = params.r
+      If RawGet(params, "g") <> Nil Then obj.g = params.g
+      If RawGet(params, "b") <> Nil Then obj.b = params.b
+      If RawGet(params, "a") <> Nil Then obj.a = params.a
+    Else
+      If IsNil(alpha) Then alpha = 0
+      obj.r = Red(params)
+      obj.g = Green(params)
+      obj.b = Blue(params)
+      obj.a = alpha
+    EndIf
+  EndIf
+  
+  Return(obj)
+EndFunction
+
+Function HL.Color:Clone()
+/******************************************************************************
+ColorObj = HL.Color:Clone()
+
+Clone the color to a new object
+---------------------------------------------------------------------
+OUTPUT
+  ColorObj => The clones color object
+******************************************************************************/
+  Return(CopyTable(self))
+EndFunction
+
+Function HL.Color:fromValue(value)
+/******************************************************************************
+HL.Color:fromValue(value)
+
+Load the color object with the given color value
+---------------------------------------------------------------------
+INPUT
+  value => The color value to load into the object
+******************************************************************************/
+  Local value = ToNumber(value)
+  self.r = Red(value)
+  self.g = Green(value)
+  self.b = Blue(value)
+  self.a = Shr(value, 24)
+EndFunction
+
+Function HL.Color:fromARGB(a, r, g, b)
+/******************************************************************************
+HL.Color:fromARGB(a, r, g, b)
+
+Load the color object with the given A, R, G, B components
+---------------------------------------------------------------------
+INPUT
+  a => Alpha component
+  r => Red component
+  g => Green component
+  b => Blue component
+******************************************************************************/
+  self.r = r
+  self.g = g
+  self.b = b
+  self.a = a
+EndFunction
+
+Function HL.Color:toRGBValue()
+/******************************************************************************
+value = HL.Color:toRGBValue()
+
+Returns the RGB color value
+---------------------------------------------------------------------
+OUTPUT
+  value => RGB color value stored in the color object
+******************************************************************************/
+  Return(RGB(self.r, self.g, self.b))
+EndFunction
+
+Function HL.Color:toARGBValue()
+/******************************************************************************
+value = HL.Color:toARGBValue()
+
+Returns the ARGB color value
+---------------------------------------------------------------------
+OUTPUT
+  value => ARGB color value stored in the color object
+******************************************************************************/
+  Return(ARGB(self.a, RGB(self.r, self.g, self.b)))
+EndFunction
+
+Function HL.Color:Darken(delta)
+/******************************************************************************
+HL.Color:Darken(delta)
+
+Make the current color darker by a given factor represented by 'delta'
+---------------------------------------------------------------------
+INPUT
+  delta => Amount in units to subtract from all current color's components
+******************************************************************************/
+  self.r = self.r - delta
+  If self.r < 0 Then self.r = 0
+  self.g = self.g - delta
+  If self.g < 0 Then self.g = 0
+  self.b = self.b - delta
+  If self.b < 0 Then self.b = 0  
+  
+  If self.r > 255 Then self.r = 255
+  If self.g > 255 Then self.g = 255
+  If self.b > 255 Then self.b = 255
+  
+EndFunction
+
+Function HL.Color:Brighten(delta)
+/******************************************************************************
+HL.Color:Brighten(delta)
+
+Make the current color brighten by a given factor represented by 'delta'
+---------------------------------------------------------------------
+INPUT
+  delta => Amount in units to add to all current color's components
+******************************************************************************/
+  self.r = self.r + delta
+  If self.r > 255 Then self.r = 255
+  self.g = self.g + delta
+  If self.g > 255 Then self.g = 255
+  self.b = self.b + delta
+  If self.b > 255 Then self.b = 255
+  
+  If self.r < 0 Then self.r = 0
+  If self.g < 0 Then self.g = 0
+  If self.b < 0 Then self.b = 0
+  
+EndFunction
+
+Function HL.GetRndColor(alpha)
+/******************************************************************************
+color = HL.GetRndColor(alpha)
+
+Returns a random color, eventually with a random alpha transparency value.
+---------------------------------------------------------------------
+INPUT
+  alpha => Set to TRUE if you want to get a random color with random
+            transparency.
+******************************************************************************/
+  Local a = 0
+  ;-- old implementation --
+  ; Local r, g, b = Rnd(255), Rnd(255), Rnd(255)
+  Local rc = GetRandomColor()
+  
+  If alpha Then a = Rnd(255)
+  
+  ; Return(ARGB(a, RGB(r, g, b)))
+  Return(ARGB(a, rc))
+  
+EndFunction
+
+
+
+HL.Input = {}
+
+Function HL.Input.CheckKeyboard(keyList, waitKey, waitRelease)
+/******************************************************************************
+key = HL.Input.CheckKeyboard(keyList, waitKey, waitRelease)
+
+Wait for a key press from a list of allowed keys.
+---------------------------------------------------------------------
+INPUT
+  keyList => A table of all allowed keys, you can set it to 'ANY' to detect
+             keypresses coming from any keys.
+  waitKey => TRUE to wait until a key is pressed
+             FALSE to make a scan and return immediatly
+  waitRelease => TRUE to wait until a pressed key is released
+                 FALSE to return immediatly as soon as the key is pressed
+OUTPUT
+  key => A string representing the pressed key or an empty string if no key
+         has been pressed (this last case is valid only if you have set
+         waitKey = FALSE).
+******************************************************************************/
+ 
+  If GetType(keyList) = #TABLE
+    If ListItems(keyList)=0 Then Return("")
+  ElseIf GetType(keyList) = #STRING
+    If keyList = "ANY"
+      ; Build characters table
+      keyList = {}
+      For i = 1 To 255
+        If (i > 32 And i < 127)         
+          InsertItem(keyList, Chr(i))
+        EndIf
+      Next
+      InsertItem(keyList, "SPACE")
+      InsertItem(keyList, "BACKSPACE")
+      InsertItem(keyList, "ENTER")
+      InsertItem(keyList, "RETURN")
+      InsertItem(keyList, "ESC")
+    EndIf
+  EndIf
+  
+  If IsNil(waitKey) Then waitKey = False
+  If IsNil(waitRelease) Then waitRelease = True
+
+  Repeat
+    For Local i = 0 To ListItems(keyList)-1
+      If IsKeyDown(keyList[i])
+        If waitRelease
+          While IsKeyDown(keyList[i])
+            Wait(10, #MILLISECONDS)
+          Wend
+        EndIf
+        Return(keyList[i])
+      EndIf
+    Next
+
+    Wait(10, #MILLISECONDS)
+  Until waitKey = False
+  
+  Return("")
+
+EndFunction
+
+Function HL.GetReversedDateTime()
+  ; Useful for attach the reversed date to files
+  Local d = GetDate(False)
+  Local t = GetTime(True)
+
+  Local day = LeftStr(d, 2)
+  Local mon = MidStr(d, 3, 2)
+  Local yea = MidStr(d, 6, 4)
+  Local tim = ReplaceStr(t, ":", "")
+
+  Local s = yea .. mon .. day .. "-" .. tim
+  Return(s)
+EndFunction
+
+Function HL.Input.CheckJoystick(waitKey, waitRelease)
+/******************************************************************************
+dir, fire = HL.Input.CheckJoystick(waitKey, waitRelease)
+
+Wait for a joystick button press or for any direction detected.
+---------------------------------------------------------------------
+INPUT
+  waitKey => TRUE to wait until a button/direction is triggered
+             FALSE to make a scan and return immediately
+  waitRelease => TRUE to wait until a pressed button/direction is released
+                 FALSE to return immediatly as soon as the button/direction
+                 is pressed.
+OUTPUT
+  dir => The numeric code of the direction detected or -1 if no direction was
+         detected.
+  fire => The numeric code of the button pressed or -1 if no button was
+         detected.
+******************************************************************************/
+  
+  If IsNil(waitKey) Then waitKey = False
+  If IsNil(waitRelease) Then waitRelease = True
+
+  Repeat
+    ; Parse all available joysticks
+    Local joyCount = CountJoysticks()
+    For j = 0 To joyCount-1
+      ; Check directions
+      If JoyDir(j) <> #JOYNODIR
+        Local jDir = JoyDir(j)
+        If waitRelease
+          While JoyDir(j) = jDir
+            Wait(10, #MILLISECONDS)
+          Wend
+        EndIf
+        Return(jDir, -1)
+      EndIf
+      
+      ; Check buttons
+      If JoyFire(j, 0) <> 0
+        Local jFire = JoyFire(j, 0)
+        If waitRelease
+          While JoyFire(j, 0) = jFire
+            Wait(10, #MILLISECONDS)
+          Wend
+        EndIf
+        Return(-1, jFire)
+      EndIf
+      
+    Next
+    
+    Wait(10, #MILLISECONDS)
+  Until waitKey = False
+  
+  Return(-1, -1)
+
+EndFunction
+
+Function HL.FormatNum(v, i, d)
+  ; Format the number <v> with <i> integer positions and <d> decimal positions
+  ; Return the formatted string
+  ; -------------------------------------------------------
+  Local iv = Int(v) ; Integer part
+  Local dv = v-iv   ; Decimal part
+  
+  Local is = ToString(iv)
+  Local ds = UnRightStr(FormatStr("%." .. d .. "f", dv), 2)
+  
+  While StrLen(is) < i
+    is = " " .. is
+  Wend
+  
+  Return(is .. "." .. ds)
+
+EndFunction

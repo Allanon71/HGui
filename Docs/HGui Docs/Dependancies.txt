@@ -1,0 +1,10 @@
+No plugins required, just pure Hollywood modules devepoled by me:
+
+@INCLUDE "+Includes.hws"            All libraries index
+@INCLUDE #INC_HELPERS               Helpers library
+@INCLUDE #INC_TABLES                Tables library
+@INCLUDE #INC_G2D                   Graphics2D library
+@INCLUDE #INC_DEBUG                 Debug library
+@INCLUDE #INC_TEXTPROC              TextProcessing library
+
+These dependancies are handled by HGui, you don't need to install them separately, just follow what I explain in the 'quick tutorial' section.

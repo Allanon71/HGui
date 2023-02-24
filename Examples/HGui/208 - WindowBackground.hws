@@ -1,0 +1,71 @@
+/*******************************************************************************
+HGUI : Tutorial 208 - Window's Background                    v1.2 : 09/02/2023 *
+********************************************************************************
+Each window has a background that can be a solid color, an image, a texture or
+a color gradient. 
+You can set the background at creation time using the following fields in the
+'options' table:
+  bgcolor      Used to define a solid color background
+  background   Used to pass an image file for the background
+  bgtexture    Used to pass an image tile used to fill the background
+  bggradient   Used top define a gradient for the background with the following
+               fields:
+    type         The gradient type: #LINEAR, #RADIAL, #CONICAL
+    angle        Gradient angle in degrees
+    colors       It's a table filled with pairs <color>, <position> where
+                 position is a value between 0 and 1 and represent the
+                 position of the color in the gradient.
+
+Only one of these flags can be used for each window.
+********************************************************************************/
+
+;---| INCLUDE THE LIBRARIES DEFINITIONS |---------------------------------------
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+;DBG.Console.Enable(True)
+;DBG.Console.AddChannel(HGui.DebugChannel)
+
+; Window creation
+Local myWin1 = HGui.Window:new(
+                 { title = "Solid Color",
+                   name  = "win1",
+                   position = { x = 100, y = 100 },
+                   size     = { w = 600, h = 400 },
+                   bgcolor  = $FF0000                      ; RED solid color
+                   })
+
+Local myWin2 = HGui.Window:new(
+                 { title = "Image",
+                   name  = "win2",
+                   position   = { x = 200, y = 200 },
+                   size       = { w = 600, h = 400 },
+                   background = "Resources/background.jpg" ; Image
+                   })
+
+Local myWin3 = HGui.Window:new(
+                 { title = "Texture",
+                   name  = "win3",
+                   position   = { x = 300, y = 300 },
+                   size       = { w = 600, h = 400 },
+                   bgtexture  = "Resources/texture.jpg"    ; Texture
+                   })
+
+Local myWin4 = HGui.Window:new(
+                 { title = "Gradient",
+                   name  = "win4",
+                   position   = { x = 400, y = 400 },
+                   size       = { w = 600, h = 400 },
+                   bggradient =                            ; Gradient
+                     { type  = #LINEAR,
+                       angle  = 45,
+                       colors = { $ff0000, 0.0,
+                                  $00ff00, 0.3,
+                                  $0000ff, 0.6,
+                                  $ff00ff, 0.9,
+                                  $ffffff, 1.0 } }
+                   })
+
+Repeat
+   WaitEvent()
+Forever

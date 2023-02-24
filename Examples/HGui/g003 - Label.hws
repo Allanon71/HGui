@@ -1,0 +1,454 @@
+/************************************************
+ * HGui Test Script                             *
+ * Fabio Falcucci                               *
+ * Feb-2023                                     *
+ ************************************************
+
+LABEL GADGET
+------------
+  A label gadget is used to print text into a box
+  shaped gadget, HGui labels allow you to display
+  text, add lines, wordwrap text and several
+  more advanced actions.
+  There are also some special tags you can use to
+  quickly change some attributes of the rendered
+  text, to use them you have to place these tags
+  at the beginning of a line of text, this means
+  that each line can have this attributes:
+    {:align-l:}      Align the line to the left
+    {:align-r:}      Align the line to the right
+    {:font++:}       Increase the font size for the line
+    {:font--:}       Decrease the font size for the line
+    {:font=nnn:}     Set the font line size with the given nnn value
+    {:bgcolor=aarrggbbz:}   Render the background of the full line
+      with the given hex color, z is the background box round level
+    {:bbcolor=aarrggbbz:}   Same as above but the background is
+      rendered only under the text area.
+ ************************************************/
+ 
+; Includes the HGui module
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; Creates a window
+Local myWin = 
+  HGui.Window:new(
+    { title = "Label Gadgets",
+      name  = "myWindow",
+      position   = { x = #CENTER, y = #CENTER },
+      size = { w = 550, h = 550 }
+      })
+
+; Disable auto-rendering feature
+HGui.SetAutoRendering(False)
+
+; For this example we are going to create two labels,
+; One will be used as a simple label while the other
+; will be used to show a more complex text.
+
+; To group these labels we need a box that we will use as a container
+Local gBox = HGui.Gadget:new(#HGUI_BOX_GADGET)
+
+; Here is the first label, note that caption field is mandatory
+Local gLab1 = HGui.Gadget:new(#HGUI_LABEL_GADGET, { caption = "" })
+  ; We want to print the current date & time in this label so we are going to
+  ; setup an interval:
+  Local i1 = SetInterval(Nil, 
+    Function()
+      ; Pick the current date and time
+      Local dt = GetDate(True)
+      
+      ; Change the label caption using the method :setCaption()
+      gLab1:setCaption(dt, True) ; <-- True means 'redraw now'
+    EndFunction,
+    500 ; Refresh every 500ms
+    )
+
+
+; Here is the second label, you can pass a table of strings to tell HGui that you want
+; to display several lines.
+Local gLab2 = HGui.Gadget:new(#HGUI_LABEL_GADGET, 
+  { caption = { "This is a multiline", "text inside a label" } })
+
+; We also need a label to print an important message for the user
+Local gLab3 = HGui.Gadget:new(#HGUI_LABEL_GADGET, 
+  { caption = { "To effectively use the scroll methods you have to align the text to the top or bottom, not the center which is the default alignment." }})
+gLab3:SetWordWrap(True, False)                     ; Let's enable the automatic wordwrap
+gLab3:FontStyle(#ANTIALIAS+#BOLD+#ITALIC, False)   ; and set an hilighted state for this text
+
+; We need a group gadget where we will group some buttons to perform tests.
+Local gGroup = HGui.Gadget:new(#HGUI_GROUP_GADGET, 
+  { Caption = { "Actions" }, 
+    Group_LabelGap = 10, 
+    Group_LabelSide = #HGUI_ALIGN_LEFT })
+    
+; Now we are going to build some buttons for our tests.
+
+; Label gadgets supports the following methods
+;   :Align(align, refresh)            Changes the alignment
+;   :FontMargins(margins, refresh)    Changes the text's margins
+;   :SetCaption(caption, refresh)     Changes the captions (can be a string or a table of strings)
+;   :SetColor(color, refresh)         Changes the text's color
+;   :SetWordwrap(enable, refresh)     Enable/Disable wordwrap
+;   :FontSize(size, refresh)          Changes the font's size
+;   :FontName(name, refresh)          Chnages the font's name
+;   :FontStyle(style, refresh)        Changes the font's style
+;   :ScrollUp(rows, refresh)          Scrolls up the text
+;   :ScrollDown(rows, refresh)        Scrolls down the text
+;   :ScrollTop(refresh)               Scrolls to the top line
+;   :ScrollBottom(maximize, refresh)  Scrolls to the bottom line
+;   :ScrollTo(row, refresh)           Scrolls to the given row
+;   :AppendLine(text, autoscroll, refresh)  Add a text line to the bottom (can be a string or a table of strings)
+;   :Clear(refresh)                   Removes any text
+;   :Get()                            Returns the current text
+
+; This button will change the theme of the first label
+gChangeLab1Theme = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Change Top label theme" }, 
+    Caption = { "Change Top", "label's theme" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          ; Refer to the previous examples to see how themes are handled and which
+          ; functions/methods can be used to change them.
+          ; -------------------------------------
+          ; The Label gadget has one skin for the normal state called 'nskin',
+          ; and one for the text called 'ntext'.
+          ; we are going to generate a simple skin using an helper function
+          gLab1:setTheme(
+            { nskin = HGui.Theme.Generate_SkinGradient(
+                GetRandomColor(),   ; Color 1
+                GetRandomColor()),  ; Color 2
+              ntext = HGui.Theme.Generate_Text(
+                Rnd(10)+10,         ; Font size
+                #ANTIALIAS,         ; Font style(s)
+                GetRandomColor(),   ; Font color
+                #HGUI_ALIGN_CENTER, ; Text Alignment
+                Rnd(2),             ; Draw edges?
+                Rnd(2),             ; Draw shadows?
+                { Top = 0, Botton = 0, Left = 3, Right = 4 } ; text margins
+                )},
+            True ;  <- Refresh the parent window
+            )
+          
+        EndFunction
+      } 
+    })
+
+; Now let's build a button for each method we want to test with the second label
+
+; :Align() method
+gLab2_Align = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Change Label 2 alignment" }, 
+    Caption = { ":Align()" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          Local a = TB.PickRandom({ #HGUI_ALIGN_LEFT, #HGUI_ALIGN_RIGHT, #HGUI_ALIGN_CENTER, #HGUI_ALIGN_TOP, #HGUI_ALIGN_BOTTOM })
+          gLab2:Align(a, True)
+          
+        EndFunction
+      } 
+    })
+
+; :FontMargins() method
+gLab2_FontMargins = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Change Label 2 text mergins" }, 
+    Caption = { ":FontMargins()" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          gLab2:FontMargins({ Top = Rnd(10), Bottom = Rnd(10), left = Rnd(10), right = Rnd(10) }, True)
+          
+        EndFunction
+      } 
+    })
+
+; :SetCaption() method
+gLab2_SetCaption = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Change Label 2 text" }, 
+    Caption = { ":SetCaption()" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          gLab2:SetCaption({ "Caption has been set", "replacing the old one", GetDate(True), "This is a very long line used to test the wordwrap functionality is working correctly" }, True)
+          
+        EndFunction
+      } 
+    })
+
+; SetColor() method
+gLab2_SetColor = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Change Label 2 text's color" }, 
+    Caption = { ":SetColor()" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          gLab2:SetColor(GetRandomColor(), True)
+          
+        EndFunction
+      } 
+    })
+    
+; :SetWordwrap() method
+gLab2_SetWordwrap = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Change Label 2 text wordwrap" }, 
+    Caption = { ":SetWordwrap()" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          ; Reads the wordwrap status to invert its state
+          ww = gLab2.Look.nText.Wordwrap
+          gLab2:SetWordwrap(Not(ww), True)
+          
+        EndFunction
+      } 
+    })
+  
+; :FontSize() method
+gLab2_SetFontSize = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Change Label 2 text's size" }, 
+    Caption = { ":FontSize()" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          gLab2:FontSize(Rnd(15)+10, True)
+          
+        EndFunction
+      } 
+    })
+
+; :FontName() method
+gLab2_SetFontName = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Change Label 2 text's font" }, 
+    Caption = { ":FontName()" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          Local f = TB.PickRandom({ #SERIF, #MONOSPACE, #SANS })
+          gLab2:FontName(f, True)
+          
+        EndFunction
+      } 
+    })
+
+; :FontStyle() method
+gLab2_SetFontStyle = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Change Label 2 text's style" }, 
+    Caption = { ":FontStyle()" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          Local s = TB.PickRandom({ #NORMAL, #ANTIALIAS, #BOLD, #ANTIALIAS+#BOLD, #ITALIC, #UNDERLINED })
+          gLab2:FontStyle(s, True)
+          
+        EndFunction
+      } 
+    })
+
+; :Align() method
+gLab2_AlignTop = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Align to top Label 2" }, 
+    Caption = { "[b]ALIGN TOP[/b]" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          ; Align to the top with horizontal centering
+          gLab2:Align(#HGUI_ALIGN_TOP+#HGUI_ALIGN_HCENTER, True)
+          
+        EndFunction
+      } 
+    })
+
+; ScrollUp() method
+gLab2_ScrollUp = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "ScrollUp Label 2" }, 
+    Caption = { ":ScrollUp()" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          gLab2:ScrollUp(1, True)
+          
+        EndFunction
+      } 
+    })
+
+; :ScrollDown() method
+gLab2_ScrollDown = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "ScrollDown Label 2" }, 
+    Caption = { ":ScrollDown()" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          gLab2:ScrollDown(1, True)
+          
+        EndFunction
+      } 
+    })
+
+; :ScrollTop() method
+gLab2_ScrollTop = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "ScrollTop Label 2" }, 
+    Caption = { ":ScrollTop()" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          gLab2:ScrollTop(True)
+          
+        EndFunction
+      } 
+    })
+
+; :ScrollBottom() method
+gLab2_ScrollBottom = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "ScrollBottom Label 2" }, 
+    Caption = { ":ScrollBottom()" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          gLab2:ScrollBottom(True)
+          
+        EndFunction
+      } 
+    })
+
+; :ScrollTo() method
+gLab2_ScrollTo = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "ScrollTo Label 2" }, 
+    Caption = { ":ScrollTo()" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          Local n = StringRequest("Insert the line number", "Line number", 1)
+          If Not(IsNil(n)) And n <> ""
+            gLab2:ScrollTo(ToString(n), True)
+          EndIf
+          
+        EndFunction
+      } 
+    })
+
+; :AppendLine() method
+gLab2_AppendLine = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Append a line to Label 2" }, 
+    Caption = { ":AppendLine()" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          Local s = TB.PickRandom(
+            { "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+              "vitae semper tortor nunc porttitor nisl.",
+              "Fusce ultricies nunc vel lectus facilisis.",
+              "Malesuada dui nec sapien pharetra sodales.",
+              "blandit lorem placerat rutrum. Vivamus metus diam.",
+              "EXAMPLE\nOF\nMULTILINE" })
+          If GetType(s) = #STRING Then s = GetDate(True) .. " : " .. s
+          gLab2:AppendLine(s, True)
+          
+        EndFunction
+      } 
+    })
+
+; Show special tags usage
+gLab2_AppendTags = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Append lines using special tags to Label 2" }, 
+    Caption = { "[b]Special Tags[/b]" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          Local s = 
+            { "{:font++:}Font increased.",
+              "{:font--:}Font decreased",
+              "{:align-l:}Align left",
+              "{:align-r:}Align right",
+              "{:bgcolor=008888885:}Full line background color",
+              "{:bbcolor=00FFFF002:}Text background color\nhello!",
+              "This is a normal line...",
+              "{:align-l:}{:font--:}" .. GetDate(True),
+              "{:align-l:}{:bbcolor=00FF88FF2:}How are you?",
+              "{:align-r:}{:font--:}" .. GetDate(True),
+              "{:align-r:}{:bbcolor=0088FFFF2:}I'm fine, thank you!"
+              }
+              
+          ; To speed up things we will refresh the gadget at the end
+          ; of the loop
+          For Local i = 0 To ListItems(s)-1
+            gLab2:AppendLine(s[i], False) ; False = Do not refresh the gadget
+          Next
+          gLab2:Render() ; Refresh the gadget
+          
+        EndFunction
+      } 
+    })
+
+; :Clear() method
+gLab2_Clear = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Clear Label 2" }, 
+    Caption = { ":Clear()" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          gLab2:Clear(True)
+          
+        EndFunction
+      } 
+    })
+
+; :Get() method
+gLab2_Get = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Get Label 2" }, 
+    Caption = { ":Get()" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          Local contents = gLab2:Get()
+          Local t = ""
+          For Local i = 0 To ListItems(contents)-1
+            t = t .. contents[i] .. "\n"
+          Next
+          
+          SystemRequest("Label 2 Contents", t, "OK")
+          
+        EndFunction
+      } 
+    })
+
+; Now let's build the layout
+; -- gBox and gGroup are inside the window's root gadget
+myWin.rootgadget:layoutSet(
+  { gadgets = { gBox, gGroup },
+    weights = { 0.70, -0.30 },
+    gap     = 1,
+    type    = #HGUI_VERTICAL_LAYOUT,
+    }, True)
+
+; -- gBox contains the labels
+gBox:layoutSet(
+  { gadgets = { gLab1, gLab2, gLab3 },
+    weights = { 0.10, 0.75, -0.15 },
+    gap     = 1,
+    type    = #HGUI_VERTICAL_LAYOUT,
+    }, True)
+
+; -- gChangeTheme button is inside the gGroup gadget
+gGroup:layoutSet(
+  { gadgets = { gChangeLab1Theme, gLab2_Align, gLab2_FontMargins, gLab2_SetCaption, gLab2_SetColor, 
+                gLab2_SetWordwrap, gLab2_SetFontSize, gLab2_SetFontName, gLab2_SetFontStyle, gLab2_AlignTop,
+                gLab2_ScrollUp, gLab2_ScrollDown, gLab2_ScrollTop, gLab2_ScrollBottom, gLab2_ScrollTo,
+                gLab2_AppendLine, gLab2_Clear, gLab2_AppendTags, gLab2_Get
+                },
+    gap     = 2,
+    type    = #HGUI_GRID_LAYOUT,
+    columns = 4,
+    borders = { left = 1, right = 1, top = 1, bottom = 1 }
+    }, True)
+
+; Restores the auto-rendering
+HGui.SetAutoRendering(True)
+
+; Finally renders the window and enters the event loop
+myWin:Render()
+
+Repeat
+  WaitEvent()
+Forever

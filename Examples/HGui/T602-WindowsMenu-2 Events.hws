@@ -1,0 +1,87 @@
+/*******************************************************************************
+HGUI : Tutorial 210 - Part 2 : Window's Menu                 v1.0 : 01/06/2016 *
+********************************************************************************
+In this tutorial we will se how we can let the menu items generate events, so
+that when an user select an item the program is notified with a callback
+function.
+This is quiet easy to do, just add assign to the field <callback> the function
+you want to be executed when an item is selected.
+This method is valid for gadgets that support the <ObPushed> event like buttons
+and switches.
+Let's see how simple it is changing a bit the example from the previous tutorial.
+********************************************************************************/
+
+;---| INCLUDE THE LIBRARIES DEFINITIONS |---------------------------------------
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; First of all we will define a single function where all events will be
+; redirected.
+Function menuListener(caller)
+  ; Callback function will be called with a single parameters that is the 
+  ; gadget object that have generated the event.
+  ; When a menu gadget is created it will get some additional fields to help
+  ; you with event tracking :
+  ;   .menuDef      Holds the item menu definition for the caller gadget
+  ;   .menuRoot     Holds the item menu or submenu definition
+  ;   .parentWindow Holds the parent menu window
+  
+  ; For this example we simply show the item data
+  SystemRequest("MENU EVENT", "You have selected item\n" .. 
+                              "name    : " .. ToString(caller.name) .. "\n" ..
+                              "caption : " .. ToString(caller.caption), 
+                              "OK", 
+                              #REQICON_INFORMATION)
+EndFunction
+
+; Here is the menu definition from the previous tutorial, but look at the
+; callback fields because they are responsible of the generated events.
+; To better track menu events we also should assign names to our items.
+Local myMenu =
+       { { type = #HGUI_BUTTON_GADGET,
+           params = { Caption = "File" },
+           submenu = {
+              { type = #HGUI_BUTTON_GADGET,
+                callback = menuListener,
+                params = { Caption = "Open file", Name = "File->Open" } },
+              { type = #HGUI_BUTTON_GADGET,
+                callback = menuListener,
+                params = { Caption = "Save file", Name = "File->Save" } },
+              { type = #HGUI_BUTTON_GADGET,
+                callback = menuListener,
+                params = { Caption = "Quit", Name = "File->Quit" } }
+            } },
+         { type = #HGUI_BUTTON_GADGET,
+           params = { Caption = "Edit" },
+           submenu = {
+              { type = #HGUI_BUTTON_GADGET,
+                callback = menuListener,
+                params = { Caption = "Copy", Name = "Edit->Copy" } },
+              { type = #HGUI_BUTTON_GADGET,
+                callback = menuListener,
+                params = { Caption = "Cut", Name = "Edit->Cut" } },
+              { type = #HGUI_BUTTON_GADGET,
+                callback = menuListener,
+                params = { Caption = "Paste", Name = "Edit->Paste" } }
+            } },
+         { type = #HGUI_BUTTON_GADGET,
+           callback = menuListener,
+           params = { Caption = "Help", Name = "Help" } },
+         { type = #HGUI_BUTTON_GADGET,
+           callback = menuListener,
+           params = { Caption = "About", Name = "About" } }
+         }
+
+; Nothing changes here
+Local myWin1 = HGui.Window:new(
+                 { title = "Window's Menu : (2) Events",
+                   name  = "win3",
+                   position   = { x = #CENTER, y = #CENTER },
+                   size       = { w = 600, h = 400 },
+                   menu       = myMenu })
+
+
+
+Repeat
+   WaitEvent()
+Forever

@@ -1,0 +1,44 @@
+/*******************************************************************************
+HGUI : Tutorial 213 - Free method                            v1.2 : 09/02/2023 *
+********************************************************************************
+Freeing up a window is different from closing a window, infact when you close
+a window you actually stop from viewing it to the screen but the window is still
+alive inside your program and you can pop it up again using the method :Open().
+Instead when you need to release the window's resources because you have to free
+some memory or because you no longer need it you have to call the :Free() 
+method.
+*******************************************************************************/
+
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+
+; In this example a window will be created and after 5 seconds it will be
+; released calling the :Free() method.
+
+win1 = HGui.Window:new(
+   { title    = "After 5 seconds this window will be set free...",
+     position = { x = 100, y = 200 },
+     size     = { w = 500, h = 200 },
+     flags    = { autoclose = False }
+     })
+
+win2 = HGui.Window:new(
+   { title    = "After 10 seconds the program will close...",
+     position = { x = 300, y = 300 },
+     size     = { w = 500, h = 200 },
+     flags    = { autoclose = False }
+     })
+
+; ----------------------------------------------------------------------------
+; WARNING: Using the code below will block event handling!! It's a bad
+;          practice to use this code but to increase readability I've used it.
+;          The best alternative, in this case, is to use SetTimeout().
+; ----------------------------------------------------------------------------
+Wait(5000, #MILLISECONDS)
+
+win1:Free()
+
+Wait(5000, #MILLISECONDS)
+
+End

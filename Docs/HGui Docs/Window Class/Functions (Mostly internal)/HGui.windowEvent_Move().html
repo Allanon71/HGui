@@ -1,0 +1,29 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>HGui.windowEvent_Move()</h1>
+
+<pre><code class="language-text-plain">result = HGui.windowEvent_Move(msg)
+
+Callback used to handle the window move event and the callback function attached to this event.
+
+INPUT
+  msg : Event message, it must have the following fields:
+    id     : Window id (numeric or LightUserData)
+    action : It must be "MoveWindow"
+    x      : The new window's horizontal position
+    y      : The new window's vertical position
+    
+OUTPUT
+  result : TRUE if the move has been handled</code></pre>
+
+  </body>
+
+</html>

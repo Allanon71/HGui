@@ -1,0 +1,59 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>Text gadget</h1>
+
+    <p>For common methods have a look <a href="../Common%20Methods.html">here</a>,</p>
+    <p>&nbsp;</p>
+    <p><span class="text-big"><strong>TEXT GADGET METHODS</strong></span>
+    </p>
+    <ul>
+      <li><span class="text-big"><code>result = gadObj:getText()</code></span>
+        <br>Returns the current text gadget contents
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:setText(value)</code></span>
+        <br>Sets the current text gadget contents
+        <br>- <strong>value</strong> : Text to put in the text gadget</li>
+    </ul>
+    <p>&nbsp;</p>
+    <p><span class="text-big"><strong>Additional arguments accepted by :New() method</strong></span>
+    </p>
+    <ul>
+      <li><strong>gfx</strong> : A table to define the text box look (see theme definition),
+        most common options are:
+        <ul>
+          <li>bgColor : Backgroud color</li>
+          <li>fgColor : Foreground color</li>
+          <li>bgCursor : Cursor's background color</li>
+          <li>fgCursor : Cursor's foreground color</li>
+          <li>adjustFontSize : True to automatically adjust the font size to the gadget
+            size</li>
+        </ul>
+      </li>
+      <li><strong>allowNewLine </strong>: <code>True</code> to allow new line/multiline
+        box</li>
+      <li><strong>text </strong>: Initial text contents</li>
+      <li>any other options usuported by the TP Object (<span style="background-color:hsl(240,75%,60%);">NEED MORE DOCS</span>)</li>
+    </ul>
+    <p>&nbsp;</p>
+    <p><span class="text-big"><strong>Additional actions accepted by :New() method</strong></span>
+    </p>
+    <ul>
+      <li><strong>OnInputEnd</strong> : Triggered when the gadget has lost its focus.</li>
+    </ul>
+    <p>
+      <br>&nbsp;</p>
+    <p><span class="text-big"><strong>Additional actions accepted by :New() method</strong></span>
+    </p>
+    <p style="margin-left:40px;">The textObj is accessible from <code>gadObj.textObj</code>
+    </p>
+  </body>
+
+</html>

@@ -1,0 +1,37 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>Data Structure</h1>
+
+<pre><code class="language-text-plain">Position   		[Table] Area position, must have the following fields:
+  .x			[Number] Horizontal position
+  .y			[Number] Vertical position
+Size            [Table] Area size in pixels, must have the following fields:
+  .x			[Number] Width
+  .y			[Number] Height
+Skin			[Table] A table describing the multilayer skin
+Active			[Boolean] True id it is an active area
+Window			[Table] Pointer to the parent window object
+Events			[Table] A table of events that this area can react to, it holds:
+  .OnMouseOver	[Function] Triggered when the mouse enters the area
+  .OnMouseOut	[Function] Triggered when the mouse exits the area
+  .OnMouseDown  [Function] Triggered when the left mouse button is pressed
+  .OnMouseUp	[Function] Triggered when the left mouse button is released
+  .OnRightMouseUp [Function] Triggere when the right mouse button is released
+Userdata		[Any] Optional user data that will be passed to the callback functions
+Object			[Table] Any attached object
+Private			[Table] Private data
+  .Button		[hwid] Hollywood button's id
+  .Name			[String] Button name</code></pre>
+    <p>&nbsp;</p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

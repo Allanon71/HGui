@@ -1,0 +1,45 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>HGui.gadgetFindByName()</h1>
+
+    <p><span class="text-big"><code>gadObj, index = HGui.gadgetFindByName(name)</code></span>
+    </p>
+    <p>Search the gadget object using its <code>name</code>, if found this function
+      will return the gadget object and the position index in the <code>HGui.Gadgets</code> table.&nbsp;
+      <br>If the gadget isn't found <code>False</code> will be &nbsp;returned.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>name </strong>: Gadget name to search for</li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <ul>
+      <li><strong>gadObj</strong> : The found gadget object or <code>FALSE</code> if
+        there is no gadgets at the given position.</li>
+      <li><strong>index </strong>: The gadget index in <code>HGui.Gadgets</code> table.</li>
+    </ul>
+    <p><u>NOTES</u>
+    </p>
+    <p><u>EXAMPLES</u>&nbsp;</p><pre><code class="language-text-plain"> ; Search for a gadget named 'myButton'
+ Local result = HGui.gadgetFindByName("myButton")
+ 
+ ; Check the result type because it can return FALSE or a gadget object
+ If GetType(result) = #TABLE
+   DebugPrint("FOUND &gt; Gadget Name is : " .. result.Name)
+ EndIf</code></pre>
+    <p><u>SEE ALSO</u>
+    </p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

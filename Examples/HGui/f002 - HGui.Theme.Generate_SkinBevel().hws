@@ -1,0 +1,92 @@
+/*
+********************
+* HGui Test Script *
+* Fabio Falcucci   *
+*    Feb-2023      *
+********************
+  This script is used as a test and to show how it's possible to use the
+helper function 
+  HGui.Theme.Generate_SkinBevel()
+to generate simple skin composed by a single layer with a bevel box.
+
+For further informations about the skin system have a look
+at the G2D library.
+-------------------
+
+HGUI.Theme.Generate_SkinBevel(type, fx, height, light, dark, middle)
+  Generates a skin that simulates a bevel box
+*/
+
+; INCLUDE THE LIBRARIES DEFINITIONS
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; Creates a new HGui window
+Local myWin = HGui.Window:new(
+                { title = "HGui.Theme.Generate_SkinColor()",
+                  name  = "myWindow",
+                  position = 
+                    { x = #CENTER, 
+                      y = #CENTER }
+                  })
+
+; Disable auto-rendering to avoid flickering
+HGui.SetAutoRendering(False)
+
+; Creates one label and one button
+Local myLabel  = HGui.Gadget:new(#HGUI_LABEL_GADGET, { caption = { "Press the button below", "to change the button skin", "with random bevel boxes" } })
+Local myButton = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { caption = { "Click me!"},
+    actions = {
+      onpushed =
+        Function(gadObj)
+          ; Change the skin everytime the button is pushed, to create nice colors
+          ; we will use the Color Object from the Helpers library.
+          ; The bevel size is random (look below at 'Rnd(5)+1').
+          ; For simplicity we are going to set the skins as follow:
+          ;  normal state  : Normal style, Flat bevel
+          ;  hilight state : Normal style, Raised bevel
+          ;  pushed style  : Sunken style, Recessed bevel
+          mcolor, hcolor, dcolor = {}, {}, {} ; mid, hi & dark colors
+          For Local i = 0 To 2
+            ; Pick a random color as base color
+            Local baseColor = GetRandomColor()
+            
+            ; Creates the color objects using the base color then brigthen and darken
+            ; it to create the dark & bright edge colors
+            Local midColor  = HL.Color:New(baseColor)
+            Local hiColor   = HL.Color:New(baseColor)
+            hiColor:Brighten(40)
+            Local darkColor= HL.Color:New(baseColor)
+            darkColor:Darken(40)
+            
+            ; Store the generated colors
+            mcolor[i] = midColor:toRGBValue()
+            hcolor[i] = hiColor:toRGBValue()
+            dcolor[i] = darkColor:toRGBValue()
+          Next
+          
+          gadObj:set({
+            look = { 
+              nskin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Flat  , Rnd(5)+1, hcolor[0], dcolor[0], mcolor[0]),
+              hskin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, Rnd(5)+1, hcolor[1], dcolor[1], mcolor[1]),
+              pskin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Sunken, GFX.BevelFx_Recessed, Rnd(5)+1, hcolor[2], dcolor[2], mcolor[2]) }
+              },
+            True)
+        EndFunction }
+      })
+
+
+; Let's arrange the gadgets into the window
+mywin.rootgadget:layoutSet({ gadgets = { myLabel, myButton },
+                             weights = { 0.30, 0.70 },
+                             gap     = 1
+                             }, True )
+
+; Finally enable the auto-rendering and refresh the window
+HGui.SetAutoRendering(True)
+myWin:Render()
+                 
+Repeat
+   WaitEvent()
+Forever

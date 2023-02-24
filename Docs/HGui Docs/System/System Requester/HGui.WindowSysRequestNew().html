@@ -1,0 +1,104 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>HGui.Window:SysRequestNew()</h1>
+
+    <p><span class="text-big"><code>result = HGui.Window:SysRequest(params)</code></span>
+    </p>
+    <p>Create a system request window to show messages and let the user interact
+      with the available options.
+      <br>The requester can work in two modes '<strong>blocking</strong>' and '<strong>non-blocking</strong>',
+      in both modes button's callbacks and a global callback function can be
+      used to manage the specified buttons.
+      <br>In '<strong>blocking</strong>' mode the code flow will be blocked until
+      an option is selected and the requester will be threated as a modal window.
+      This mode will return the number of the selected option or -1 if the requester
+      has been closed by its close gadget.
+      <br>If used in ‘non-blocking’ mode the code flow will continue and when an
+      event is detected the associated callback functions will be called.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>params </strong>: A table with the standard window option and
+        the requester specific ones. Below there is a list of the additional fields
+        supported by this method.
+        <ul>
+          <li><strong>name </strong>: Unique name window</li>
+          <li><strong>icon </strong>: Optional icon name/brush id</li>
+          <li><strong>blocking </strong>: True or False depending if you want to block
+            the code flow or not</li>
+          <li><strong>text </strong>: Message to show in the requester body</li>
+          <li><strong>wordwrap </strong>: Optional flag to set if the text should be
+            word-wrapped (default is False)</li>
+          <li><strong>buttons </strong>: The button you want to show in the requesters,
+            this is a table with one subtable per button like this
+            <br><code>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;{ &nbsp;{ button_parameters },&nbsp;</code>
+            <br><code>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;... &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</code>
+            <br><code>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;} &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</code>
+          </li>
+          <li><strong>align :</strong> Text alignment, default = <code>#HGUI_ALIGN_CENTER</code>
+          </li>
+          <li><strong>buttonWeights :</strong> A table with the button weights (optional)</li>
+          <li><strong>groupWeights :</strong> A table with the body &amp; button weights
+            (optional)</li>
+          <li><strong>layout </strong>: Buttons alignment and arrangement, one of the
+            following:
+            <br><code>&nbsp; &nbsp; &nbsp;#HGUI_VERTICAL_LAYOUT &nbsp;&nbsp;</code>
+            <br><code>&nbsp; &nbsp; &nbsp;#HGUI_HORIZONTAL_LAYOUT&nbsp;</code>
+            <br><code>&nbsp; &nbsp; &nbsp;#HGUI_GRID_LAYOUT &nbsp; &nbsp; &nbsp;&nbsp;</code>
+          </li>
+          <li><strong>callback :</strong> You can define your callback functions in the
+            buttons parameters (like you do with standard buttons) or you can use a
+            global callback that will be called with the following parameters:
+            <ul>
+              <li>Window object</li>
+              <li>Button object (empty table if the requester is closed)</li>
+              <li>Button number (-1 if the requester is closed)</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <p>The output depends on the <code>blocking</code> flag.</p>
+    <p style="margin-left:40px;"><u>BLOCKING = False&nbsp;</u>
+      <br>This method returns the requester's window object immediately. The callback
+      functions will be executed when an event is detected and will return the
+      window object, the button object and the button number (-1 if the window
+      was closed).</p>
+    <p style="margin-left:40px;"><code>winObj = HGui.Window:SysRequestNew()</code>
+      <br>&nbsp;</p>
+    <p style="margin-left:40px;"><u>BLOCKING = True</u>
+      <br>This function returns the window object, the button object and the button
+      number (-1 if the window was closed), also the callback function will be
+      executed if specified.</p>
+    <p style="margin-left:40px;"><code>winObj, btnObj, btnNum = HGui.Window:SysRequestNew()</code>
+    </p>
+    <p>&nbsp;</p>
+    <p><u>NOTES</u>
+      <br>In any case the requester window will be closed and set free automatically.</p>
+    <p>Here are some default values used if you do not specify them:</p><pre><code class="language-text-plain">params.size     = HGui.Theme.SysRequest.WindowSize
+params.text     = ""
+params.icon     = ""
+params.align    = #HGUI_ALIGN_CENTER
+params.buttons  = { { Caption = "OK" } }
+params.layout   = #HGUI_VERTICAL_LAYOUT
+params.callback = Function() EndFunction
+params.blocking = True
+params.wordwrap = False</code></pre>
+    <p><u>EXAMPLES</u>&nbsp;</p>
+    <p><u>SEE ALSO</u>
+      <br>&nbsp;</p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

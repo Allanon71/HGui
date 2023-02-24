@@ -1,0 +1,45 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>HGui.gadgetFindByHWIdAndPos()</h1>
+
+    <p><span class="text-big"><code>gadObj = HGui.gadgetFindByHWIdAndPos(HWId, x, y)</code></span>
+    </p>
+    <p>Check if the specified point into the given window pecifing its Hollywood
+      ID <code>HWId</code> it's inside a gadget.
+      <br>Returns the gadget if was found otherwise returns <code>FALSE</code>.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>HWId </strong>: Hollywood ID of the window we are looking for
+        the gadget</li>
+      <li><strong>x</strong> : Horizontal position</li>
+      <li><strong>y</strong> : Vertical position</li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <ul>
+      <li><strong>gadObj</strong> : The found gadget object or <code>FALSE</code> if
+        there is no gadgets at the given position.</li>
+    </ul>
+    <p><u>NOTES</u>
+    </p>
+    <p><u>EXAMPLES</u>&nbsp;</p><pre><code class="language-text-plain"> ; Check if there is gadget at (100, 100) on window 1
+ Local result, g = HGui.gadgetFindByHWIdAndPos(1, 100, 100)
+ If result
+   DebugPrint("FOUND &gt; Gadget name is : " .. g.name)
+ EndIf</code></pre>
+    <p><u>SEE ALSO</u>
+    </p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

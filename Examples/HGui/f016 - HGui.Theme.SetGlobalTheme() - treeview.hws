@@ -1,0 +1,157 @@
+/*
+********************
+* HGui Test Script *
+* Fabio Falcucci   *
+*    Feb-2023      *
+********************
+  This script is used as a test and to show how it's possible to use the
+helper function 
+  HGui.Theme.SetGlobalTheme()
+to globally change the theme for a specific gadget class, in this case for
+TREEVIEW gadgets.
+-------------------
+
+HGui.Theme.SetGlobalTheme(GadgetType, Theme)
+  Set the specified theme to the given gadget class
+*/
+
+; INCLUDE THE LIBRARIES DEFINITIONS
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; Creates a new HGui window
+Local myWin = HGui.Window:new(
+                { title = "HGui.Theme.SetGlobalTheme()",
+                  name  = "myWindow",
+                  position   = { x = #CENTER, y = #CENTER },
+                  size = { w = 340, h = 500 }
+                  })
+                   
+; Disable auto-rendering to avoid flickering
+HGui.SetAutoRendering(False)
+
+; Let's create 2 skins that we will use with our DROPDOWN gadget
+Local current, skins = 0, {}
+skins = { [0] = { OuterBox = { nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $444400, $004400, $FF4400) },
+                  Body     = { nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $444444, $004400, $FFFF44) },
+                  TopBox   = { nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $66FFFF, $008888, $22AAAA) },
+                  ;-- columns headers (buttons) --
+                  nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $88EEEE, $888888, $AADDDD),
+                  hSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $bbDDbb, $66DD66, $ffdddd),
+                  pSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEDDDD, $88AAAA, $AACCCC),
+                  dSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $BBBBBB),
+                  nText = HGui.Theme.Generate_Text(20, #ANTIALIAS, $000000, #HGUI_ALIGN_LEFT, False, False),
+                  hText = HGui.Theme.Generate_Text(20, #ANTIALIAS+#ITALIC, $440000, #HGUI_ALIGN_LEFT, True, False),
+                  pText = HGui.Theme.Generate_Text(20, #ANTIALIAS, $000000, #HGUI_ALIGN_LEFT, False, True),
+                  dText = HGui.Theme.Generate_Text(20, #ANTIALIAS, $666666, #HGUI_ALIGN_LEFT, False, False),
+                  ;-- contents ares --
+                  font = { name = #SERIF, sizeOffset = 0, Style = #ANTIALIAS, Color = $446600 },
+                  ;-- BG Colors --
+                  BGColors = { odd = $55BBBB, even = $66CCCC },
+                  ;-- Selected Colors --
+                  Selected = { fontColor = $FFFFFF, BGColor = $000044 },
+                  ;-- Row height --
+                  EntryHeight = 24,
+                  ;-- Alternate Line Colors --
+                  AlternateLines = True,
+                  ;-- Vertical Lines --
+                  VerticalLines = False,
+                  VLinesColor1 = $00FFFF,
+                  VLinesColor2 = $006666,
+                  ;-- Columns --
+                  ColumnsGap = 1,
+                  HeadersHeight = 20,
+                  ;-- Scrollers --
+                  Scrollbar = {
+                    size = 20 },
+                  ;-- NodeSign --
+                  nodeStyle = 2                    
+                  },
+          [1] = { OuterBox = { nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $440000, $000000, $FF0000) },
+                  Body     = { nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $444400, $000000, $FFFF00) },
+                  TopBox   = { nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $66FFFF, $008888, $22AAAA) },
+                  ;-- columns headers (buttons) --
+                  nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $44EEEE, $008888, $33DDDD),
+                  hSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $bbbbbb, $666666, $ffeedd),
+                  pSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEEEEE, $888888, $AAAAAA),
+                  dSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $BBBBBB),
+                  nText = HGui.Theme.Generate_Text(24, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, False),
+                  hText = HGui.Theme.Generate_Text(24, #ANTIALIAS+#BOLD, $000000, #HGUI_ALIGN_CENTER, False, True),
+                  pText = HGui.Theme.Generate_Text(24, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True),
+                  dText = HGui.Theme.Generate_Text(24, #ANTIALIAS, $666666, #HGUI_ALIGN_CENTER, False, False),
+                  ;-- contents ares --
+                  font = { name = #MONOSPACE, sizeOffset = -10, Style = #BOLD+#ANTIALIAS, Color = $FF00FF },
+                  ;-- BG Colors --
+                  BGColors = { odd = $00BBBB, even = $00CCCC },
+                  ;-- Selected Colors --
+                  Selected = { fontColor = $FFFFFF, BGColor = $660000 },
+                  ;-- Row height --
+                  EntryHeight = 28,
+                  ;-- Alternate Line Colors --
+                  AlternateLines = False,
+                  ;-- Vertical Lines --
+                  VerticalLines = True,
+                  VLinesColor1 = $00FFFF,
+                  VLinesColor2 = $006666,
+                  ;-- Columns --
+                  ColumnsGap = 3,
+                  HeadersHeight = 30,
+                  ;-- Scrollers --
+                  Scrollbar = {
+                    size = 40 },
+                  ;-- NodeSign --
+                  nodeStyle = 1
+                    }
+          }
+
+; We are going to create a LISTVIEW for our test and a button we will use
+; to rotate the skins we have defined above.
+Local myTView = HGui.Gadget:new(#HGUI_TREEVIEW_GADGET, 
+                { Column = 0,
+                  headersheight = 30,
+                  scrollersize = 20,
+                  
+                  Data = 
+                    { ColumnSizes = { 200, 100, 80 },
+                      Headers     = { "Text", "Number", "Cardinal" },
+                      Items       = { { "Number One", "1", "First", _Selected = True }, 
+                                      { "Number Two", "2", "Second",
+                                      childs = { { "inside", "the", "number 2",
+                                          childs = { { "deep", "inside", "num.2 " } } 
+                                                    } 
+                                                  }
+                                        }, 
+                                      { "Number Three", "3", "Third" } },
+                      SortOrder   = 
+                        { Columns = { 0 },
+                          Descending  = { False } }
+                      }
+                    })
+
+Local myButton = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { caption = { "Click me", "to change the LISTVIEW skin"},
+    actions = {
+      onpushed =
+        Function(gadObj)
+          ; Change the treeview skin everytime the button is pushed
+          HGui.Theme.SetGlobalTheme(#HGUI_TREEVIEW_GADGET, skins[current])
+          current = current+1
+          If current > 1 Then current = 0
+        EndFunction }
+      })
+
+; Let's arrange the gadgets into the window
+mywin.rootgadget:layoutSet({ gadgets = { myTView, myButton },
+                             weights = { 0.80, 0.20 },
+                             gap     = 1,
+                             type    = #HGUI_VERTICAL_LAYOUT,
+                             }, True )
+
+; Finally enable the auto-rendering and refresh the window
+HGui.SetAutoRendering(True)
+myWin:Render()
+
+
+Repeat
+  WaitEvent()
+Forever

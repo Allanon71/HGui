@@ -1,0 +1,73 @@
+/*******************************************************************************
+* HGUI : Tutorial 202 - Window's Basics                      v1.2 : 09/02/2023 *
+********************************************************************************
+Let's see more about HGui windows. First of all you should know that you can set
+several parameters/options when you are creating a window including a name that
+must be unique for each window. 
+If you omit the name the system will assign one for you, but doing this you are
+forced to store the window object somewhere to keep track of your windows since
+the given name is pseudo-random.
+We are going to see in this tutorial how we can specify a position and a size
+to our window during the creation process.
+********************************************************************************/
+
+;::: INCLUDE THE LIBRARIES DEFINITIONS :::::::::::::::::::::::::::::::::::::::::
+@INCLUDE "../../+Includes.hws"          ; Path relative to this application
+@INCLUDE #INC_HGUI                      ; Include the HGui library
+
+; Enable the debug output
+DBG.Console.Enable(True)
+DBG.Console.AddChannel(HGui.WChannel)
+
+; Create the HGui window
+Local myWindow =
+         HGui.Window:new(
+            { title = "My First Window!",      ; Window's title
+              name  = "Win0",                  ; Unique window's name
+              position =                       ; Position (x, y)
+                 { x = 20, y = 20 },
+              size =                           ; Size (w, h)
+                 { w = 400, h = 100 }
+              })
+
+/*******************************************************************************
+Using a specific name for your windows allow you to retrieve your window objects
+by name:
+********************************************************************************/
+
+Local searchedWindow = HGui.windowFindByName("Win0")
+NPrint("WINDOW OBJECT   : ", myWindow)
+NPrint("SEARCHED OBJECT : ", searchedWindow)
+NPrint("Do you see? Are the same object!")
+
+/*******************************************************************************
+That's the reason why window's names must be unique: if you try to create two
+windows with the same name an error will be raised.
+
+Now we are able to give an initial position and a size to our window, to do this
+we have added some fields in the arguments table and that's the way all things
+works in HGui, including all the other HGui objects.
+
+Here we have seen the following window's parameters:
+  title       [string] The window's title, the text rendered in the drag bar
+  name        [string] The window's unique name, used internally for search
+                       purposes.
+  position    [table] A table holding the window's position with the fields:
+   .x           [number]
+   .y           [number]
+  size        [table] A table holding the window's size with the fields:
+   .w           [number]
+   .h           [number]
+Coordinates and sizes are expressed in pixels.
+********************************************************************************/
+
+Repeat
+   WaitEvent()
+Forever
+
+/*******************************************************************************
+ -> Try to change the window's position
+ -> Try to change the window's size
+ -> Try  to  use  the  Hollywood  constants #LEFT,  #RIGHT, #TOP, #BOTTOM in the
+    window's position arguments which are fully supported.
+********************************************************************************/

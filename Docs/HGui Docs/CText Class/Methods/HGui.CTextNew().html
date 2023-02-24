@@ -1,0 +1,104 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>HGui.CText:New()</h1>
+
+    <p><span class="text-big"><code>ctextObj = HGui.CText:New(options)</code></span>
+    </p>
+    <p>Create a new CText object shaped by the table <code>options</code>.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>options </strong>: A table of all default values you want to override.
+        Here are the supported fields:
+        <ul>
+          <li><strong>name </strong>: Object name, must be unique or Nil to let the
+            system assign one for you.</li>
+          <li><strong>caption </strong>: The text to display, can be a string or a table
+            of strings (one entry is one line)</li>
+          <li><strong>first_line </strong>: First line to display</li>
+          <li><strong>interline </strong>: Additional interline value, can be negative
+            too, expressed in pixels.</li>
+          <li><strong>vert_adjust </strong>: Vertical adjustment for the rendering</li>
+          <li><strong>wordwrap </strong>: Wordwrap switch, TRUE to enable word wrapping.</li>
+          <li><strong>angle </strong>: Text rotation angle in degrees.</li>
+          <li><strong>font </strong>: Font description table
+            <ul>
+              <li><strong>name </strong>: Font name, it can be also a font constant</li>
+              <li><strong>size </strong>: Font size in pixels</li>
+              <li><strong>style </strong>: Font style (Hollywood style constants)</li>
+              <li><strong>color </strong>: Text color</li>
+              <li><strong>align </strong>: Text alignment, can be one or a combination of
+                the following constants:&nbsp;
+                <br><code>#HGUI_ALIGN_LEFT, #HGUI_ALIGN_RIGHT, #HGUI_ALIGN_TOP, #HGUI_ALIGN_BOTTOM, #HGUI_ALIGN_HCENTER, #HGUI_ALIGN_VCENTER, #HGUI_ALIGN_CENTER</code>
+              </li>
+            </ul>
+          </li>
+          <li><strong>effects </strong>: Text effects definition
+            <ul>
+              <li><strong>edge </strong>: Edge effect
+                <ul>
+                  <li><strong>type </strong>: Effect type, can be one of the following constants: <code>#NONE</code> (Switch
+                    off the effect), <code>#HGUI_TEXTEDGE_FLAT</code> (Flat edge around the text), <code>#HGUI_TEXTEDGE_RAISED</code> (Raised
+                    effect), <code>#HGUI_TEXTEDGE_RECESSED</code> (Recessed effect)</li>
+                  <li><strong>size </strong>: Border's size in pixels</li>
+                  <li><strong>color1 </strong>: Color1 is used for the border color of the FLAT
+                    fx, Light edges for the RAISED fx, Dark edges for the RECESSED fx</li>
+                  <li><strong>color2 </strong>: Color2 is used for the dark edges for the RAISED
+                    fx, Light edges for the RECESSED fx</li>
+                </ul>
+              </li>
+              <li><strong>shadow </strong>: Text shadow effect
+                <ul>
+                  <li><strong>type </strong>: Shadow type/direction, can be one of the following
+                    constants: <code>#NONE</code> (Switch off the effect) and&nbsp;
+                    <br><code>#SHDWNORTH, #SHDWNORTHEAST, #SHDWEAST, #SHDWSOUTHEAST, #SHDWSOUTH, #SHDWSOUTHWEST, #SHDWWEST, #SHDWNORTHWEST</code>
+                  </li>
+                  <li><strong>distance </strong>: Shadow distance in pixels</li>
+                  <li><strong>color </strong>: Shadow color</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li><strong>margins </strong>: Text margins table
+            <ul>
+              <li><strong>top </strong>: Top margin in pixels</li>
+              <li><strong>bottom </strong>: Bottom margin in pixels</li>
+              <li><strong>left </strong>: Left margin in pixels</li>
+              <li><strong>right </strong>: Right margin in pixels</li>
+            </ul>
+          </li>
+          <li><strong>window </strong>: The window this CText belongs to, can be the
+            window's name or a window object, if not specified the area will be linked
+            to the currently active window.</li>
+          <li><strong>area </strong>: An HGui.Area object where the CText will be rendered.
+            You can specify an existing Area object or a new one will be built for
+            you. You have to specify in the options the <code>position</code> table nad
+            the <code>size</code> table to allow the system to build the HGui.Area for
+            you. <code>position</code> must have the <code>x</code> and <code>y</code> fields,
+            and <code>size</code> must have the <code>w</code> and <code>h</code> fields.</li>
+        </ul>
+      </li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <ul>
+      <li><strong>ctextObj </strong>: A new CText object.</li>
+    </ul>
+    <p><u>NOTES</u>
+      <br>
+      <br><u>EXAMPLES</u>&nbsp;</p>
+    <p><u>SEE ALSO</u>
+    </p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

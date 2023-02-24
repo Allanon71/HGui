@@ -1,0 +1,171 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>Treeview gadget</h1>
+
+    <p>For common methods have a look <a href="../Common%20Methods.html">here</a>,</p>
+    <p>&nbsp; &nbsp;&nbsp;</p>
+    <p><span class="text-big"><strong>TREEVIEW GADGET METHODS</strong></span>
+    </p>
+    <ul>
+      <li><span class="text-big"><code>gadObj:SelectAll(Refresh)</code></span>
+        <br>Selects all list items (only in listview with multiselect enabled)
+        <br>- <strong>refresh</strong> : Set to <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:UnselectAll(Refresh) / gadObj:DeselectAll(refresh)</code></span>
+        <br>Deselects all list items
+        <br>- <strong>refresh</strong> : Set to <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:openNodes(refresh)</code></span>
+        <br>Open all the tree nodes
+        <br>- <strong>refresh</strong> : Set to <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:closeNodes(refresh)</code></span>
+        <br>Close all the tree nodes
+        <br>- <strong>refresh</strong> : Set to <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:remove(index, refresh)</code></span>
+        <br>Removes the specified item at the given index
+        <br>- <strong>index</strong> : item's index to remove
+        <br>- <strong>refresh</strong> : Set to <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:removeAll(refresh)</code></span>
+        <br>Removes all the list items
+        <br>- <strong>refresh</strong> : Set to <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:removeSelected(refresh)</code></span>
+        <br>Removes selected items from the list
+        <br>- <strong>refresh</strong> : Set to <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>itemsList, selectedList = gadObj:get()</code></span>
+        <br>Retrieves the item list and the selected list
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:insert(record, index, selected, refresh)</code></span>
+        <br>Scales all the layers to the specified size, optionally using&nbsp;
+        <br>- <strong>record </strong>: The item record to insert
+        <br>- <strong>index </strong>: The position where to insert the item, if <code>nil</code> the
+        item is added at the bottom of the list
+        <br>- <strong>selected</strong> : Set to <code>True</code> to select this item
+        <br>- <strong>refresh</strong> : Set to <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:setItems(itemsList, refresh)</code></span>
+        <br>Replaces the current list with the one specified
+        <br>- <strong>itemsList</strong> : The new list data set
+        <br>- <strong>refresh</strong> : Set to <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:rebuildLayout()</code></span>
+        <br>Rebuild and refresh the entire gadget
+        <br>&nbsp;</li>
+    </ul>
+    <p><span class="text-big"><strong>Additional arguments accepted by :New() method</strong></span>
+    </p>
+    <ul>
+      <li><strong>Data </strong>: A table used to specify the gadget contents, it
+        should have the following fields:
+        <ul>
+          <li><strong>selected </strong>: A table used to specify the selected items
+            (<code>True</code> = selected)</li>
+          <li><strong>alignments </strong>: A table used to specify for each column
+            the alignment (using HGui <a href="../../Constants.txt">constants</a>)</li>
+          <li><strong>columnSizes </strong>: A table to specify each column size in
+            pixels</li>
+          <li><strong>headers </strong>: A table to specify each column title/header</li>
+          <li><strong>items </strong>: A table used to pass the data to show in the
+            list, each record has the following additional fields::
+            <ul>
+              <li><strong>_childs </strong>: A table used to define all this node's childs</li>
+              <li><strong>_selected </strong>: A table to set all selected childs</li>
+              <li><strong>_opened </strong>: A table to set if the childs are opened nodes
+                or not</li>
+            </ul>
+          </li>
+          <li><strong>sortOrder </strong>: A table used to specify for each column the
+            sorting order</li>
+          <li><strong>icons </strong>: A table used to specify for each record an optional
+            icon</li>
+          <li><strong>columnHandlers </strong>: A table to specify for each column a
+            conversion function to display converted/formatted data instead of the
+            raw data.</li>
+        </ul>
+      </li>
+      <li><strong>OuterBox_Borders </strong>: Distance between main container and
+        its internal gadgets</li>
+      <li><strong>VScrollerGap </strong>: Distance between contents area and the
+        vertical scroller</li>
+      <li><strong>ScrollerSize </strong>: Scrollers size in pixels (override the
+        theme)</li>
+      <li><strong>ColumnHeight </strong>: Height of the column headers (override
+        the theme)</li>
+      <li><strong>VerticalGap </strong>: Distance between all vertical items (top,
+        body, horizontal scroller)</li>
+      <li><strong>Vertical_Borders </strong>: Distance between all internal items
+        (top, body, horizontal scroller)</li>
+      <li><strong>ColumnsGap </strong>: Distance between column headers (override
+        theme)</li>
+      <li><strong>ColumnsBorders </strong>:Distance between column headers borders</li>
+      <li><strong>Borders </strong>: Gadget's borders</li>
+      <li><strong>VLines </strong>: Vertical lines between the columns <code>True</code> or <code>False</code>
+      </li>
+      <li><strong>VLinesColor1 </strong>: Most left line color</li>
+      <li><strong>VLinesColor2 </strong>: Most right line color</li>
+      <li><strong>Multiselect </strong>: Allow multiple row selection <code>True</code> or <code>False</code>
+      </li>
+      <li><strong>AutoSelectChilds </strong>: Auto-select item's childs when selecting
+        a parent node</li>
+      <li><strong>AutoUnselectChilds </strong>: Auto-unselect item's childs when
+        unselecting a parent node</li>
+      <li><strong>FontName </strong>: Font name</li>
+      <li><strong>FontSizeOffset </strong>: Adjust font size, usefull for multiline
+        cells</li>
+      <li><strong>FontStyle </strong>: Font style</li>
+      <li><strong>FontColor </strong>: Font color (unselected)</li>
+      <li><strong>EntryHeight </strong>: Height in pixels of a single row &amp;
+        base font size</li>
+      <li><strong>AlternateLines </strong>: Alternate lines background color (<code>True</code> or <code>False</code>)</li>
+      <li><strong>HeadersOFF </strong>: <code>True</code> to hide column headers</li>
+      <li><strong>HScrollerOFF </strong>: <code>True</code> to hide the horizontal
+        scroller</li>
+      <li><strong>VScrollerOFF </strong>: <code>True</code> to hide the vertical scroller</li>
+      <li><strong>WheelPageQualifier </strong>: Override default page key qualifier
+        (<code>LSHIFT</code>)</li>
+      <li><strong>WheelSEQualifier </strong>: Override default start/end key qualifier
+        (<code>LCTRL</code>)</li>
+      <li><strong>IconsSizeOffset </strong>: +/- size offset</li>
+      <li><strong>IconsXOffset </strong>: +/- position offset</li>
+      <li><strong>IconsAsBackground </strong>: Determines if the icons m ust be
+        used as background images: <code>True</code> or <code>False</code>
+      </li>
+      <li><strong>IconsMaximize </strong>: Determines if the icon image must be
+        maximized or not: <code>True</code> or <code>False</code>
+      </li>
+      <li><strong>IconsTextGap </strong>: Distance in pixels between icon and text</li>
+      <li><strong>IconsFixedTextOffset </strong>: <code>True</code> or <code>False</code> →
+        IconsTextGap</li>
+      <li><strong>ResizeableColumns </strong>: Determines if columns can be resized
+        using the mouse: <code>True</code> or <code>False</code> → default True</li>
+      <li><strong>OCStyle</strong> : &nbsp;Open/Close sybols style (<code>1</code>=Box, <code>2</code>=Arrows)</li>
+      <li><strong>SelectGroups</strong> : Enable/Disable group selection (default
+        = <code>True</code>)
+        <br>&nbsp;</li>
+    </ul>
+    <p>&nbsp;</p>
+    <p><span class="text-big"><strong>Additional supported actions</strong></span>&nbsp;</p>
+    <ul>
+      <li><strong>OnChange </strong>: Triggered when something changes</li>
+      <li><strong>OnSelect </strong>: Triggered when an item has been selected</li>
+      <li><strong>OnUnselect </strong>/ <strong>OnDeselect </strong>: Triggere when
+        an item has been deselected
+        <br>
+        <br>&nbsp; &nbsp; &nbsp;&nbsp;
+        <br>&nbsp;</li>
+    </ul>
+  </body>
+
+</html>

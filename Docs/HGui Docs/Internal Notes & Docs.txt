@@ -1,0 +1,210 @@
+This document lists things to implement, partially implemented or stuff to fix, or simply ideas to enhance HGui.
+
+TO DO
+-----
+The following settings are theme related and must be moved in the theme table:
+- HGui.LVResizeLineColor1             Column resize marker color 1 (default: $000000)
+- HGui.LVResizeLineColor2             Column resize marker color 2 (default: $FF0000)
+
+METHODS TO ADD
+--------------
+- DROP DOWN GADGETS
+  The DropDown gadget is composed by a button that once pressed show a ListView with all possible items that can be selected. To add methods that changes the items list I can pass the method calls to the attached Listview which contains the DropDown items. 
+If the DropDown is opened I should force a refresh, if it is closed no refresh is needed because the items are hidden.
+  So I have to add to the DropDown gadget the following methods:
+  - :InsertItem(item, position)
+  - :RemoveItem(item, position)
+  - :Clear()
+  - :SetItems(items)
+
+- LIST VIEW GADGETS
+  Add the possibility to filter datasets with a these methods:
+  - :applyFilter()
+  - :clearFilter()
+  
+LABEL & BUTTON GADGET (not yet in the docs)
+-------------------------------------------
+I've added support for the following tags to add on-the-fly style changes, these tags must be placed on the line beginning, otherwise they will not be recognized.
+
+ - Alignment control
+   {:align-l:}, {:align-r:}, {:align-c:}
+       |            |            +---> center alignment
+       |            +----------------> right alignment
+       +-----------------------------> left alignment
+       
+ - Font size
+   {:font++:}, {:font--:}, {:font=xxx:}
+        |           |           +----> set the specified size
+        |           +----------------> decrease the size
+        +----------------------------> increase the size
+        
+   
+ - Background color
+   {:bgcolor=aarrggbbz:}, {:bbcolor=aarrggbbz:}
+            |                      +-> Sets the backgound color of the text
+            +------------------------> Set the background color of the entire line
+            
+
+ THEMES
+ ------
+   Add functions to save and load skins
+  
+ ADD & DEC BUTTONS ON A TEXTBOX or LABEL
+ ---------------------------------------
+ Experimental solution LINK system
+   [+/-] button -> :Link(gadget, action, params)
+   Every gadget  have a links table with linked actions
+ 
+Something like:
+   Local plusButton = HGui....
+   plusButton:Link(textBox, "+/-", { range { 0, 100 }, value = 1 })
+     
+Everytime the plusButton is pushed the code will look into the links table and will execute the linked actions, in this case will add 1 to the current text gadget value keeping it whitin the limits.
+     
+PLANNED LINKS
+  - BUTTONS
+    "+/-" action available for (Increase & Decrease current value)
+      LABEL
+      SCROLLBAR (Cursor)
+      SLIDER (Cursor)
+      KNOB (Cursor)
+      - TEXT                DONE
+      DROPDOWN (Entry)
+  - SWITCH
+    "show state" available for (show a string based on its value)
+      LABEL
+      TEXT
+    "change state" available for (enable or disable gadget and its children)
+      ALL
+  - SLIDER / SCROLLBAR
+    "+/-"
+      LABEL
+      SLIDER
+      SCROLLBAR
+      KNOB
+      TEXT
+      DROPDOWN
+        
+This way linking gui elements is very easy, suppose this scenario:
+  [number][+][-]
+Create the 3 items :
+   b1 = HGui.Gadget:new(...)
+   b2 = HGui.Gadget:new(...)
+   b3 = HGui.Gadget:new(...)
+Now let's link b2 and b3 to b1
+   b2:Link(b1, "+/-", { range = { 0, 100 }, value = 1 })
+   b3:Link(b1, "+/-", { range = { 0, 100 }, value = -1 })
+This means that b2 can decrease b1 value in a range from 0 to 100 with increase steps of 1 unit, the same applies to the b3 but instead of increasing it will decrease b1 value.
+    
+SYSTEM REQUESTER
+----------------
+- SysRequestNew() 
+  I need to implement the <autosize> flag so that the requester size is calculated automatically considering the following requester items: 
+  - icon and its size
+  - requester body
+  - button area size (horizontal and vertical layouts)
+
+CURSOR'S SCROLLBAR
+------------------
+- At the beginning or at the end of the cursor range the cursor can flicker, it's due unnecessary rendering. Must be fixed.
+
+KEYBOARD NAVIGATION
+-------------------
+- Must be implemented completely, two keys for navigation must be defined to move to the next and previous gadgets in the interface, while a third key is needed to activate the gadget.
+
+CONTEXTUAL MENUS
+----------------
+- prebuiltGroups lacks recursivity
+- Implement a check to maintain the menu inside the visible screen
+
+MEANING OF THE CODE TAGS
+------------------------
+[NOTE] : Notes
+[TODO] : To be completed / fixed
+[WARN] : Warning
+
+******************************************************************************
+* THINGS TO FIX                                                              *
+******************************************************************************
+ * Text Class Bug
+    - Discovered a bug in multiline text gadget. If you insert a blank line, go to the last line and hit the Home button to reach the first character the program will crash. This problem is not yet fixed. 
+ * Cache Off
+     - Some gadgets fails with the cache switched off, check out the showcase.
+ * Menu
+     - Open a submenu: if the pointer hilights another item of the parent menu the current submenu must be closed (or not?).
+     - Switch gadgets are using the menu skin.
+ * DropDown gadget
+     - If I set HGui.Theme.DropDown.WindowBorders = 1 the top and bottom borders are not drawn.
+ * HGui.Window:close()
+     - Seems that hidden windows cannot be closed directly, check this behaviour and handle this case.
+ * ListView
+     - Bug : If I resize a column with icon shrinking it until the text is completely hidden I get an error on TextOut() for wrong coordinates.
+     - Bug : In some circumstances resizing a column crashesS Hollywood.
+
+ ******************************************************************************
+ * THING TO BE COMPLETED                                                      *
+ ******************************************************************************
+ * ListView
+   - Missing : Ability to move the columns around, let's see when I'll implement the gadgets drag & drop feature.
+* RMB Support for pop-up menu or custom actions. 
+  - Check if the current implementation is enough.
+  - HGui.RMB_Handler(msg) -> It's still needed?
+* Text Gadget events?
+  - OnInputEnd [ OK ]
+  - OnKeyPress [ MISSING? ] -> Check it out!
+* Gadget Focus events
+  - HGui.ActiveGadget [ OK ], handled by OnOver/OnOut
+  - GotFocus
+    HGui.GadgetEvent_GotFocus(msg)
+  - LostFocus
+    HGui.GadgetEvent_LostFocus(msg)
+* HGui.Theme.SetGadgetClass(GadgetType, Theme)
+  - Seems to be completed.
+* HGui.Window:menuSet(menuDef, params)
+  - The <params> table is actually ignored.
+* Gadget hotkeys (should be ok, check it out!)
+* Set Progressbar : outer_box, cursor tags
+* Set DropDown : Missing all tags
+* Set Image : Missing all tags
+* Set Knob : Missing some tags -> DOUBLE CASE KNOB, CHECK IT OUT!!!
+* Set TreeView : Missing items and selected tags
+* HGui.Gadget:free(refresh)
+  - This method should clean all occurencies of itself on layouts so that the layout could be updated without the removed gadget. Actually removing a gadget present in a layout will leave an hole but the gui will be fully working. 
+    If I use HIDE it is right to leave an "hole" in the interface, but if I use FREE the layout must be updated!
+* :FreeCache() gadget method INCOMPLETE.
+* Prebuilt layouts : Must be recursive, actually only one level is handled
+
+******************************************************************************
+* THINGS TO IMPLEMENT                                                        *
+******************************************************************************
+* iText gadget
+  - Scrollbars, line numbers, syntax hilighting (maybe), mouse actions.
+  - read only mode
+* AboutWindow : one for HGui and one custom for user applications
+* Panel/Ribbon gadget
+  - Panels could be repositioned and detached on separate windows.
+* Gadgets with icon support
+  - An option to resize automatically the icon in the gadget frame.
+* Spin gadget
+* Tabs gadget
+* Keyboard navigation system
+* Gadget drag & drop
+* Drag & drop on the windows
+* Tips with alpha channel?
+   
+******************************************************************************
+* TO CHECK                                                                   *
+******************************************************************************
+* Area:set()
+  - Partial areas handling should be complete, check and test.
+* Window events
+  - In the window structure I've inserted empty events so I can avoid the type check on these fields. Check if all type checks have been removed.
+* Area events
+  - In the area structure I've inserted empty events so I can avoid the type check on these fields. Check if all type checks have been removed.
+* Virtual gadget
+  - Check if all gadget classes are working as they should.
+  - Check nested virtual gadgets
+* Menu
+  - Check if all gadget classes are working as they should
+* Skin cache off
+* Text cache off

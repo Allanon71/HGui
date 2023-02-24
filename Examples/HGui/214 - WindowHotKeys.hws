@@ -1,0 +1,64 @@
+/*******************************************************************************
+HGUI : Tutorial 214 - Window's Hot Keys                      v1.2 : 09/02/2023 *
+********************************************************************************
+During the window's creation process you can assign to each window one or more
+hotkeys to perform the following actions automatically:
+  - hide
+  - show
+  - open
+  - close
+  - activate
+
+You have to provide in the 'options' table a subtable named 'Hotkeys', this
+table must define each action you want to initialize with a qualifier and a
+key. 
+All hotkeys are globally listened, this means that all windows are listening
+for all hotkeys defined so even if a window is not the active one its hotkeys
+will be listened and handled correctly.
+
+NOTE
+Please note that to listen to keybaord events one window of your application
+must be active otherwise events cannot be detected!
+
+Here is an example of how you can use this feature.
+*******************************************************************************/
+
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; Let's set a global size table common for all windows
+Local wsize = { w = 400, h = 300 }  ; A shortcut for all our window sizes
+
+win01 = HGui.Window:new({ Position = 
+                          { x = 200, 
+                            y = 200 }, 
+                          Size = wSize,
+                          Title = "01 : Press <a> to ACTIVATE me!", 
+                          HotKeys = 
+                            { ;-- define the key used to activate the window --
+                              Activate = 
+                              { Qualifier = "", Key = "a", AltCode = "" } 
+                              },
+                              ;-- you can put here more actions as additional
+                              ;-- table items.
+                            })
+
+win02 = HGui.Window:new({ Position = { x = 250, y = 250 }, Size = wSize,
+                          Title = "02 : Press <B> to ACTIVATE me!", 
+                          HotKeys = { Activate = { Qualifier = "", Key = "B", AltCode = "" } } })
+                          
+win03 = HGui.Window:new({ Position = { x = 300, y = 300 }, Size = wSize,
+                          Title = "03 : Press <c> to HIDE, <d> to SHOW me!", 
+                          HotKeys = { Hide = { Qualifier = "", Key = "c", AltCode = "" }, 
+                                      Show = { Qualifier = "", Key = "d", AltCode = "" } } })
+                                      
+win04 = HGui.Window:new({ Position = { x = 350, y = 350 }, Size = wSize,
+                          Title = "04 : RALT+F3 to CLOSE me!, z to OPEN me!", 
+                          HotKeys = { Close = { Qualifier = "ralt", Key = "F3", AltCode = "" }, 
+                                      Open = { Qualifier = "", Key = "z", AltCode = "" } } })
+
+;-------------------------------------------------------------------------------
+
+Repeat
+   WaitEvent
+Forever

@@ -1,0 +1,67 @@
+/* 
+********************
+* HGui Test Script *
+* Fabio Falcucci   *
+*    Feb-2023      *
+********************
+  This script is used as a test and to show how it's possible to use the
+helper function 
+  HGui.Theme.Generate_SkinColor()
+to generate simple skin composed by a a single layer with a fill color.
+
+For further informations about the skin system have a look
+at the G2D library.
+-------------------
+HGUI.Theme.Generate_SkinColor(color)
+  Generates a flat skin using the provided color
+======================================= */
+
+; INCLUDE THE LIBRARIES DEFINITIONS
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; Creates a new HGui window
+Local myWin = HGui.Window:new(
+                { title = "HGui.Theme.Generate_SkinColor()",
+                  name  = "myWindow",
+                  position = 
+                    { x = #CENTER, 
+                      y = #CENTER }
+                  })
+
+; Disable auto-rendering to avoid flickering
+HGui.SetAutoRendering(False)
+
+; Creates one label and one button
+Local myLabel  = HGui.Gadget:new(#HGUI_LABEL_GADGET, { caption = { "Press the button below", "to change the button skins", "with random plain colors" } })
+Local myButton = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { caption = { "Click me!"},
+    actions = {
+      onpushed =
+        Function(gadObj)
+          ; Change the skin everytime this button is pushed
+          gadObj:set({
+            look = { 
+              nskin = HGui.Theme.Generate_SkinColor(GetRandomColor()),  ; Normal state
+              hskin = HGui.Theme.Generate_SkinColor(GetRandomColor()),  ; Hilighted state
+              pskin = HGui.Theme.Generate_SkinColor(GetRandomColor()) } ; Pushed state
+              },
+            True)
+        EndFunction }
+      })
+
+
+; Let's arrange the gadgets into the window
+mywin.rootgadget:layoutSet(
+  { gadgets = { myLabel, myButton },
+    weights = { 0.30, 0.70 },
+    gap     = 1
+    }, True )
+    
+; Finally enable the auto-rendering and refresh the window
+HGui.SetAutoRendering(True)
+myWin:Render()
+                 
+Repeat
+  WaitEvent()
+Forever

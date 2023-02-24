@@ -1,0 +1,70 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>HGui.Window:SoftKeypadNew()</h1>
+
+    <p><span class="text-big"><code>HGui.Window:SoftKeypadNew(params)</code></span>
+    </p>
+    <p>Show a softkeyboard to the screen so the user can input numbers using
+      the mouse or the touch screen, input by keyboard is supported.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>params </strong>: A Table used to customize the soft keypad
+        <ul>
+          <li><strong>text </strong>: Box description</li>
+          <li><strong>callbackOk </strong>: Callback function on entered number</li>
+          <li><strong>callbackClose </strong>: Callback function on requester close</li>
+          <li><strong>decimals </strong>: Flag to allow decimal numbers, default = <code>False</code>
+          </li>
+          <li><strong>mathSigns </strong>: Flag to allow maths signs, default = <code>False</code>
+          </li>
+          <li><strong>isPassword </strong>: Flag to mask password pins, default = <code>False</code>
+          </li>
+          <li><strong>generate </strong>: Generate PIN button is showed? default = <code>False</code>
+          </li>
+          <li><strong>paste </strong>: Paste button is showed? default = <code>True</code>
+          </li>
+          <li><strong>value </strong>: Default value to put into the softpad</li>
+          <li><strong>textClear </strong>: Text for the clear button</li>
+          <li><strong>textGenerate </strong>: Text for the generate button</li>
+          <li><strong>textOk </strong>: Text for the ok button</li>
+          <li><strong>textPaste </strong>: Text for the paste button</li>
+          <li><strong>maxLen </strong>: Max number of digits allowed</li>
+          <li><strong>waitInput </strong>: Determines if this is a blocking requester
+            or not.
+            <br><code>True</code> = Blocking
+            <br><code>False</code> = Non-Blocking
+            <br>&nbsp;</li>
+        </ul>
+      </li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <p>This function always returns the SoftPad window object, but be aware that
+      in most of the cases it is completely useless because this requester is
+      able to close the window and free the resources by itself when a number
+      is entered or when the requester is cancelled.
+      <br>&nbsp;
+      <br>The <code>callbackOk</code> function will be called with the entered number.
+      <br>The <code>callbackClose</code> function will be called when the requester
+      is closed by its close gadget.
+      <br>&nbsp;</p>
+    <p><u>NOTES</u>
+      <br>All the text in the buttons will be adjusted automatically to best fit
+      in the button size.</p>
+    <p><u>EXAMPLES</u>&nbsp;</p>
+    <p><u>SEE ALSO</u>
+      <br>&nbsp;</p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

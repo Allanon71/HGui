@@ -1,0 +1,4041 @@
+/*********************************************************************
+ * FS LIBRARY                                                        *
+ * Author : Fabio Falcucci (Allanon)                                 *
+ * License : Donationware                                            *
+ * Version : 2.1                                                     *
+ * Release : 19.11.2021                                              *
+ * Dependancies : HELPERS, TABLES, DEBUG Libraries                   *
+ *--------------------------------------------------------------------
+ 
+   FS Library has been developed to help with file system related 
+ functions.
+ 
+ CONTENTS
+ ========
+ :: MISC ::
+ FS.AppDataLocation(AppName, DefaultPath, Test)
+ FS.CutLastFolder(path)
+ FS.OpenFolder(path)
+ FS.ParseFilename(filename)
+ 
+ :: TASKS ::
+ FS.Task.IsRunning(taskName, winHelper)
+ FS.Task.Kill(taskName)
+ 
+ :: SCRIPTS ::
+ FS.Build_Script(scriptFile, commands, execute)
+ FS.ExecuteSynch_Script(scriptFile, logFile, stdErr, append)
+ FS:Execute_Script(scriptFile)
+ 
+ :: CONFIG FILES ::
+ FS.Config.Add(table, source, index, value, category, type, subtype)
+ FS.Config.Load(file, header, updFunc, fileId, recursive, source, lineCount)
+ FS.Config.Remove(subtable, source, index, category) *** Unfinished ***
+ FS.Config.Set(table, source, index, value, type, subtype)
+ FS.Config.Write(file, source, fileId)
+ 
+ :: FILES ::
+ FS.Files.ChangeExistingName(fileName, filePath)
+ FS.Files.CheckLastChar(fileName, ascValue)
+ FS.Files.ClearCache()
+ FS.Files.Delete(filename)
+ FS.Files.ExtractFromZip(archive, sourceFile, destFile, pwd, continueOnError)
+ FS.Files.Find(startDir, pattern, recursive, dirProgressCB, fileProgressCB, foundProgressCB, breakKey, userData, results)
+ FS.Files.FindByCRC32(startDir, crc, recursive, dirProgressCB, fileProgressCB, foundProgressCB, breakKey, singleFile, userData, results)
+ FS.Files.GetDirectories(startDir, getFiles, recursive, checksum, notNested)
+ FS.Files.GetExtention(fileName)
+ FS.Files.GetLastLine(fileName)
+ FS.Files.GoDirectoryUp(path, levels)
+ FS.Files.IsAvailable(fileName, useCache)
+ FS.Files.IsPathRelative(path)
+ FS.Files.LoadToTable(fileName)
+ FS.Files.Open(id, fileName, mode)
+ FS.Files.ReadFloat(handler)
+ FS.Files.ReadString(handler, length, bytes)
+ FS.Files.ReadTable(handler)
+ FS.Files.RemoveExtention(filename)
+ FS.Files.SaveFromTable(table, filename, backup, noLineFeed)
+ FS.Files.Script_Build(scriptFile, commands, execute)
+ FS.Files.Search(params, results)
+ FS.Files.SetExecutable(filename)
+ FS.Files.ToTable(filename)
+ FS.Files.Validate(prefix, filename, searchPaths)
+ FS.Files.WriteInt(handler, value)
+ FS.Files.WriteString(handler, string, bytes)
+ FS.Files.WriteTable(handler, table)
+ FS.Files.applyQuotes(filename)
+ 
+ :: INI FILES ::
+ FS.Ini.ReadValue(filename, key, separator)
+ 
+ :: TEXT FILES ::
+ FS.TxtFiles.InsertBefore(filename, marker, newLine, allowMultiple, caseSensistive, makeBackup)
+ 
+ :: VOLUMES ::
+ FS.Volumes.ClearCache()
+ FS.Volumes.Get(useCache)
+ FS.Volumes.GetPart(fullPath)
+ FS.Volumes.IsAvailable(volumeName)
+ FS.Volumes.Monitor_Check()
+ FS.Volumes.Monitor_Start(callback, scanDelay)
+ FS.Volumes.Monitor_Stop()
+ 
+ */
+
+@INCLUDE "+Includes.hws"
+@INCLUDE #INC_HELPERS
+@INCLUDE #INC_TABLES
+;@INCLUDE #INC_DEBUG
+
+
+Global FS  = {}                ;                           Main FileSystem table
+       FS.Files   = {}         ;                         Files related functions
+       FS.Volumes = {}         ;                       Volumes related functions
+       FS.TxtFile = {}         ;                    Text Files related functions
+       FS.Task    = {}         ;                 Task handling related functions
+       FS.Config  = {}         ;                    Configuration Files handling
+       FS.GConfig = {}         ;                                    Not yet used
+
+       FS.Private = {}         ;                    Private & Internal functions
+
+       FS.Cache = {}
+       FS.Cache.Volumes = {}   ;                             Cached volume names
+       FS.Cache.Files   = {}   ;                                    Cached files
+       FS.Cfg = {}             ;                      Loaded configuration files
+       FS.Ini = {}             ;                          Ini files manipulation
+       
+       FS.Version = "2021.11.19:2.1"
+
+Function FS.AppDataLocation(AppName, DefaultPath, Test)                   ; v2.0
+/*******************************************************************************
+path = FS.AppDataLocation(AppName, DefaultPath, Test)
+
+Returns the app data folder and/or create it if it is missing.
+-------------------------------------------------------------------------------
+INPUT
+  AppName       Application Name
+  DefaultPath   Default path for unsupported systems like Amigalike systems
+  Test          Does not create the directory, only check if it exists
+  
+OUTPUT
+  path          Path to the AppData folder
+  result        Result returnes if Test=True
+  
+EXAMPLE
+  | Local appPath = FS.AppDataLocation("myApp", "")
+  
+  This command on Windows will probabily points to :
+    C:\Users\<current-user>\AppData\Roaming\myApp
+    
+  In a Linux systems instead it should point to :
+    \home\<current-user>\.myApp
+*******************************************************************************/
+  If IsNil(Test) Then Test = False
+  
+  Local vInfo = GetVersion()
+  Local sInfo = GetSystemInfo()
+  
+  Local vInfoP = LeftStr(vInfo.Platform, 3)
+  Local AppData = ""
+  
+  If vInfoP = "Mac" Or vInfoP = "Win"
+    AppData = FullPath(sInfo.AppData, AppName)
+    
+  ElseIf vInfoP = "Lin"
+    AppData = FullPath(sInfo.UserHome, "." .. appName)
+    
+  Else
+    AppData = DefaultPath
+    
+  EndIf
+  
+  If Not(Test) Then MakeDirectory(AppData)
+  
+  Return(AppData, Exists(AppData))
+
+EndFunction
+
+Function FS.Files.ToTable(file)                                           ; v2.0
+/*******************************************************************************
+table = FS.Files.ToTable(file)
+
+Load the file lines into a table and return it.
+If the file does not exists or an error occured an empty table will be returned.
+-------------------------------------------------------------------------------
+INPUT
+  file    File to load
+  
+OUTPUT
+  table   Loaded file or an empty table
+  
+EXAMPLE
+  | Local lines = FS.Files.ToTable("myfile.txt")
+*******************************************************************************/
+  If Exists(file)
+    Local table = {}
+    
+    Local result = FS.Files.Open(Nil, file, #MODE_READ)
+    If result.ok
+      While Not(Eof(result.handler))
+        Local l = ReadLine(result.handler)
+        InsertItem(table, l)
+      Wend
+      
+      CloseFile(result.handler)
+      Return(table)
+      
+    EndIf
+    
+  EndIf
+  
+  Return({})
+  
+EndFunction
+
+Function FS.Files.SaveFromTable(table, file, backup, noLineFeed)         ; v2.1
+/******************************************************************************
+result = FS.Files.SaveFromTable(table, file, backup)
+
+Saves a table previously loaded with FS.Files.ToTable() to the given file or
+any other suitable table.
+-------------------------------------------------------------------------------
+INPUT
+  table       Table to save (a one-level table of strings)
+  file        File name where the table will be saved
+  backup      Set to TRUE to make a backup if the destination file exists
+  noLineFeed  If True no additional line feeds will be added, useful for
+              tables that already have linefeeds on each line, default False
+OUTPUT
+  result    TRUE if the table is saved without errors
+  
+EXAMPLE
+  | Local result = FS.Files.SaveFromTable(
+  |   { "line 1",       ; Table contents
+  |     "line 2",
+  |     "last line"},
+  |   "myFile.txt",     ; Target file name
+  |   True)             ; Make a backup
+
+NOTE
+  If there is the need to make a backup of the destination file it will get
+  the suffix .backup, if a backup already exists it will be deleted before
+  executing the new backup
+******************************************************************************/
+  If Backup
+    If Exists(file)
+      Local backFile = file .. ".backup"
+      If Exists(backFile) Then DeleteFile(backFile)
+      Rename(file, FilePart(backFile))
+    EndIf
+  EndIf
+  
+  ; Check noLineFeed option
+  Local writeFunc = WriteLine
+  If noLineFeed Then writeFunc = WriteString
+  
+  Local result = FS.Files.Open(Nil, file, #MODE_WRITE)
+  If result.ok
+    Local c = ListItems(table)
+    For Local i = 0 To c-1
+      writeFunc(result.handler, table[i])
+    Next
+    CloseFile(result.handler)
+    
+    Return(True)
+    
+  Else
+    Return(False)
+    
+  EndIf
+  
+EndFunction
+
+Function FS.Files.IsPathRelative(path)
+/******************************************************************************
+result = FS.Files.IsPathRelative(path)
+
+Returns TRUE if the given path is relative, if it's an absolute path FALSE will
+be retuned.
+-------------------------------------------------------------------------------
+INPUT
+  path    Path we need to check
+OUTPUT
+  result  TRUE if the path is relative
+-------------------------------------------------------------------------------
+NOTE
+  An absolute path is detected if the path has a semicolon character or if, in
+  case we are in a Linux-ish system, the first character equal to a backslash.
+******************************************************************************/
+  Local info = GetVersion()
+  Local relative = True
+  
+  If FindStr(path, ":") <> -1
+    relative = False
+  ElseIf info.Platform = "Linux" Or
+         info.Platform = "Android" Or
+         info.Platform = "MacOS"
+    If LeftStr(path, 1) = "\\"
+      relative = False
+    EndIf
+  EndIf
+  
+  Return(relative)
+
+EndFunction
+
+;=========== continuare da qua [TODO]
+
+Function FS.Files.CheckLastChar(Filename, AscValue)
+/******************************************************************************
+result = FS.Files.CheckLastChar(filename, ascvalue)
+
+Read the last character of <filename> and returns TRUE if it's equal
+to the <ascvalue> specified.
+---------------------------------------------------------------------
+INPUT
+  filename     The file you want to scan
+  ascvalue     The character asc value you need to check
+OUTPUT
+  result       TRUE if the last character of <filename> matches with
+               <ascvalue>, or FALSE if it does not match or the 
+               specified file does not exists.
+********************************************************************************/
+   Local result = False
+
+   If Exists(Filename)
+      Local fid    = OpenFile(Nil, Filename, #MODE_READ)
+      Local lenght = FileLength(fid)
+      If lenght > 0
+         Seek(fid, lenght-1)
+         If ReadChr(fid) = AscValue Then result = True
+      EndIf
+      CloseFile(fid)
+   EndIf
+
+   Return(result)
+EndFunction
+
+
+Function FS.Files.GetLastLine(Filename)
+/*******************************************************************************
+result = FS.Files.GetLastLine(filename)
+
+Read the last line of <filename> and returns it as result.
+---------------------------------------------------------------------
+INPUT
+  filename     The file you want to scan
+OUTPUT
+  result       The last line of the given file or an empty string if 
+               there are no lines to read or the specified file does
+               not exists.
+********************************************************************************/
+;###############################################################################
+;### NOTE : missing error handling on OpenFile() and ReadLine() ################
+;###############################################################################
+   Local result = ""
+
+   If Exists(Filename)
+      Local fid = OpenFile(Nil, Filename, #MODE_READ)
+      If FileLength(fid) > 0
+         result = ReadLine(fid)
+         While Not(Eof(fid))
+            result = ReadLine(fid)
+         Wend
+      Else
+         result = Nil
+      EndIf
+      CloseFile(fid)
+   EndIf
+
+   Return(result)
+EndFunction
+
+Function FS.Files.GetDirectories(StartingDir, getFiles, recursive, checksum, notNested)
+  /****************************************************************************
+  result = FS.Files.DirectoryList(StartingDir)
+  
+  Returns the directories inside the <StartingDir> folder.
+  Each entry hold all standard Hollywood fields:
+    Name          This field will contain the name of entry
+    Type          This will be always #DOSTYPE_DIRECTORY
+    Flags         This field will receive a combination of protection flags of
+                  the directory.
+    Time          This field will receive a string containing the time the
+                  directory was last modified. The string will always be in the
+                  format dd-mmm-yyyy hh:mm:ss. E.g.: 08-Nov-2004 14:32:13. 
+    LastAccessTime
+                  This field will receive a string containing the time the
+                  directory was last accessed. This attribute is not supported
+                  on AmigaOS. 
+    CreationTime  This field will receive a string containing the time the
+                  directory was created. This attribute is only supported on
+                  Win32. 
+    Comment       This field will contain the comment of a file. This is only
+                  supported by the Amiga versions.    
+  *****************************************************************************/
+  Local result = {}
+  
+  If Not(Exists(StartingDir)) Then Return(result)
+  If IsNil(getFiles)  Then getFiles  = False
+  If IsNil(recursive) Then recursive = False
+  If IsNil(checksum)  Then checksum  = False
+  If IsNil(notNested) Then notNested = False
+  
+  Local DirID = OpenDirectory(Nil, StartingDir)
+  Local entry = NextDirectoryEntry(DirID)
+  While entry <> Nil
+    If entry.Type = #DOSTYPE_DIRECTORY
+      entry.path = FullPath(StartingDir, entry.Name)
+      InsertItem(result, entry)
+      
+      If recursive
+        Local path    = FullPath(StartingDir, entry.name)
+        Local results = FS.Files.GetDirectories(path, getFiles, Recursive, Checksum, notNested)
+        
+        If notNested
+          For i, v In Pairs(results)
+            InsertItem(result, v)
+          Next
+        
+        Else
+          result[ListItems(result)-1].contents = results
+          
+        EndIf
+        
+      EndIf
+      
+    ElseIf entry.Type = #DOSTYPE_FILE And getFiles
+      entry.path = FullPath(StartingDir, entry.Name)
+      
+      If checksum
+        entry.md5 = MD5(entry.path)
+      EndIf
+      
+      InsertItem(result, entry)
+      
+    EndIf
+    
+    entry = NextDirectoryEntry(DirID)
+  Wend
+
+  CloseDirectory(DirID)
+
+  Return(result)
+  
+EndFunction
+
+Function FS.Files.Search(params, results)
+/********************************************************************************
+results = FS.Files.Search(params, results)
+
+Improved version of FS.Files.Find() used to find files on media devices.
+---------------------------------------------------------------------
+INPUT
+  params              A table with search parameters
+    searchInFile      True if you want to search inside the file instead of looking in the name
+                      Default to False.
+    startingDir       Root directory where the search must start, default is current Directory()
+    pattern           A string or a table of strings where the matching pattern
+                      is specified. See MatchPattern() for details on recognized patterns.
+                      Default is * (any file name).
+    caseSensitive     Flag to enable/disable case sensitive searches, default is True (enabled).
+    recursive         Flag to enable/disable recursive search, default is False (disabled).
+    md5calc           Flag to enable md5 calculation, default = False.
+    dirProgressFunc   Callback function called every time the target directory changes (for example
+                      during recursive scans). The function will get the following arguments:
+                        - Directory name
+                        - UserData
+    fileProgressFunc  Callback function called every time a file it's being scanned. The function
+                      will get the following arguments:
+                        - Directory name
+                        - File name
+                        - UserData
+    foundProgressFunc Callback function called when a matching file is found, this function will be
+                      called with the following arguments:
+                        - Directory name
+                        - File name
+                        - UserData
+    breakKey          The scanning routine will look for the key specified here to interrupt itself,
+                      if the process is interrupted only the partial results will be returned. 
+                      Default key is ESC.
+    userData          Custom user data that will be returned along the callback functions.
+    results           PRIVATE. Used to poplulate results during recurive searches.
+
+OUTPUT
+  result              Results are stored and returned into an array of tables, each one representing
+                      a file match, each entry have the following fields:
+                        - Folder            The path where the file was found
+                        - File              The found file name (without path)
+                        - Size              The found file size
+                        - MD5               The found file MD5 checksum
+********************************************************************************/
+  If IsNil(params) Then params = {}
+  
+  ; Parameters
+  If TB.Item.IsNil(params, "searchinfile") Then params.searchInFile = False
+  If TB.Item.IsNil(params, "startingdir") Then params.startingDir = GetCurrentDirectory()
+  If TB.Item.IsNil(params, "pattern") Then params.pattern = "*"
+  If TB.Item.IsNil(params, "casesensitive") Then params.caseSensitive = True
+  If TB.Item.IsNil(params, "recursive") Then params.recursive = False
+  If TB.Item.IsNil(params, "md5calc") Then params.md5calc = False
+  If TB.Item.IsNil(params, "dirprogressfunc") Then params.dirProgressFunc = Function() EndFunction
+  If TB.Item.IsNil(params, "fileprogressfunc") Then params.fileProgressFunc = Function() EndFunction
+  If TB.Item.IsNil(params, "foundprogressfunc") Then params.foundProgressFunc = Function() EndFunction
+  If TB.Item.IsNil(params, "breakkey") Then params.breakKey = "ESC"
+  If TB.Item.IsNil(params, "userdata") Then params.userdata = ""
+
+  ; Check the PRIVATE results table
+  If IsNil(results) Then results = {}
+
+  ; CALLBACK : DirProgressFunc
+  params.dirProgressFunc(params.startingDir, params.userData)
+
+  ; Main find loop
+  ExitOnError(False)
+  Local DirID = OpenDirectory(Nil, params.startingDir)
+  Local lastErrorCode = GetLastError()
+  ExitOnError(True)
+  
+  If lastErrorCode = 0
+    Local entry, i, v = NextDirectoryEntry(DirID)
+    While entry <> Nil
+      If entry.Type = #DOSTYPE_FILE
+        ; A file has been detected
+        ; CALLBACK : FileProgressFunc
+        params.fileProgressFunc(params.startingDir, entry.Name, params.userData)
+        
+        ; Should search the string inside the file?
+        If params.searchInFile
+          ; === SEARCH WITHIN THE FILE ===
+          ; Try to open the file
+          Local result = FS.Files.Open(Nil, FullPath(params.startingDir, entry.name), #MODE_READ)
+          If result.ok
+            SetFileEncoding(result.handler, #ENCODING_ISO8859_1)
+
+            ; Opened succesfully, load chunks
+            Local chunkSize    = 256*1024 ; 256k
+            Local currentPoint = 0
+            Local fileSize     = entry.size
+            Local found        = False
+
+            If chunkSize > fileSize Then chunkSize = fileSize
+            While currentPoint <= fileSize
+              ; Load chunk
+              Local chunk = ReadBytes(result.handler, chunkSize)
+              currentPoint = currentPoint + chunkSize
+              If FindStr(chunk, params.pattern, params.caseSensitive, 0) <> -1
+                ; String has been found
+                If TB.Item.IsNil(results, params.pattern) Then results[params.pattern] = {}
+                ; CALLBACK : FoundProgressFunc
+                params.foundProgressFunc(params.startingDir, entry.Name, params.userData)
+                Local _md5 = 0
+                If params.md5calc Then _md5 = MD5(FullPath(params.startingDir, entry.Name))
+                InsertItem(results[params.pattern], { Folder = params.startingDir,
+                                               File   = entry.Name,
+                                               Size   = entry.Size,
+                                               MD5    = _md5 })
+                Break
+              Else
+                ; Prepare for the next chunk
+                If chunkSize = ByteLen(params.pattern) Then Break
+                currentPoint = currentPoint - ByteLen(params.pattern)
+                If currentPoint + chunkSize > fileSize Then chunkSize = fileSize - currentPoint
+                Seek(result.handler, currentPoint)
+
+              EndIf
+            Wend
+            
+            CloseFile(result.handler)
+          Else
+            ;DebugPrint("ERROR OPENING ", entry.File)
+          EndIf
+          
+          
+        Else
+          ;=== SEARCH IN FILE NAME ===
+          ; If Pattern is a single string...
+          If GetType(params.pattern) = #STRING
+            Local entry_name = entry.Name
+            Local pattern    = params.pattern
+            If Not(params.CaseSensitive)
+              entry_name = LowerStr(entry.Name)
+              pattern    = LowerStr(params.pattern)
+            EndIf
+            If MatchPattern(entry_name, pattern)
+              If TB.Item.IsNil(results, params.pattern) Then results[params.pattern] = {}
+              ; CALLBACK : FoundProgressFunc
+              params.foundProgressFunc(params.startingDir, entry.Name, params.userData)
+              Local _md5 = 0
+              If params.md5calc Then _md5 = MD5(FullPath(params.startingDir, entry.Name))
+              InsertItem(results[params.pattern], { Folder = params.startingDir,
+                                             File   = entry.Name,
+                                             Size   = entry.Size,
+                                             MD5    = _md5 })
+            EndIf
+
+          ; If Pattern is a table...
+          ElseIf GetType(params.pattern) = #TABLE
+            For i, v In Pairs(params.pattern)
+            Local entry_name = entry.Name
+              Local pattern    = params.pattern
+              If params.CaseSensitive
+                entry_name = LowerStr(entry.Name)
+                pattern    = LowerStr(v)
+              EndIf        
+              If params.CaseSensitive Then entry_name = LowerStr(entry.Name)
+              If MatchPattern(entry_name, pattern)
+                If TB.Item.IsNil(results, v) Then results[v] = {}
+                ; CALLBACK : FoundProgressFunc
+                params.foundProgressFunc(params.startingDir, entry.Name, params.userData)
+                Local _md5 = 0
+                If params.md5calc Then _md5 = MD5(FullPath(params.startingDir, entry.Name))
+                InsertItem(results[v], { Folder = params.startingDir,
+                                         File   = entry.Name,
+                                         Size   = entry.Size,
+                                         MD5    = _md5 })
+              EndIf
+            Next
+          EndIf
+
+        EndIf
+        
+      Else
+        ; A Directory has been detected, check if we must do a recursive scan
+        If params.recursive
+          Local _params = CopyTable(params)
+          _params.startingDir = FullPath(params.startingDir, entry.Name)
+          FS.Files.Search(_params, results)
+        EndIf
+      EndIf
+
+      entry = NextDirectoryEntry(DirID)
+
+      ; Check if we have to break the search loop
+      If HL.IsNotNil(params.breakKey)
+        If IsKeyDown(params.breakKey) Then Break()
+      EndIf
+    Wend
+
+    CloseDirectory(DirID)
+  
+  EndIf
+  
+  Return(results)
+
+EndFunction
+
+Function FS.Files.Find(StartingDir, Pattern, Recursive, DirProgressFunc,
+                       FileProgressFunc, FoundProgressFunc, BreakKey, UserData,
+                       results)
+/*******************************************************************************
+result = FS.Files.Find(startingDir, pattern, recursive, 
+                       dirProgressFunc, fileProgressFunc, 
+                       foundProgressFunc, breakKey, userData, 
+                       results)
+
+Search and returns any file that matches the specified <pattern>.
+---------------------------------------------------------------------
+INPUT
+  startingDir     Root directory where the search must start.
+  pattern         A string or a table of strings where the matching 
+                  pattern is specified. See MatchPattern() for 
+                  details on recognized patterns.
+  recursive       TRUE to perform the search recursively.
+  dirProgressFunc Callback function called every time the target 
+                  directory changes (for example during recursive
+                  scans). The function will get the following 
+                  arguments:
+                    - Directory name
+                    - UserData
+  fileProgressFunc Callback function called every time a file it's
+                   being scanned. The function will get the following
+                   arguments:
+                     - Directory name
+                     - File name
+                     - UserData
+  foundProgressFunc Callback function called when a matching file is
+                    found, this function will be called with the
+                    following arguments:
+                      - Directory name
+                      - File name
+                      - UserData
+  breakKey        The scanning routine will look for the key
+                  specified here to interrupt itself, if the process
+                  is interrupted only the partial results will be
+                  returned. Default key is ESC.
+  userData        Custom user data that will be returned along the 
+                  callback functions.
+  results         PRIVATE. Used to poplulate results during recurive
+                  searches.
+OUTPUT
+  result      Results are stored and returned into an array of tables,
+              each one representing a file match, each entry have the
+              following fields:
+                - Folder            The path where the file was found
+                - File              The found file name
+                - Size              The found file size
+                - MD5               The found file MD5 checksum
+********************************************************************************/
+   ; Check the Starting Directory
+   If Not(Exists(StartingDir)) Then Return({})
+
+   ; Check the Break key
+   If HL.IsNil(BreakKey) Then BreakKey = "ESC"
+
+   ; Check the PRIVATE results table
+   If HL.IsNil(results) Then results = {}
+
+   ; CALLBACK : DirProgressFunc
+   If HL.IsNotNil(DirProgressFunc) Then DirProgressFunc(StartingDir, UserData)
+
+   ; Main find loop
+   Local DirID = OpenDirectory(Nil, StartingDir)
+   Local entry = NextDirectoryEntry(DirID)
+   While entry <> Nil
+      If entry.Type = #DOSTYPE_FILE
+         ; A file has been detected
+         ; CALLBACK : FileProgressFunc
+         If HL.IsNotNil(FileProgressFunc) Then FileProgressFunc(StartingDir, entry.Name, UserData)
+
+         ; If Pattern is a single string...
+         If GetType(Pattern) = #STRING
+            If MatchPattern(entry.Name, Pattern)
+               If TB.Item.IsNil(results, pattern) Then results[pattern] = {}
+
+               ; CALLBACK : FoundProgressFunc
+               If HL.IsNotNil(FoundProgressFunc) Then FoundProgressFunc(StartingDir, entry.Name, UserData)
+               InsertItem(results[pattern], { Folder = StartingDir,
+                                              File   = entry.Name,
+                                              Size   = entry.Size,
+                                            ;  MD5    = MD5(FullPath(StartingDir, entry.Name))
+                                              })
+            EndIf
+
+         ; If Pattern is a table...
+         ElseIf GetType(Pattern) = #TABLE
+            For i, v In Pairs(Pattern)
+               If MatchPattern(entry.Name, v)
+                  If TB.Item.IsNil(results, v) Then results[v] = {}
+
+                     ; CALLBACK : FoundProgressFunc
+                     If HL.IsNotNil(FoundProgressFunc) Then FoundProgressFunc(StartingDir, entry.Name, UserData)
+                     InsertItem(results[v], { Folder = StartingDir,
+                                              File   = entry.Name,
+                                              Size   = entry.Size,
+                                            ;  MD5    = MD5(FullPath(StartingDir, entry.Name))
+                                              })
+               EndIf
+            Next
+         EndIf
+
+      Else
+         ; A Directory has been detected, check if we must do a recursive scan
+         If Recursive
+            FS.Files.Find(FullPath(StartingDir, entry.Name), Pattern, Recursive, DirProgressFunc,
+                          FileProgressFunc, FoundProgressFunc, BreakKey, UserData, results)
+         EndIf
+      EndIf
+
+      entry = NextDirectoryEntry(DirID)
+
+      ; Check if we have to break the search loop
+      If HL.IsNotNil(BreakKey)
+         If IsKeyDown(BreakKey) Then Break()
+      EndIf
+   Wend
+
+   CloseDirectory(DirID)
+
+   Return(results)
+
+EndFunction
+
+
+Function FS.Files.FindByCRC32(StartingDir, CRC, Recursive, DirProgressFunc,
+                       FileProgressFunc, FoundProgressFunc, BreakKey, SingleFile,
+                       UserData, results)
+/*******************************************************************************
+result = FS.Files.FindByCRC32(startingDir, crc, recursive, 
+                              dirProgressFunc, fileProgressFunc,
+                              foundProgressFunc, breakKey, userData, 
+                              results)
+                              
+Search and returns any file that matches the specified <crc>.
+---------------------------------------------------------------------
+INPUT
+  startingDir     Root directory where the search must start.
+  crc             The CRC32 value we are looking for.
+  recursive       TRUE to perform the search recursively.
+  dirProgressFunc Callback function called every time the 
+                  target directory changes (for example during
+                  recursive scans). The function will get the
+                  following arguments:
+                    - Directory name
+                    - UserData
+  fileProgressFunc  Callback function called every time a file it's
+                    being scanned. The function will get the
+                    following arguments:
+                      - Directory name
+                      - File name
+                      - UserData
+  foundProgressFunc Callback function called when a matching file is
+                    found, this function will be called with the
+                    following arguments:
+                      - Directory name
+                      - File name
+                      - UserData
+  breakKey        The scanning routine will look for the key
+                  specified here to interrupt itself, if the process
+                  is interrupted only the partial results will be
+                  returned. Default key is ESC.
+  userData        Custom user data that will be returned along the
+                  callback functions.
+  results         PRIVATE. Used to poplulate results during recurive
+                  searches.
+OUTPUT
+  result          Results are stored and returned into an array of
+                  tables, each one representing a file match, each
+                  entry have the following fields:
+                    - FolderName   The path where the file was found
+                    - File         The found file name
+                    - Size         The found file size
+                    - MD5          The found file MD5 checksum
+********************************************************************************/
+   ; Check the Starting Directory
+   If Not(Exists(StartingDir)) Then Return({})
+
+   ; Check the Break key
+   If HL.IsNil(BreakKey) Then BreakKey = "ESC"
+
+   ; Check the PRIVATE results table
+   If HL.IsNil(results) Then results = {}
+
+   ; CALLBACK : DirProgressFunc
+   If HL.IsNotNil(DirProgressFunc) Then DirProgressFunc(StartingDir, UserData)
+
+   If HL.IsNil(SingleFile) Then SingleFile = True
+
+   ; Main find loop
+   Local DirID = OpenDirectory(Nil, StartingDir)
+   Local entry = NextDirectoryEntry(DirID)
+   While entry <> Nil
+      If entry.Type = #DOSTYPE_FILE
+         ; A file has been detected
+         ; CALLBACK : FileProgressFunc
+         If HL.IsNotNil(FileProgressFunc) Then FileProgressFunc(StartingDir, entry.Name, UserData)
+
+         ; If Pattern is a single string...
+         If GetType(Pattern) = #STRING
+            If CRC32(FullPath(StartingDir, entry.Name)) = CRC
+               If TB.Item.IsNil(results, pattern) Then results = {}
+
+               ; CALLBACK : FoundProgressFunc
+               If HL.IsNotNil(FoundProgressFunc) Then FoundProgressFunc(StartingDir, entry.Name, UserData)
+               InsertItem(results, { Folder = StartingDir,
+                                     File   = entry.Name,
+                                     Size   = entry.Size,
+                                     MD5    = MD5(FullPath(StartingDir, entry.Name))
+                                     })
+
+               If SingleFile Then Return(results)
+
+            EndIf
+
+         EndIf
+
+      Else
+         ; A Directory has been detected, check if we must do a recursive scan
+         If Recursive
+            FS.Files.FindByCRC32(FullPath(StartingDir, entry.Name), CRC, Recursive, DirProgressFunc,
+                                 FileProgressFunc, FoundProgressFunc, BreakKey, SingleFile, UserData, results)
+         EndIf
+      EndIf
+
+      entry = NextDirectoryEntry(DirID)
+
+      ; Check if we have to break the search loop
+      If HL.IsNotNil(BreakKey)
+         If IsKeyDown(BreakKey) Then Break()
+      EndIf
+   Wend
+
+   CloseDirectory(DirID)
+
+   Return(results)
+
+EndFunction
+
+
+Function FS.Volumes.IsAvailable(VolumeName)
+/*******************************************************************************
+result = FS.Volumes.IsAvailable(volumeName)
+
+Returns TRUE if <volumeName> is available in the current system.
+---------------------------------------------------------------------
+INPUT
+  volumeName   The volume name we want to check.
+
+OUTPUT
+  result       TRUE if <volumeName> is available.
+---------------------------------------------------------------------
+NOTES
+  This function is available only on Amiga-Like systems.
+********************************************************************************/
+   Local VolList, Count = FS.Volumes.Get()
+
+   For Local i = 0 To Count - 1
+      If VolList[i] = VolumeName Then Return(True)
+   Next
+   
+   Return(False)
+EndFunction
+
+
+Function FS.Files.ClearCache()
+/*******************************************************************************
+FS.Files.ClearCache()
+
+Clear all cached files.
+---------------------------------------------------------------------
+NOTES
+  This function is available only on Amiga-Like systems.
+********************************************************************************/
+   FS.Cache.Files = {}
+EndFunction
+
+
+Function FS.Files.IsAvailable(Filename, UseCache)
+/*******************************************************************************
+result = FS.Files.IsAvailable(fileName, useCache)
+
+Returns TRUE if the <fileName> specified exists in the current
+system. If <fileName> was not found in the cache then it will be
+searched in the file system.
+Setting <useCache> to TRUE will force the file search on the cache
+system to improve response speed.
+---------------------------------------------------------------------
+INPUT
+  fileName        Complete path+filename we want to check
+  useCache        Performs the check on the cache if set to TRUE
+OUTPUT
+  result          TRUE if the file was found in the filesystem or in 
+                  the cache.
+---------------------------------------------------------------------
+NOTES
+  This function is available only on Amiga-Like systems.
+  Note that even if <UseCache> is set to <false> the cache system will
+  be updated for future uses.
+********************************************************************************/
+   If HL.IsNil(UseCache) Then UseCache = False
+   
+   ; Check the cached files
+   If UseCache
+      If Not(TB.Item.IsNil(FS.Cache.Files, Filename))
+         Return(FS.Cache.Files[Filename])
+      EndIf
+   EndIf
+         
+   Local Result = True
+   Local Volume = FS.Volumes.GetPart(Filename)
+   If FS.Volumes.IsAvailable(Volume)
+      If Exists(Filename)
+         ; Update the cache system
+         FS.Cache.Files[Filename] = True
+         Return(True)
+      EndIf
+   EndIf
+   
+   FS.Cache.Files[Filename] = False
+   Return(False)
+EndFunction
+
+
+Function FS.Volumes.ClearCache()
+/*******************************************************************************
+FS.Volumes.ClearCache()
+
+Clears the cached volumes.
+---------------------------------------------------------------------
+NOTES
+  This function is available only on Amiga-Like systems.
+********************************************************************************/
+   FS.Cache.Volumes = {}
+EndFunction
+
+
+Function FS.Volumes.Get(UseCache)
+/*******************************************************************************
+result = FS.Volumes.Get(useCache)
+
+Returns the available volumes list detected in the current system.
+Setting <useCache> to TRUE means that the volume list will be taken
+from the cache otherwise the system will be scanned for available 
+devices, updating the cache if needed.
+---------------------------------------------------------------------
+INPUT
+  useCache        Performs the check on the cache if set to TRUE.
+OUTPUT
+  volumes         A table composed by strings, one for each detected
+                  volume.
+  count           How many volumes was detected.
+---------------------------------------------------------------------
+NOTES
+  This function is available only on AmigaOS4 systems.
+********************************************************************************/
+   If HL.IsNil(UseCache) Then UseCache = False
+   
+   ; Check the cache
+   If UseCache
+      Local CacheCount = TB.Count(FS.Cache.Volumes)
+      If TB.Count(FS.Cache.Volumes) > 0 Then Return(FS.Cache.Volumes, CacheCount)
+   EndIf
+   
+   ; Query the system for available volumes
+   Local TempFile = GetTempFileName()
+   Execute("Assign VOLS > " .. TempFile)
+
+   ; Parse the command output
+   Local volumes = {}
+   Local file_id = OpenFile(Nil, TempFile, #MODE_READ)
+   Local index = 0
+
+   ; Discard the first line because is useless
+   Local discard = ReadLine(file_id)
+
+   While Not(Eof(file_id))
+      Local l = ReadLine(file_id)
+      Local strings, count = SplitStr(l, "[")
+
+      ; If <count> = 1 means that the volume is not mounted
+      Local mounted = True
+      If count = 1 Then mounted = False
+      
+      Local l = LeftStr(strings[0], StrLen(strings[0]) - 1) .. ":"
+
+      Switch SystemInfos.Platform
+         Case "AmigaOS4"
+            l = TrimStr(Strings[0], " ", False)
+            l = TrimStr(l, " ", True)
+            l = l .. ":"
+
+         Default
+            DebugPrint("*** FS.Volumes.Get()")
+            DebugPrint("*** UNSUPPORTED SYSTEM -> " .. SystemInfos.Platform)
+
+      EndSwitch
+
+      If mounted
+         volumes[index] = l
+         index = index + 1
+      EndIf
+   Wend
+
+   CloseFile(file_id)
+   DeleteFile(TempFile)
+
+   FS.Cache.Volumes = Volumes
+   Return(Volumes, Index)
+EndFunction
+
+
+Function FS.Volumes.Monitor_Start(Callback, ScanDelayMS)
+/*******************************************************************************
+result = FS.Volumes.Monitor_Start(callback, scandelayms)
+
+Initialize a volume monitor that will execute the <callback> function
+everytime the volume list changes. The volume check will be executed
+every <scanDelayMS> milliseconds.
+---------------------------------------------------------------------
+INPUT
+  callback  Callback function called when the volume list changes,
+            this routine will be called with the following parameters:
+              - deviceList     A table with all available volumes.
+OUTPUT
+  result    TRUE if the monitor was installed correctly otherwise
+            FALSE if an error occurred or the monitor is already
+            installed.
+---------------------------------------------------------------------
+NOTES
+  This function is available only on Amiga-Like systems.
+********************************************************************************/
+   If TB.Item.IsNil(FS.Volumes, "monitor_id")
+      FS.Volumes.Monitor_List = FS.Volumes.Get()
+      FS.Volumes.Monitor_Callback = Callback
+      FS.Volumes.Monitor_ScanDelayMS = ScanDelayMS
+      FS.Volumes.Monitor_ID = SetInterval(Nil, FS.Volumes.Monitor_Check,
+                                               FS.Volumes.Monitor_ScanDelayMS)
+      Return(True)
+   Else
+      Return(False)
+   EndIf
+EndFunction
+
+
+Function FS.Volumes.Monitor_Check()
+/*******************************************************************************
+FS.Volumes.Monitor_Check()
+
+Interval routine called every time the volume list must be checked.
+If the volume list is changed the function (stored in 
+FS.Volumes.Monitor_Callback) will be called with the updated device
+list.
+---------------------------------------------------------------------
+NOTES
+  This function is available only on Amiga-Like systems.
+  Actually only added devices are detected and not removed devices.
+********************************************************************************/
+   Local devs = FS.Volumes.Get()
+   Local cnt1 = TB.Count(FS.Volumes.Monitor_List)
+   Local cnt2 = TB.Count(devs)
+   If cnt1 <> cnt2
+      FS.Volumes.ClearCache()
+      FS.Files.ClearCache()
+   EndIf
+   Local NotFound = {}
+   Local nf_Index = 0
+
+   ; Scan the updated list to check that every volume stored in the original
+   ; list is present.
+   For i = 0 To (cnt2 - 1)
+      Local Found = False
+      For k = 0 To (cnt1 - 1)
+         If Devs[i] = FS.Volumes.Monitor_List[k]
+            Found = True
+         EndIf
+      Next
+
+      If Found = False
+         ; Stores the new detected device
+         NotFound[nf_Index] = Devs[i]
+         nf_Index = nf_Index + 1
+      EndIf
+   Next
+
+   ; Stores the new volumes list
+   FS.Volumes.Monitor_List = CopyTable(Devs)
+
+   If nf_Index > 0
+      FS.Volumes.ClearCache()
+      FS.Files.ClearCache()
+      FS.Volumes.Monitor_Callback(Devs)
+   EndIf
+EndFunction
+
+
+Function FS.Volumes.Monitor_Stop()
+/*******************************************************************************
+result = FS.Volumes.Monitor_Stop()
+
+Stops the volume detection system.
+---------------------------------------------------------------------
+OUTPUT
+  result    TRUE if the monitor was correctly stopped, FALSE if an
+            error occurred or if the monitor was already stopped.
+---------------------------------------------------------------------
+NOTES
+  This function is available only on Amiga-Like systems.
+********************************************************************************/
+   If TB.Item.IsNil(FS.Volumes, "monitor_id")
+      Return(False)
+   Else
+      ClearInterval(FS.Volumes.Monitor_ID)
+      FS.Volumes.Monitor_ID = Nil
+      Return(True)
+   EndIf
+EndFunction
+
+
+Function FS.Volumes.GetPart(fullpath)
+/*******************************************************************************
+result = FS.Volumes.GetPart(fullpath)
+
+Returns the volume part of the <fullpath> file.
+---------------------------------------------------------------------
+INPUT
+  fullpath        Full qualified file path.
+OUTPUT
+  result          The volume part of the passed <fullpath>.
+********************************************************************************/
+   Local SysInfos = GetVersion()
+
+   Switch SysInfos.Platform
+      Case "AROS"
+      Local parts, count = SplitStr(fullpath, ":")
+      If count = 2 Then Return(parts[0] .. ":")
+
+      Case "AmigaOS4"
+      Local parts, count = SplitStr(fullpath, ":")
+      If count = 2 Then Return(parts[0] .. ":")
+
+      Case "AmigaOS3"
+      Local parts, count = SplitStr(fullpath, ":")
+      If count = 2 Then Return(parts[0] .. ":")
+
+      Case "MorphOS"
+      Local parts, count = SplitStr(fullpath, ":")
+      If count = 2 Then Return(parts[0] .. ":")
+
+      Case "WarpOS"
+      Local parts, count = SplitStr(fullpath, ":")
+      If count = 2 Then Return(parts[0] .. ":")
+
+      Case "Linux"
+      Return("/")
+
+      Case "MacOS"
+      Return("/")
+
+      Case "Win32"
+      Local parts, count = SplitStr(fullpath, ":")
+      If count = 2 Then Return(parts[0] .. ":\\")
+
+      Default
+      Return("")
+
+   EndSwitch
+
+   Return("")
+
+EndFunction
+
+
+Function FS.TxtFile.InsertBefore(Filename, Marker, NewLine, AllowMultiple,
+                                 CaseSensitive, MakeBackup)
+/*******************************************************************************
+result = FS.TxtFile.InsertBefore(filename, marker, newline,
+                                 allowMultiple, caseSensitive,
+                                 makeBackup)
+
+Read the text file <filename> and look for a row equal to <marker>,
+then the routine will insert, just before the detected row, the
+<newLine> row or rows if <newLine> is a table.
+<allowMultiple> specify if <newLine> can be inserted only in the
+first occurance or on all occurrencies of <marker>.
+<makeBackup> specify in <filename> we are going to modify must be
+backed up or not.
+---------------------------------------------------------------------
+INPUT
+  filename        The file name of the text file we want to modify
+  marker          The marker row we have to find
+  newline         A string or a table of string that we want to
+                  insert before the found <marker>.
+  allowMultiple   TRUE if we need to insert <newLine> before all
+                  detected <marker> rows, FALSE to work only on the
+                  first occurency.
+  caseSensitive   TRUE to look for the <marker> using case sensitive
+                  mode.
+  makeBackup      TRUE to make a backup of <filename> before any
+                  changes.
+OUTPUT
+  result          TRUE if all went fine
+---------------------------------------------------------------------
+NOTE
+  AllowMultiple is valid only if <NewLine> is a string.
+********************************************************************************/
+   If Exists(Filename)
+      Local fid = OpenFile(Nil, Filename, #MODE_READ)
+      If Not(HL.IsNil(fid))
+         ; Load the file into a table
+         Local file, pos = {}, -1
+         While Not(Eof(fid))
+            pos = pos + 1
+            file[pos] = ReadLine(fid)
+         Wend
+         CloseFile(fid)
+         
+         If Not(AllowMultiple)
+            ; Check if <NewLine> already exists
+            For Local i = 0 To pos
+               If CaseSensitive
+                  If file[pos] = NewLine Then Return(True)
+               Else
+                  If LowerStr(file[pos]) = LowerStr(NewLine) Then Return(True)
+               EndIf
+            Next
+         EndIf
+         
+         ; Looks for <Marker> line
+         Local InsertPos, Idx = {}, -1
+         For Local i = 0 To pos
+            If FindStr(file[pos], NewLine, CaseSensitive) <> -1
+               ; Occurrency found
+               Idx = Idx + 1
+               InsertPos[Idx] = i
+               If Not(AllowMultiple) Then Break
+            EndIf
+         Next
+
+         If Idx <> -1
+            ; Insert <NewLine>
+            For Local i = Idx To 0 Step -1
+               If GetType(NewLine) <> #TABLE
+                  InsertItem(file, NewLine, InsertPos[i])
+               Else
+                  Local cl = TB.Count(NewLine) - 1
+                  For Local kk = 0 To cl
+                     InsertItem(file, NewLine[kk], InsertPos[i + kk])
+                  Next
+               EndIf
+            Next
+
+            ; If needed create a backup
+            If MakeBackup
+               CopyFile(Filename, PathPart(Filename), FilePart(Filename) .. "_" .. GetDate(True))
+            EndIf
+            
+            ; Save the modified file
+            Local fid = OpenFile(Nil, Filename, #MODE_WRITE)
+            If Not(HL.IsNil(fid))
+               Local cnt = TB.Count(file) - 1
+               For Local i = 0 To cnt
+                  WriteLine(fid, file[i])
+               Next
+               CloseFile(fid)
+               Return(True)
+            EndIf
+         EndIf
+         Return(True)
+      EndIf
+   Else
+      Return(False)
+   EndIf
+EndFunction
+
+
+; Coppie TIPO Config
+FS.Config.DataTypes =
+  { ["section"] = 1,
+    ["end section"] = 1,
+    ["comment"] = 1,
+    ["include"] = 1,
+    ["[CNS]"] = 1,
+    ["[SST]"] = 1,
+    ["[MST]"] = 1,
+    ["[SCL]"] = 1,
+    ["[MCL]"] = 1,
+    ["[SIN]"] = 1,
+    ["[MIN]"] = 1,
+    ["[SFL]"] = 1,
+    ["[MFL]"] = 1,
+    ["[SSI]"] = 1,
+    ["[MSI]"] = 1,
+    ["[SSF]"] = 1,
+    ["[MSF]"] = 1,
+    ["[SBL]"] = 1,
+    ["[MBL]"] = 1,
+    ["[FNN]"] = 1
+    }
+    
+FS.Config.SubTypes =
+  { ["[%SW]"] = 1,
+    ["[%SH]"] = 1,
+    ["[%DW]"] = 1,
+    ["[%DH]"] = 1,
+    ["[%LW]"] = 1,
+    ["[%LH]"] = 1,
+    ["[RLX]"] = 1,
+    ["[RLY]"] = 1,
+    ["[LLF]"] = 1,
+    ["[LRG]"] = 1,
+    ["[LTP]"] = 1,
+    ["[LBT]"] = 1,
+    ["[HSC]"] = 1
+    }
+
+Function FS.Config.Load(Filename, Header, UpdFunc, FileID, Recursive, Source, LineCount)
+/*******************************************************************************
+result = FS.Config.Load(filename, header, updFunc, fileID, recursive)
+
+Read a configuration file and return its contents into a table or
+returns NIL if an error has been encontered. This is an handy and
+structured way to store configuration files or any type of data you
+wish to save, this data will be loaded back and returned into a
+single table.
+---------------------------------------------------------------------
+INPUT
+  filename      Configuration file to load
+  header        File header we must verify
+  updFunc       Callback function for activity monitoring, the
+                function will be called without parameters.
+  fileID        PRIVATE
+  recursive     PRIVATE
+OUTPUT
+  result        A table with the interpreted configuration file.
+---------------------------------------------------------------------
+NOTE
+   If you use the <header> field to identify your files remember to define the
+   <header> field as a single string [SST] like this:
+     | [SST]header = myFile
+   Then you can load your file with:
+     | myConfig = FS.Config.Load(filename, "myFile")
+     
+*******************************************************************************
+
+17/11/2015
+Now constants can be specified as a combination of values
+like:
+[CNS]style = #BOLD+#ANTIALIAS
+
+Sections can also be indexed by numeric values like:
+[SECTION]=#1
+  ...
+[END SECTION]
+
+16/11/2015
+Now you can use numeric indexes specifying the index number
+prefixed by #, example:
+[CNS]#0 = #BRUSH
+[SIN]#1 = 105
+
+=== IMPLEMENTARE ===
+You can use the format #+ to append the item to the
+end of the table.
+You can use the format #- to insert at the begin of
+the table
+
+   FILE FORMAT
+   -----------
+   * COMMENTS *
+       Comments are lines starting with the double slash // or starting with any
+       number of spaces and double slash //.
+       Empty lines are accepted and treated as comments.
+
+       EXAMPLE
+       | // This is a comment
+       |   // This is a comment
+
+
+   * INCLUDES [+++] *
+       Includes are references to external files, if found this files will be
+       loaded and returned in the result table.
+
+       EXAMPLE
+       | [+++] = filename
+
+
+   * STRINGS [SST][MST] *
+       You can specify a single string or multiple strings using these tags,
+       multiple strings will be returned into a table. Multiple strings must be
+       comma separated.
+       There are some encoded characters you have to use in your strings as
+       specified below:
+         {TAB}           Tabulator character
+         {COMMA}         If you have to pass the comma character , in a multiple
+                         string you have to encode it with this tag.
+         {ENTER}         Useful to insert line feeds in your strings.
+         {SPACE}
+         {EQUAL}         Used to encode the equal character = in your strings.
+         $RELPATH\       This is a placeholder for the path of the configuration
+                         file being processed.
+
+       EXAMPLE
+       | [SST]name = Spiderman
+       | [MST]abilities = Strenght, Speed, Web
+
+       The above example, once loaded, will be represented on the resulting table
+       this way:
+          loadedFile = { name = Spiderman,
+                         abilities = { Strenght, Speed, Web } }
+
+
+   * COLORS [SCL][MCL] *
+       You can store color as single color or multiple colors using the tags
+       using the tags [SCL] and [MCL], see STRINGS for further details.
+
+       EXAMPLE
+       | [SCL]border_color = $FF0000
+       | [MCL]edge_colors  = $44FF0055, $44888877
+
+
+   * INTEGER NUMBERS [SIN][MIN] *
+       Using the tags [SIN] and [MIN] you can store single and multiple integer
+       numbers, any floating point number will be converted into integers once
+       loaded into the result table. See STRINGS for further details.
+
+       EXAMPLE
+       | [SIN]elapsed  = 100
+       | [MIN]sequence = 45, 9887, 231
+
+
+   * FLOATING POINT NUMBERS [SFL][MFL] *
+       You can store floating point values as single number or multiple numbers
+       with the tags [SFL] and [MFL]. See STRINGS for further details.
+
+       EXAMPLE
+       | [SFL]onefloat = 23.456
+       | [MFL]coords = 0.345, 1.323, 5.5, 90.001
+
+
+   * SPECIAL INTEGERS [SSI][MSI] *
+       These tags allow you to define parametric integers using an additional
+       tag attached to the values you need. You can define single or multiple
+       values using [SSI] and [MSI] with the following format:
+         [SSI]<name> = [special_tag]<value>
+         [MSI]<name> = [special_tag]<value>, ...
+       See STRINGS for further details.
+
+       Here is a list of all available special tags and their syntax:
+         [%SW]<value>            Host screen width percentual
+         [%SH]<value>            Host screen height percentual
+         [%DW]<value>            Current display width percentual
+         [%DH]<value>            Current display height percentual
+         [%LW]<layer>,<value>    Layer width percentual
+         [%LH]<layer>,<value>    Layer height percentual
+         [RLX]<layer>,<value>    Layer's x coordinate + width percentual
+         [RLY]<layer>,<value>    Layer's y coordinate + height percentual
+         [LLF]<layer>            Layer's x coordinate
+         [LRG]<layer>            Layer's x coordinate + layer's width
+         [LTP]<layer>            Layer's y position
+         [LBT]<layer>            Layer's y coordinate + layer's height
+         [HSC]<const>            Hollywood Screen constants, you can choose one
+                                 of the following:
+                                   CENTER, LEFT, RIGHT, TOP, BOTTOM, WIDTH,
+                                   HEIGHT
+       All calculated items will be rounded to integers values.
+
+       EXAMPLE
+       | [SSI]screen_quarter = [%SW]25
+       | [MSI]half_screen    = [%SW]50, [%SH]50
+       | [SSI]centered       = [HSC]CENTER
+       | [SSI]layerwidth     = [%LW]my_layer, 100
+
+
+   * SPECIAL FLOATS [SSF][MSF] *
+       These tags allow you to define parametric integers using an additional
+       tag attached to the values you need. You can define single or multiple
+       values using [SSI] and [MSI] with the following format:
+         [SFI]<name> = [special_tag]<value>
+         [MFI]<name> = [special_tag]<value>, ...
+       See STRINGS for further details.
+       See SPECIAL INTEGERS for recognized special tags and usage example.
+
+
+   * BOOLEANS [SBL][MBL] *
+       You can define boolean values using the tags [SBL] and [MBL]
+
+       EXAMPLE:
+       | [SBL]use_alpha = 1
+       | [MBL]flags     = 1, 1, 0, 1, 0
+
+
+   * CONSTANTS [CNS] *
+       Constants can be defined using the tag [CNS], all user's constants and
+       built in ones can be accessed.
+       17/11/2015 : You can combine constants using the + sign
+
+       EXAMPLE:
+       | [CNS]color = #RED
+
+
+   * FONT NAME [FNN] *
+       You can define a special field where you can specify a font name using
+       the tag [FNN].
+       You can also use the built in Hollywood's constants like #SANS, #SERIF or
+       #MONOSPACE.
+
+       EXAMPLE
+       | [FFN]fontname = #SANS
+
+
+   * SECTIONS *
+     It's possible to define sections to represent tables and nested tables.
+     Each section must be delimited by a starting tag and an ending tag with
+     the following format:
+       [SECTION]=<section_name>  Start a section and name it with <section_name>
+                                 You can use numbers as <section_name> to index
+                                 the corresponding table with numeric values.
+                                 You have to prefix the number with #.
+       ...
+       ...                       Place here your definitions or nested sections
+       ...
+       [END SECTION]            Close a previously opened section.
+
+     EXAMPLE
+     | [SECTION]=colors
+     |   [SCL]foreground = $FF0000
+     |    [SCL]background = $0000FF
+     |    [SECTION]#0
+     |      [SIN]dummy_value1 = 100
+     |      [SFL]dummy_value2 = 50.12
+     |   [END SECTION]
+     | [END SECTION]
+
+     The above example will be represented in the result table as follow:
+     | result = { colors =
+     |              { foreground = $FF0000,
+     |                background = $0000FF,
+     |                { dummy_value1 = 100,
+     |                  dummy_value2 = 50.12 }
+     |               }
+
+********************************************************************************/
+  ; Source holds the source configuration file, each record represent a line
+  ; and each line have the following fields:
+  ;   .raw      Raw line as it is in the source file
+  ;   .type     The line type can be : 'variable', 'comment', 'section'
+  ;   .data     Data depends on .type
+
+  Local Result = {}
+  If IsNil(Source) Then Source = {}
+  If IsNil(Recursive) Then Recursive = False
+   
+  If Not(IsNil(Filename))
+    If Filename <> ""
+      If Exists(Filename)
+        ; | File opening or using id if recursive
+        Local fid = 0
+        If Recursive
+          fid = FileID
+        Else
+          fid = OpenFile(Nil, Filename, #MODE_READ)
+        EndIf
+            
+        ; | Variables init
+        If IsNil(LineCount) Then LineCount = 0
+            
+        ; | Reading loop
+        While Not(Eof(fid))
+          ; | Read Line & Increase Source line counter
+          Local Data = ReadLine(fid)
+          LineCount = LineCount + 1
+        
+          ; | Store raw source line and the parent table
+          Source[LineCount-1] = { raw = Data, table = result, me = result }
+        
+          ; | Trim spaces and process the line
+          Data = TrimStr(Data, " ", False)
+
+          
+          If LeftStr(Data, 2) = "//" Or Data = ""
+            ;:::::::::::::::::::::::::::::
+            ;::: COMMENT or BLANK LINE :::
+            ;:::::::::::::::::::::::::::::
+            Source[LineCount-1].type = "comment"          
+
+
+          ; Implementare sintassi alternativa
+          ; {[space]section_name
+          ; { mysection
+          ; { #01
+          ElseIf LeftStr(Data, 9) = "[SECTION]" Or LeftStr(Data, 1) = "{"
+            ;:::::::::::::::::::::::::
+            ;::: SECTION (opening) :::
+            ;:::::::::::::::::::::::::
+            Source[LineCount-1].type = "section"
+; DEVO USARE IL CAMPO RAW COME IN END SECTION ?
+            Local n, SectionName
+            If LeftStr(Data, 9) = "[SECTION]"
+              n = SplitStr(Data, "=")
+              TB.TrimSpaces(n)
+              SectionName = n[1]
+            Else
+              SectionName = UnrightStr(Data, 1)
+              SectionName = TrimStr(SectionName, " ", False)
+              SectionName = TrimStr(SectionName, " ", True)
+            EndIf
+            
+            ; Prefixed section
+            If LeftStr(SectionName, 1) = "#"
+              SectionName = ToNumber(UnrightStr(SectionName, 1))
+            EndIf
+
+            Source[LineCount-1].data = { index = SectionName }
+
+            ; Recursive analisys
+            Local temp, stemp
+            Local previousSection, previousLine = result, LineCount
+            temp, stemp, LineCount = FS.Config.Load(Filename, Nil, UpdFunc, fid, True, Source, LineCount)
+            If TB.Item.Exists(Source, lineCount-1) Then Source[linecount-1].me = temp
+            If TB.Item.Exists(Source, previousLine-1) Then Source[previousLine-1].me = temp
+            
+            If TB.Item.Exists(Result, SectionName)
+              TB.Merge(Result[SectionName], temp)
+
+            Else
+              Result[SectionName] = temp
+          EndIf
+          
+
+          ; Implementare sintassi alternativa
+          ; }
+          ElseIf LeftStr(Data, 13) = "[END SECTION]" Or LeftStr(Data, 1) = "}"
+            ;:::::::::::::::::::::::::::::
+            ;::: END SECTION (closing) :::
+            ;:::::::::::::::::::::::::::::
+            Source[LineCount-1].type = "end section"
+            Source[LineCount-1].raw = "}"
+; IL CAMPO RAW A SECONDA DEL SORGENTE?
+            If Recursive
+              Return(Result, Source, LineCount)
+            EndIf
+
+          ElseIf LeftStr(Data, 5) = "[+++]"
+            ;:::::::::::::::
+            ;::: INCLUDE :::
+            ;:::::::::::::::
+            Source[LineCount-1].type = "include"
+
+            Local n = SplitStr(Data, "=")
+            TB.TrimSpaces(n)
+            
+            Local FileName = n[1]
+            Local temp, stemp = FS.Config.Load(Filename, Nil, Nil, Nil, False)
+            TB.Merge(Result, temp, False)
+            Source[LineCount-1].data = { value = Filename }
+            
+
+        ElseIf LeftStr(Data, 5) = "[CNS]"
+          ;::: SINGLE CONSTANT ::::::::::::::::::::::::::::::::::::::::::::::
+          Source[LineCount-1].type = "variable"
+          
+          Local n = SplitStr(Data, "=")
+          TB.TrimSpaces(n)
+
+          ; Verifica se è stato usato il segno +
+          If FindStr(n[1], "+") <> -1
+            Local v = 0
+            Local constants = SplitStr(n[1], "+")
+            TB.TrimSpaces(constants)
+            
+            Source[LineCount-1].Data = { values = constants }
+            
+            For ii, vv In Pairs(constants) Do v = v + GetConstant(vv)
+            Result[UnrightStr(n[0], 5)] = v
+            
+          Else
+            Source[LineCount-1].Data = { values = { n[1] } }
+            If n[1] <> "" Then Result[UnrightStr(n[0], 5)] = GetConstant(n[1])
+          EndIf
+            
+          Source[LineCount-1].Data.Index = UnrightStr(n[0], 5)
+          Source[LineCount-1].Data.Type = "[CNS]"
+
+                
+        ElseIf LeftStr(Data, 5) = "[SST]"
+          ;::: SINGLE STRING :::::::::::::::::::::::::::::::::::::::::::
+          Source[LineCount-1].type = "variable"
+          
+          Local n = SplitStr(Data, "=")
+          TB.TrimSpaces(n)
+          
+          Source[LineCount-1].Data = { Index = UnrightStr(n[0], 5), Value = n[1], type = "[SST]" }
+            n[1] = ReplaceStr(n[1], "$RELPATH/", PathPart(Filename))
+            n[1] = ReplaceStr(n[1], "{EQUAL}", "=")
+            n[1] = ReplaceStr(n[1], "{ENTER}", "\n")
+            n[1] = ReplaceStr(n[1], "{COMMA}", ",")
+            n[1] = ReplaceStr(n[1], "{SPACE}", " ")
+            n[1] = ReplaceStr(n[1], "{TAB}", "\t")
+            Result[UnrightStr(n[0], 5)] = n[1]
+
+
+        ElseIf LeftStr(Data, 5) = "[MST]"
+          ;::: MULTIPLE STRINGS :::::::::::::::::::::::::::::::::::::::::::::
+          Source[LineCount-1].type = "variable"
+          
+          Local n = SplitStr(Data, "=")
+          TB.TrimSpaces(n)
+          Local m = SplitStr(n[1], ",")
+          TB.TrimSpaces(m)
+          
+          Source[LineCount-1].Data = { values = m, Index = UnrightStr(n[0], 5), Type = "[MST]" }
+          
+          Local sc = ListItems(m)
+          For Local scc = 0 To sc-1
+            m[scc] = ReplaceStr(m[scc], "$RELPATH/", PathPart(Filename))
+            m[scc] = ReplaceStr(m[scc], "{EQUAL}", "=")
+            m[scc] = ReplaceStr(m[scc], "{ENTER}", "\n")
+            m[scc] = ReplaceStr(m[scc], "{COMMA}", ",")
+            m[scc] = ReplaceStr(m[scc], "{TAB}", "\t")
+          Next
+          Result[UnrightStr(n[0], 5)] = m
+
+
+        ElseIf LeftStr(Data, 5) = "[SCL]"
+          ;::: SINGLE COLOR :::::::::::::::::::::::::::::::::::::::::::::::::
+          Source[LineCount-1].type = "variable"
+          
+          Local n = SplitStr(Data, "=")
+          TB.TrimSpaces(n)
+          Result[UnrightStr(n[0], 5)] = ToNumber(n[1])
+
+          Source[LineCount-1].Data = { value = n[1], Index = UnrightStr(n[0], 5), Type = "[SCL]" }
+
+
+        ElseIf LeftStr(Data, 5) = "[MCL]"
+          ;::: MULTIPLE COLORS ::::::::::::::::::::::::::::::::::::::::::::::
+          Source[LineCount-1].type = "variable"
+          
+          Local n = SplitStr(Data, "=")
+          TB.TrimSpaces(n)
+          Local m = SplitStr(n[1], ",")
+          TB.TrimSpaces(m)
+
+          Source[LineCount-1].Data = { values = CopyTable(m), Index = UnrightStr(n[0], 5), Type = "[MCL]" }
+
+          Local i, v = NextItem(m)
+          While GetType(i) <> #NIL
+            m[i] = ToNumber(v)
+            i, v = NextItem(m, i)
+          Wend
+
+          Result[UnrightStr(n[0], 5)] = m
+
+
+        ElseIf LeftStr(Data, 5) = "[SIN]"
+          ;::: SINGLE INTEGER :::::::::::::::::::::::::::::::::::::::::::::::
+          ;DebugPrint("::: SIN @ " .. LineCount)
+          Source[LineCount-1].type = "variable"
+          
+          Local n = SplitStr(Data, "=")
+          TB.TrimSpaces(n)
+          Local t = ToNumber(n[1])
+
+          Result[UnrightStr(n[0], 5)] = Round(t)
+                
+          Source[LineCount-1].Data = { value = n[1], Index = UnrightStr(n[0], 5), Type = "[SIN]" }
+            
+        ElseIf LeftStr(Data, 5) = "[MIN]"
+          ;::: MULTIPLE INTEGERS ::::::::::::::::::::::::::::::::::::::::::::
+          Source[LineCount-1].type = "variable"
+          
+          Local n = SplitStr(Data, "=")
+          TB.TrimSpaces(n)
+          Local m = SplitStr(n[1], ",")
+          TB.TrimSpaces(m)
+          
+          Source[LineCount-1].Data = { values = CopyTable(m), Index = UnrightStr(n[0], 5), Type = "[MIN]" }
+          
+          Local i, v = NextItem(m)
+          While GetType(i) <> #NIL
+            m[i] = Round(ToNumber(v))
+            i, v = NextItem(m, i)
+          Wend
+
+          Result[UnrightStr(n[0], 5)] = m
+
+
+        ElseIf LeftStr(Data, 5) = "[SFL]"
+          ;::: SINGLE FLOATING ::::::::::::::::::::::::::::::::::::::::::::::
+          Source[LineCount-1].type = "variable"
+          
+          Local n = SplitStr(Data, "=")
+          TB.TrimSpaces(n)
+          Result[UnrightStr(n[0], 5)] = ToNumber(n[1])
+
+          Source[LineCount-1].Data = { value = n[1], Index = UnrightStr(n[0], 5), Type = "[SFL]" }
+
+
+        ElseIf LeftStr(Data, 5) = "[MFL]"
+          ;::: MULTIPLE FLOATINGS :::::::::::::::::::::::::::::::::::::::::::
+          Source[LineCount-1].type = "variable"
+          
+          Local n = SplitStr(Data, "=")
+          TB.TrimSpaces(n)
+          Local m = SplitStr(n[1], ",")
+          TB.TrimSpaces(m)
+          
+          Source[LineCount-1].Data = { values = CopyTable(m), Index = UnrightStr(n[0], 5), Type = "[MFL]" }
+          
+          Local i, v = NextItem(m)
+          While GetType(i) <> #NIL
+            m[i] = ToNumber(v)
+            i, v = NextItem(m, i)
+          Wend
+
+          Result[UnrightStr(n[0], 5)] = m
+
+
+        ElseIf LeftStr(Data, 5) = "[SSI]"
+          ;::: SINGLE SPECIAL INTEGER :::::::::::::::::::::::::::::::::::::::
+          Source[LineCount-1].type = "special"
+          
+          Local n = SplitStr(Data, "=")
+          TB.TrimSpaces(n)
+
+          value, special, vv = FS.Private.ParseSpecial(n)
+          Result[UnrightStr(n[0], 5)] = Round(value)
+
+          Source[LineCount-1].Data = { value = vv, special = special, Index = UnrightStr(n[0], 5), Type = "[SSI]" }
+            
+        ElseIf LeftStr(Data, 5) = "[MSI]"
+          ;::: MULTIPLE SPECIAL INTEGER :::::::::::::::::::::::::::::::::::::
+          Source[LineCount-1].type = "special"
+          
+          Local n = SplitStr(Data, "=")
+          TB.TrimSpaces(n)
+          Local m = SplitStr(n[1], ",")
+          TB.TrimSpaces(m)
+
+          Local i, v = NextItem(m)
+          Local vv, special = {}, {}
+          While GetType(i) <> #NIL
+             Local tbl = { n[0], m[i] }
+             m[i], special[i], vv[i] = FS.Private.ParseSpecial(tbl)
+             Round(m[i])
+             i, v = NextItem(m, i)
+          Wend
+          
+          Source[LineCount-1].Data = { values = CopyTable(vv), special = CopyTable(special), Index = UnrightStr(n[0], 5), Type = "[MSI]" }
+          
+          Result[UnrightStr(n[0], 5)] = m
+
+
+          ElseIf LeftStr(Data, 5) = "[SSF]"
+            ;::: SINGLE SPECIAL FLOATING ::::::::::::::::::::::::::::::::::::
+            Source[LineCount-1].type = "special"
+            
+            Local n = SplitStr(Data, "=")
+            TB.TrimSpaces(n)
+
+            value, special, vv = FS.Private.ParseSpecial(n)
+            Result[UnRightStr(n[0], 5)] = value
+            
+            Source[LineCount-1].Data = { value = vv, special = special, Index = UnrightStr(n[0], 5), Type = "[SSF]" }
+              
+
+          ElseIf LeftStr(Data, 5) = "[MSF]"
+            ;::: MULTIPLE SPECIAL FLOATING ::::::::::::::::::::::::::::::::::
+            Source[LineCount-1].type = "special"
+            
+            Local n = SplitStr(Data, "=")
+            TB.TrimSpaces(n)
+            Local m = SplitStr(n[1], ",")
+            TB.TrimSpaces(m)
+            
+            Local i, v = NextItem(m)
+            Local vv, special = {}, {}
+            While GetType(i) <> #NIL
+              Local tbl = { n[0], m[i] }
+              m[i], special[i], vv[i] = FS.Private.ParseSpecial(tbl)
+              i, v = NextItem(m, i)
+            Wend
+
+            Result[UnrightStr(n[0], 5)] = m
+            
+            Source[LineCount-1].Data = { values = CopyTable(vv), special = CopyTable(special), Index = UnrightStr(n[0], 5), Type = "[MSF]" }
+
+
+          ElseIf LeftStr(Data, 5) = "[SBL]"
+            ;::: SINGLE BOOLEAN :::::::::::::::::::::::::::::::::::::::::::::
+            Source[LineCount-1].type = "variable"
+            
+            Local n = SplitStr(Data, "=")
+            TB.TrimSpaces(n)
+
+            value = IIF(n[1] = "1", True, False)
+            
+            Result[UnrightStr(n[0], 5)] = value
+            
+            Source[LineCount-1].Data = { value = n[1], Index = UnrightStr(n[0], 5), Type = "[SBL]" }
+
+
+          ElseIf LeftStr(Data, 5) = "[MBL]"
+            ;::: MULTIPLE BOOLEAN :::::::::::::::::::::::::::::::::::::::::::
+            Source[LineCount-1].type = "variable"
+            
+            Local n = SplitStr(Data, "=")
+            TB.TrimSpaces(n)
+            Local m = SplitStr(n[1], ",")
+            TB.TrimSpaces(m)
+            
+            Source[LineCount-1].Data = { values = CopyTable(m), Index = UnrightStr(n[0], 5), Type = "[MBL]" }
+            
+            Local i, v = NextItem(m)
+            While GetType(i) <> #NIL
+               m[i] = IIF(m[i] = "1", True, False)
+               i, v = NextItem(m, i)
+            Wend
+
+            Result[UnrightStr(n[0], 5)] = m
+
+          ElseIf LeftStr(Data, 5) = "[FNN]"
+            ;::: FONT NAME ::::::::::::::::::::::::::::::::::::::::::::::::::
+            Source[LineCount-1].type = "variable"
+            
+            Local n = SplitStr(Data, "=")
+            TB.TrimSpaces(n)
+
+            Switch n[1]
+               Case "#SANS"
+                  value = #SANS
+               
+               Case "#SERIF"
+                  value = #SERIF
+                  
+               Case "#MONOSPACE"
+                  value = #MONOSPACE
+                  
+               Default
+                  value = n[1]
+                  
+            EndSwitch
+
+            Result[UnrightStr(n[0], 5)] = value
+
+            Source[LineCount-1].Data = { value = n[1], Index = UnrightStr(n[0], 5), Type = "[FNN]" }
+            
+          EndIf
+          
+          ;DebugPrint("AT THE END OF THE LOOP LINECOUNT IS : ", LineCOunt)
+          
+          If HL.IsNotNil(UpdFunc) Then UpdFunc()
+               
+        Wend
+
+        If HL.IsNil(FileID) Then CloseFile(fid)
+
+        ; Checking file header
+        If HL.IsNotNil(Header)
+           If TB.Item.IsNil(Result, "header")
+              Return(Nil)
+           Else
+              If Result.header <> Header
+                 Return(Nil)
+              EndIf
+           EndIf
+        EndIf
+            
+        ; Ricorsivamente verifica gli indici numerici e li
+        ; converte se necessario
+        Local convert = Function() EndFunction
+        convert = Function(table)
+                    Local toConvert = {}
+                    For i, v In Pairs(table)
+                      If GetType(i) = #STRING
+                        If LeftStr(i,1)="#"
+                          newi = ToNumber(UnrightStr(i, 1))
+                          InsertItem(toConvert, { table = table, oldIndex = i, newIndex = newi })
+                        EndIf
+                      EndIf
+                      If GetType(v) = #TABLE
+                        table[i] = convert(v)
+                      EndIf
+                    Next
+                    For i, v In Pairs(toConvert)
+                      Local t = v.table
+                      Local oi = v.oldIndex
+                      Local ni = v.newIndex
+                      t[ni] = t[oi]
+                      t[oi] = Nil
+                    Next
+                    Return(table)
+                  EndFunction
+        converted = convert(Result)
+        Return(converted, source)
+
+       Else
+          Return(Nil)
+       EndIf
+    Else
+       Return(Nil)
+    EndIf
+Else
+    Return(Nil)
+EndIf
+   
+EndFunction
+
+Function FS.Config.Remove(subtable, source, index, category)
+  ; **** ROUTINE INCOMPLENTA E NON TESTATA ****
+  Local found = False
+  If category = "section"
+    For i, v In Pairs(source)
+      If TB.Item.Exists(v, "me")
+        If v.me = subtable
+          Local start, endp, scount = i, i+1, 0
+          Local item = source[endp]
+          While Not(item.type = "end section" And scount = 0)
+            If item.type = "section"
+              scount = scount + 1
+            ElseIf item.type = "end section"
+              scount = scount - 1
+            EndIf
+            ;DebugPrint("SCOUNT:", scount, item.raw, item.type)
+            endp = endp+1
+            item = source[endp]
+          Wend
+          For i = start To endp
+            RemoveItem(source, start)
+          Next
+          v.table[v.data.index] = Nil
+          Return(True)
+        EndIf
+      EndIf
+    Next
+  
+  Else
+    ; Looking for the given item in the given table
+    ; QUESTA FUNZIONE E' INCOMPLETA!
+    ; Verifica se esiste la chiave da eliminare
+    If TB.Item.Exists(table, index)
+      Local found = False
+      ; Gestisce la modifica sul sorgente
+      For i, v In Pairs(source)  
+        If TB.Item.Exists(v, "table")
+          ; Scorre gli elementi per cercare la tabella corrispondente
+          If v.table = table
+            ; Quando la trova verifica se esiste il campo 'data'
+            If TB.Item.Exists(v, "data")
+              ; Se esiste verifica anche che esista il campo 'index'
+              If TB.Item.Exists(v.data, "index")
+                ; Se esiste verifica che questo sia il medesimo che stiamo cercando
+                If v.data.index = index
+                  ; GESTIONE ELIMINAZIONE
+                  RemoveItem(source, i)
+                  subtable.index = Nil
+                  
+                  found = True
+                  Break
+                  
+                EndIf
+              EndIf
+            EndIf
+          EndIf
+        EndIf
+      Next
+      
+      If found
+        ; ELEMENTO TROVATO
+        table.index = value
+        Return(True)
+      Else
+        ; ELEMENTO NON TROVATO
+        Return(False, "Item <" .. index .. "> on table <" .. ToString(table) .. "> not found!")
+      EndIf
+      
+    Else
+      ; ELEMENTO NON TROVATO
+      Return(False, "Item <" .. index .. "> on table <" .. ToString(table) .. "> not found!")
+    
+    EndIf
+   
+        
+  EndIf
+
+  
+  Return(False)
+  
+EndFunction
+
+Function FS.Config.Add(table, source, index, value, category, type, subtype)
+  Local result, error, found, pos = False, "", False, pos
+  ;DebugPrint("++++++++++++++++++++++++++++++ ", index, value, category, type, subtype)
+  
+  If TB.Item.IsNil(table, index) Or IsNil(index)
+    ; Cerca la prima riga dove è presente la tabella indicata
+    Local e = ListItems(source)-1
+    For Local i = 0 To e
+      Local v = source[i]
+      ;DebugPrint("SCAN -> ", i, v.raw)
+      
+      If TB.Item.Exists(v, "table")
+        If category = "section"
+          
+          If TB.Item.Exists(v, "me") And v.type = "section"
+            
+            If v.table = table
+              Local offset = 0
+              If v.me = v.table Then offset = 1
+             
+              Local index = value
+              If LeftStr(value, 1) = "#"
+                index = ToNumber(UnrightStr(value, 1))
+                If TB.Item.Exists(table, index)
+                  ;DebugPrint("ESISTE GIA'!! " .. index .. " alla posizione " .. i .. " <=========")
+                  ;DebugPrint("Sposta tutti gli indici in basso di una posizione.")
+                  
+                  Local _start = i
+                  Local _end   = i
+                  Local deepness = 0
+                  Local swapList = {}
+                  
+                  Repeat 
+                    /*
+                    If source[_end].type = "section"
+                      DebugPrint("deep:", deepness, "index:", _end, source[_end].raw, "Numeric :", GetType(source[_end].data.index), #NUMBER, "Section index :", ToNumber(source[_end].data.index), " >= ", index)
+                    Else
+                      If TB.Item.Exists(source[_end], "raw") Then DebugPrint(_end, source[_end].raw)
+                    EndIf 
+                    */
+                    If source[_end].type = "end section"
+                      deepness = deepness - 1
+                    ElseIf source[_end].type = "section" And deepness = 0 And GetType(source[_end].data.index) = #NUMBER And ToNumber(source[_end].data.index) >= index
+                      ;DebugPrint("========================> Muove sezione alla riga ", _end)
+                      source[_end].raw = source[_end].raw ;.. " ***"
+                      Local idx = source[_end].data.index
+                      ;DebugPrint("    Replacing ", "#" .. idx, " with ", "#" .. ToString(idx+1))
+                      source[_end].raw = ReplaceStr(source[_end].raw, "#" .. source[_end].data.index, "#" .. ToString(idx+1))
+                      source[_end].data.index = idx+1
+                      ;DebugPrint("Copying Index " .. idx .. " to " .. idx+1)
+                      If TB.Item.IsNil(table, idx+1) Then table[idx+1] = {}
+                      ;table[idx+1]=table[idx]
+                      InsertItem(swapList, { _to = idx+1, _from = idx })
+                      ;DebugPrint("Resetting Index " .. index)
+                      ;table[index]=Nil
+                      ;DBG.DumpTable(source[_end])
+                      deepness = deepness + 1
+                    ElseIf source[_end].type = "section"
+                      deepness = deepness + 1
+                    EndIf
+                    _end = _end + 1
+                  Until TB.Item.IsNil(source, _end)
+
+                  TB.Sort(swapList, True, "_to")
+                  For p = ListItems(swapList)-1 To 0 Step - 1
+                    ;DebugPrint("SWAPPING ", swapList[p]._to, swapList[p]._from)
+                    table[swapList[p]._to] = table[swapList[p]._from]
+                  Next
+                  
+                EndIf
+              EndIf
+              
+              table[index] = {}
+              InsertItem(source, { type = "section", raw = "[SECTION]=" .. value, table = table, me = table[index], data = { Index = Index } }, i+offset)
+              InsertItem(source, { type = "end section", raw = "[END SECTION]", table = table, me = table[index] }, i+offset+1)
+              
+              Found = True
+              Break
+            EndIf
+          EndIf
+          
+        ElseIf v.me = table
+          ; Tabella trovata
+        
+          ; Creo l'elemento da aggiungere
+          
+          If category = "special"
+            InsertItem(source, { type = "special", table = table, me = table, data = { type = type, index = index, special = subtype, value = value }}, i+1)
+            table[index] = value
+            
+          ElseIf category = "comment"
+            ; Specificare il commento senza //
+            InsertItem(source, { type = "comment", table = table, me = table,  raw = "// " .. value }, i+1)
+          
+          ElseIf category = "include"
+            ; value è il nome del file da includere
+            InsertItem(source, { type = "include", table = table, me = table,  data = { value = value }}, i+1)
+            
+          ElseIf category = "variable"
+            ;DebugPrint("VARIABLE")
+            ; Le costanti vanno passate come stringhe, le costanti da sommare
+            ; vanno passate in una tabella di stringhe
+            
+            If GetType(value) = #TABLE
+              InsertItem(source, { type = "variable", table = table, me = table,  data = { values = value, index = index, type = type }}, i+1)
+              
+              If type = "[CNS]"
+                ; Costante?
+                Local v = 0
+                For k1, k2 In Pairs(value) Do v = v + GetConstant(k2)
+                value = v
+              EndIf
+              
+              table[index] = value
+              
+            Else
+              ;DebugPrint("RIGA DOVE INSERIRE : ")
+              ;DBG.DumpTable(source[i+1])
+              ;DebugPrompt("FAVA?")
+              InsertItem(source, { type = "variable", table = table, me = table,  data = { value = value, index = index, type = type }}, i+1)
+
+              If type = "[CNS]"
+                ; Costante?
+                value = GetConstant(value)
+              EndIf
+              
+              table[index] = value
+            EndIf
+            
+          Else
+            Return(False, "Type <" .. category .. "> unrecognized.")
+          
+          EndIf
+          
+          Found = True
+          Break
+        EndIf
+        
+      EndIf
+    Next
+    
+    If Found = False
+      Return(False, "Table not found!")
+    Else
+      Return(True)
+    EndIf
+    
+  Else
+    Return(False, "Item <" .. index .. "> already exists in table <" .. ToString(table) .. ">!")
+  EndIf
+  
+EndFunction
+
+Function FS.Config.Set(table, source, index, value, type, subtype)
+  Local result, error, found = False, "", False
+  
+  ; Verifica se esiste la chiave da modificare
+  If TB.Item.Exists(table, index)
+    Local found = False
+    ; Gestisce la modifica sul sorgente
+    For i, v In Pairs(source)  
+      If TB.Item.Exists(v, "table")
+        ; Scorre gli elementi per cercare la tabella corrispondente
+        If v.table = table
+          ; Quando la trova verifica se esiste il campo 'data'
+          If TB.Item.Exists(v, "data")
+            ; Se esiste verifica anche che esista il campo 'index'
+            If TB.Item.Exists(v.data, "index")
+              ; Se esiste verifica che questo sia il medesimo che stiamo cercando
+              If v.data.index = index
+                ; GESTIONE MODIFICHE
+                ; :: Cambio di tipo dati ::
+                If Not(IsNil(type))
+                  ; :: Verifica la correttezza del tipo specificato ::
+                  If TB.Item.IsNil(FS.Config.DataTypes, type)
+                    ; TIPO ERRATO
+                    Return(False, "Type <" .. type .. "> unrecognized!")
+                  EndIf
+
+                  ; ATTUALMENTE NON GESTITI :
+                  ;    SECTION
+                  ;    END SECTION
+                  ;    COMMENT
+                  ;    INCLUDE
+                  If type = "section" Or type = "end section" Or type = "include" Or type = "comment"
+                    Return(False, "Type <" .. type .. "> not yet implemented!")
+                  EndIf
+                  
+                  If TB.Item.Exists(v.data, "type")
+                    v.data.type = type
+                  Else
+                    Return(False, "Item <" .. index .. "> does not have a TYPE field!")
+                  EndIf
+                EndIf
+                
+                If v.data.type = "[SSI]" Or v.data.type = "[SSF]" Or v.data.type = "[MSI]" Or v.data.type = "[MSF]"
+                  If Not(IsNil(subtype))
+                    ; :: Verifica la correttezza del subtype ::
+                    If TB.Item.IsNil(FS.Config.SubTypes, subtype)
+                      Return(False, "Subtype <" .. subtype .. "> not recognized!")
+                    EndIf
+                    
+                    If TB.Item.Exists(v.data, "special")
+                      v.data.special = subtype
+                    Else
+                      Return(False, "Item <" .. index .. "> does not have a SPECIAL field!")
+                    EndIf
+                  EndIf
+                EndIf
+                
+                If TB.Item.Exists(v.data, "value")
+                  v.data.value = value
+                ElseIf TB.Item.Exists(v.data, "values")
+                  v.data.values = value
+                Else
+                  Return(False, "'value' nor 'values' field exists on item <" .. index .. ">!")
+                EndIf
+
+                found = True
+                Break
+                
+              EndIf
+            EndIf
+          EndIf
+        EndIf
+      EndIf
+    Next
+    
+    If found
+      ; ELEMENTO TROVATO
+      table[index] = value
+      Return(True)
+    Else
+      ; ELEMENTO NON TROVATO
+      Return(False, "Item <" .. index .. "> on table <" .. ToString(table) .. "> not found!")
+    EndIf
+    
+  Else
+    ; ELEMENTO NON TROVATO
+    Return(False, "Item <" .. index .. "> on table <" .. ToString(table) .. "> not found!")
+  
+  EndIf
+  
+EndFunction
+
+Function FS.Files.RemoveExtention(Filename)
+/*******************************************************************************
+result, ext, filepart, path = FS.Files.RemoveExtention(filename)
+
+Returns the given <filename> without its file-extension, if any,
+additionally returns the removed extention.
+---------------------------------------------------------------------
+INPUT
+  filename      The filename we want to remove the extention.
+OUTPUT
+  result        The source <filename> without its extention, if any,
+                or NIL if the given file does not exists.
+  ext           The removed extention or an empty string or NIL if
+                the given file does not exists.
+  filepart      The resulting file part (without its path).
+  path          The source file's path.
+********************************************************************************/
+   If HL.IsNil(Filename) Then Return(Nil, Nil)
+   
+   Local File = FilePart(Filename)
+   Local Path = PathPart(Filename)
+
+   Local SFile, Count = SplitStr(File, ".")
+   If Count = 1 Then Return(Filename, "", File, Path)
+   
+   Local Extension = "." .. SFile[Count - 1]
+   Local ExtLen = StrLen(Extension)
+   
+   Local File = LeftStr(File, StrLen(File) - ExtLen)
+   Return(FullPath(Path, File), Extension, File, Path)
+EndFunction
+
+
+Function FS.Files.GetExtention(Filename)
+/*******************************************************************************
+result = FS.Files.GetExtention(filename)
+
+Returns the <filename> extention or NIL if extention is not available.
+---------------------------------------------------------------------
+INPUT
+  filename    The filename we want to check.
+OUTPUT
+  result      The source filename's extention or NIL if it's not
+              available.
+********************************************************************************/
+   If HL.IsNil(Filename) Then Return(Nil)
+
+   Local File = FilePart(Filename)
+   Local Path = PathPart(Filename)
+
+   Local SFile, Count = SplitStr(File, ".")
+   If Count = 1 Then Return(Nil)
+
+   Return(SFile[Count - 1])
+EndFunction
+
+Function FS.Files.GoDirectoryUp(path, levels)
+
+  If Not(IsDirectory(path)) Then levels = levels + 1
+  
+  For i1 = 1 To levels
+    Local l = StrLen(path)
+
+    For p = l-1 To 0 Step -1
+      Local c = MidStr(path, p, 1)
+
+      If c = "/" Or c = "\\"
+        path = UnleftStr(path, l-p)
+        Break()
+      EndIf
+    Next
+  Next
+    
+  Return(path)
+EndFunction
+
+
+Function FS.ParseFilename(Filename)
+/*******************************************************************************
+filename = FS.ParseFilename(filename)
+
+This function parses the given <filename> and replaces special
+placeholder with the corresponding values. Actually the supported
+placeholders are:
+  $APPPATH        Running executable's path
+  $CURRPATH       Working executable's path
+---------------------------------------------------------------------
+INPUT
+  filename        The filename we want to process.
+OUTPUT
+  filename        The processed file (same as the source).
+********************************************************************************/
+   ; Parse $APPPATH
+   Local AppType, AppPath = GetProgramInfo()
+   Filename = ReplaceStr(Filename, "$APPPATH", PathPart(AppPath))
+
+   ; Parse $CURRPATH
+   Local CurrPath = GetCurrentDirectory()
+   Filename = ReplaceStr(Filename, "$CURRPATH", PathPart(AppPath))
+
+   Return(Filename)
+EndFunction
+
+
+Function FS.Private.ParseSpecial(DataPair)
+/*******************************************************************************
+value = FS.Private.ParseSpecial(dataPair)
+
+Private routine used to parse special tags of FS.Config.Load()
+---------------------------------------------------------------------
+INPUT
+  dataPair        DataPair to process.
+OUTPUT
+  value           Processed value.
+********************************************************************************/
+   Local n = DataPair
+   Local mode = LeftStr(n[1], 5)
+   Local value = 0
+
+   Switch mode
+      Case "[%SW]"
+         ;--- SCREEN WIDTH % ---------------------------------------------------
+         Local scrw = GetAttribute(#DISPLAY, 0, #ATTRHOSTWIDTH)
+         value = scrw * ToNumber(UnRightStr(n[1], 5))/100
+
+      Case "[%SH]"
+         ;--- SCREEN HEIGHT % --------------------------------------------------
+         Local scrh = GetAttribute(#DISPLAY, 0, #ATTRHOSTHEIGHT)
+         value = scrh * ToNumber(UnRightStr(n[1], 5))/100
+
+      Case "[%DW]"
+         ;--- DISPLAY WIDTH % --------------------------------------------------
+         Local scrw = GetAttribute(#DISPLAY, 0, #ATTRWIDTH)
+         value = scrw * ToNumber(UnRightStr(n[1], 5))/100
+
+      Case "[%DH]"
+         ;--- DISPLAY HEIGHT % -------------------------------------------------
+         Local scrh = GetAttribute(#DISPLAY, 0, #ATTRHEIGHT)
+         value = scrh * ToNumber(UnRightStr(n[1], 5))/100
+
+      Case "[%LW]"
+         ;--- RELATIVE LAYER WIDTH % -------------------------------------------
+         Local v = TB.TrimSpaces(SplitStr(n[1], ","))
+         If Not(LayerExists(UnRightStr(v[0], 5)))
+            value = 0
+         Else
+            Local scrw = GetAttribute(#LAYER, UnRightStr(v[0], 5), #ATTRWIDTH)
+            value = scrw * ToNumber(v[1])/100
+         EndIf
+
+      Case "[%LH]"
+         ;--- RELATIVE LAYER HEIGHT % ------------------------------------------
+         Local v = TB.TrimSpaces(SplitStr(n[1], ","))
+         If Not(LayerExists(UnRightStr(v[0], 5)))
+            value = 0
+         Else
+            Local scrh = GetAttribute(#LAYER, UnRightStr(v[0], 5), #ATTRHEIGHT)
+            value = scrh * ToNumber(v[1])/100
+         EndIf
+
+      Case "[RLX]"
+         ;--- RELATIVE LAYER X -------------------------------------------------
+         Local v = TB.TrimSpaces(SplitStr(n[1], ","))
+         If Not(LayerExists(UnRightStr(v[0], 5)))
+            value = 0
+         Else
+            Local scrw = GetAttribute(#LAYER, UnRightStr(v[0], 5), #ATTRWIDTH)
+            value = GetAttribute(#LAYER, UnRightStr(v[0], 5), #ATTRXPOS) + scrw * ToNumber(v[1])/100
+         EndIf
+
+      Case "[RLY]"
+         ;--- RELATIVE LAYER Y -------------------------------------------------
+         Local v = TB.TrimSpaces(SplitStr(n[1], ","))
+         If Not(LayerExists(UnRightStr(v[0], 5)))
+            value = 0
+         Else
+            Local scrh = GetAttribute(#LAYER, UnRightStr(v[0], 5), #ATTRHEIGHT)
+            value = GetAttribute(#LAYER, UnRightStr(v[0], 5), #ATTRYPOS) + scrh * ToNumber(v[1])/100
+         EndIf
+
+      Case "[LLF]"
+         ;--- LAYER LEFT -------------------------------------------------------
+         If Not(LayerExists(UnRightStr(v[0], 5)))
+            value = 0
+         Else
+            value = GetAttribute(#LAYER, UnRightStr(n[1], 5), #ATTRXPOS) - 1
+         EndIf
+
+      Case "[LRG]"
+         ;--- LAYER RIGHT -------------------------------------------------------
+         If Not(LayerExists(UnRightStr(v[0], 5)))
+            value = 0
+         Else
+            value = GetAttribute(#LAYER, UnRightStr(n[1], 5), #ATTRXPOS) + GetAttribute(#LAYER, UnRightStr(n[1], 5), #ATTRWIDTH) + 1
+         EndIf
+
+      Case "[LTP]"
+         ;--- LAYER TOP --------------------------------------------------------
+         If Not(LayerExists(UnRightStr(v[0], 5)))
+            value = 0
+         Else
+            value = GetAttribute(#LAYER, UnRightStr(n[1], 5), #ATTRYPOS) - 1
+         EndIf
+
+      Case "[LBT]"
+         ;--- LAYER BOTTOM -----------------------------------------------------
+         If Not(LayerExists(UnRightStr(v[0], 5)))
+            value = 0
+         Else
+            value = GetAttribute(#LAYER, UnRightStr(n[1], 5), #ATTRYPOS) + GetAttribute(#LAYER, UnRightStr(n[1], 5), #ATTRHEIGHT) + 1
+         EndIf
+
+      Case "[HSC]"
+         ;--- HOLLYWOOD SCREEN CONSTANT ----------------------------------------
+         n[1] = UnRightStr(UpperStr(n[1]), 5)
+         Switch n[1]
+            Case "CENTER"
+               value = #CENTER
+            Case "LEFT"
+               value = #LEFT
+            Case "RIGHT"
+               value = #RIGHT
+            Case "TOP"
+               value = #TOP
+            Case "BOTTOM"
+               value = #BOTTOM
+            Case "WIDTH"
+               value = GetAttribute(#DISPLAY, 0, #ATTRWIDTH)
+            Case "HEIGHT"
+               value = GetAttribute(#DISPLAY, 0, #ATTRHEIGHT)
+         EndSwitch
+
+      Case "[STD]"
+         ;--- STANDARD VALUE ---------------------------------------------------
+         value = ToNumber(UnrightStr(n[1], 5))
+
+   EndSwitch
+
+   Return(value, mode, UnrightStr(n[1], 5))
+
+EndFunction
+
+Function FS.Execute_Script(script_file)
+/*******************************************************************************
+FS.Execute_Script(scriptFile)
+
+Execute silently the given <scriptFile>.
+---------------------------------------------------------------------
+INPUT
+  scriptFile      The script we want to execute.
+---------------------------------------------------------------------
+NOTE
+  Actually only AmigaOS4 and AROS are supported.
+********************************************************************************/
+   Local SystemInfos = GetVersion()
+   
+   Switch SystemInfos.Platform
+      Case "AmigaOS4"
+      Run("Run >NIL: *>NIL: Execute " .. script_file)
+
+      Case "AROS"
+      Run("Run EXECUTE " .. script_file)
+
+      Default
+      Run("Execute " .. script_file)
+
+   EndSwitch
+
+EndFunction
+
+
+Function FS.ExecuteSynch_Script(script_file, logfile, stderr, append)
+/*******************************************************************************
+FS.Execute_Script(scriptFile)
+
+Execute silently and synchronously the given <scriptFile> waiting
+for the script to be terminated.
+---------------------------------------------------------------------
+INPUT
+  scriptFile      The script we want to execute.
+  logfile         Where eventually redirect the output.
+  stderr          Include in the output file the stderr messages.
+  append          If logfile is specified this flag sets if the
+                  output should be appended or not.
+  
+OUTPUT
+  result          True if the script was executed, False if there was
+                  an error.
+  cmdline         The command line executed by Execute()
+  
+NOTES
+  If an error is raised the program execution will be halted
+  using a DebugPrompt() with the error message.
+  For Linux and MacOS the script is invoked using "sh" shell
+********************************************************************************/
+  Local SystemInfos = GetVersion()
+  Local rop         = ">"
+
+  ; Check parameters
+  If Not(Exists(script_file))
+      Local msg = "FS.ExecuteSynch_Script(script_file, logfile, stderr)\n" ..
+                  "SYSTEM: " .. SystemInfos.Platform .. " is not supported.\n" ..
+                  "-- Hit Enter to continue --"
+      DebugPrompt(msg)
+      
+      Return(False, "")
+  
+  EndIf
+  
+  If append
+    rop = ">>"
+    
+  EndIf
+  
+  
+  Switch SystemInfos.Platform
+  
+    Case "AmigaOS3"
+    ;==============
+      ; stderr NOT supported
+      If HL.IsNotNil(logfile)
+        script_file = script_file .. " " .. rop .. logfile
+      EndIf
+      
+      Execute("Execute " .. script_file)
+    
+
+    Case "AmigaOS4"
+    ;==============
+      ; stderr NOT supported
+      If HL.IsNotNil(logfile)
+        script_file = script_file .. " " .. rop .. logfile
+      EndIf
+      
+      Execute("Run >NIL: *>NIL: Execute " .. script_file)
+
+    Case "AROS"
+    ;==========
+      ; stderr NOT supported
+      If HL.IsNotNil(logfile)
+        script_file = script_file .. " " .. rop .. logfile
+      EndIf
+      
+      Execute("Run EXECUTE " .. script_file)
+
+    Case "MorphOS"
+    ;=============
+      ; stderr NOT supported
+      If HL.IsNotNil(logfile)
+        script_file = script_file .. " " .. rop .. logfile
+      EndIf
+      
+      Execute("Run " .. script_file)
+
+    Case "WarpOS"
+    ;============
+      ; stderr NOT supported
+      If HL.IsNotNil(logfile)
+        script_file = script_file .. " " .. rop .. logfile
+      EndIf
+      
+      Execute("Run " .. script_file)
+
+    Case "Win32"
+    ;===========
+      ; stderr NOT supported
+      If HL.IsNotNil(logfile)
+        script_file = script_file .. " " .. rop .. logfile
+        If stderr
+          script_file = script_file .. " 2>&1"
+        EndIf
+      EndIf
+      
+      Execute(script_file)
+
+    Case "Linux"
+    ;===========
+      If HL.IsNotNil(logfile)
+        script_file = script_file .. " " .. rop .. logfile
+        If stderr
+          script_file = script_file .. " 2>&1"
+        EndIf
+      EndIf
+      
+      Execute("sh " .. script_file)
+
+    Case "MacOS"
+    ;===========
+      If HL.IsNotNil(logfile)
+        script_file = script_file .. " " .. rop .. logfile
+        If stderr
+          script_file = script_file .. " 2>&1"
+        EndIf
+      EndIf
+
+      Execute("sh " .. script_file)
+
+    Default
+      Local msg = "FS.ExecuteSynch_Script(script_file, logfile, stderr)\n" ..
+                  "SYSTEM " .. SystemInfos.Platform .. " is not supported.\n" ..
+                  "-- Hit Enter to continue --"
+      DebugPrompt(msg)
+      
+      Return(False, "")
+      
+  EndSwitch
+
+  Return(True, script_file)
+  
+EndFunction
+
+FS.Task = {}
+/*
+Function FS.Task.Kill(taskName, supportApp_Win)
+  ; taskkill /IM "notepad.exe" /F
+  
+  If IsNil(supportApp_Win)
+    supportApp_Win = ""
+  
+  Else
+    supportApp_Win = supportApp_Win .. " "
+    
+  EndIf
+  
+  Local v = GetVersion()
+  
+  Switch v.platform
+    Case "Win32"
+      Local tmpFile = GetTempFileName() .. ".bat"
+      Local tmpResult = GetTempFileName()
+      Local fid = OpenFile(Nil, tmpFile, #MODE_READWRITE)
+      Local cmd = "taskkill /IM \"" .. taskName .. "\" /F"
+      WriteLine(fid, cmd)
+      CloseFile(fid)
+      
+      ; Execute the script
+      Execute(supportApp_Win .. "\"" .. tmpFile .. "\"")
+            
+    Case "Linux"
+      SystemRequest("ERROR", "LINUX NOT YET SUPPORTED!\n\nFS.Task.Kill()", "OK", #REQICON_ERROR)
+      
+  EndSwitch
+    
+  Return(False)
+  
+EndFunction
+*/
+
+Function FS.Task.Kill(taskName)
+  Local v = GetVersion()
+  
+  Switch v.platform
+  
+    Case "Win32"
+    ;===========
+    Run("C:/Windows/System32/taskkill.exe", "/IM " .. "\"" .. taskName .. "\" /F")
+    
+    Case "Linux"
+    ;===========
+    Run("pkill " .. taskName)
+    
+    Case "MacOS"
+    ;===========
+    Run("pkill " .. taskName)
+
+    Default
+      Local msg = "FS.Task.Kill(taskName)\n" ..
+                  "SYSTEM " .. v.Platform .. " is not supported.\n" ..
+                  "-- Hit Enter to continue --"
+      DebugPrompt(msg)
+      
+      Return(False, "SYSTEM " .. v.Platform .. " is not supported.")
+      
+  EndSwitch
+  
+  Return(True)
+  
+EndFunction
+
+Function FS.Task.IsRunning(taskName, supportApp_Win)
+/*******************************************************************************
+FS.Task.IsRunning(taskName, supportApp_Win)
+
+Returns True if the task with the given name is running
+If provided, supportApp_Win is an app to run the command
+silently, for example using silentBatch.exe program
+---------------------------------------------------------------------
+INPUT
+  taskName        Task name to check
+  supportApp_Win  Optional windows command to avoid black window popping
+
+OUTPUT
+  result          True if the task is running otherwise false,
+                  if an error was raised a seconds parameter with
+                  the error will be passed.
+  error           Error description or Nil.
+  
+NOTES
+  If an error is raised the program execution will be halted
+  using a DebugPrompt() with the error message.
+  For Linux and MacOS the script is invoked using "sh" shell
+********************************************************************************/
+
+  
+  If IsNil(supportApp_Win)
+    supportApp_Win = ""
+  
+  Else
+    supportApp_Win = supportApp_Win .. " "
+    
+  EndIf
+  
+  Local v = GetVersion()
+  
+  Switch v.platform
+  
+    Case "Win32"
+    ;===========
+      Local tmpFile   = GetTempFileName() .. ".bat"
+      Local tmpResult = GetTempFileName()
+      Local fid       = OpenFile(Nil, tmpFile, #MODE_READWRITE)
+      Local cmd       = "tasklist /nh /fi \"imagename eq " .. taskName .. "\" /fo csv | find /i \"" .. taskName .. "\" > nul || (echo not_running >\"" .. tmpResult .. "\")"
+      WriteLine(fid, cmd)
+      CloseFile(fid)
+
+      ; Execute the script
+      Execute(supportApp_Win .. "\"" .. tmpFile .. "\"")
+      Wait(1000, #MILLISECONDS)
+
+      If Not(Exists(tmpResult))
+        ; Running
+        DeleteFile(tmpFile)
+        Return(True)
+        
+      Else
+        Local r = FileToString(tmpResult)
+        DeleteFile(tmpFile)
+        DeleteFile(tmpResult)        
+        If FindStr(r, "not_running") <> -1
+          ; Not running
+          Return(False)
+          
+        Else
+          ; Running
+          Return(True)
+          
+        EndIf
+        
+      EndIf
+      
+    Case "Linux"
+    ;===========
+      ; USING: pgrep <taskname>
+      ; Create a script for this purpose
+      Local outfile    = GetTempFileName()
+      Local scriptFile = GetTempFileName()
+      Local result = FS.Files.Open(Nil, scriptFile, #MODE_WRITE)
+      If result.ok
+        WriteLine(result.handler, "pgrep " .. taskName .. " >" .. outfile .. " 2>&1")
+        CloseFile(result.handler)
+        
+      Else
+        Local msg = "FS.Task.IsRunning(taskName, supportApp_Win)\n" ..
+                    "Cannot create the script file: " .. scriptFile .. "\n" ..
+                    "Error: " .. result.errorDesc .. "\n" ..
+                    "-- Hit Enter to continue --"
+        DebugPrompt(msg)
+        Return(False, "Error creating '" .. scriptName .. "' script.")
+        
+      EndIf
+      
+      ; Remove old output file
+      If Exists(outFile)
+        DeleteFile(outFile)
+        
+      EndIf
+      
+      ; Execute the script
+      Execute("sh " .. scriptFile)
+      
+      ; Check results
+      If Exists(outfile)
+        ; A file was generate, check id it empty
+        Local outContent = FileToString(outFile)
+        outContent = ReplaceStr(outContent, Chr(10), "")
+        outContent = ReplaceStr(outContent, Chr(13), "")
+        If StrLen(outContent) = 0
+          ; File vuoto, task non trovato, not running
+          Return(False)
+          
+        Else
+          ; Verifica se c'è qualche errore
+          If FindStr(outContent, "err", False) <> -1
+            Local msg = "FS.Task.IsRunning(taskName, supportApp_Win)\n" ..
+                        "Error executing the script: " .. scriptFile .. "\n" ..
+                        "Error: " .. outContent .. "\n" ..
+                        "-- Hit Enter to continue --"
+            DebugPrompt(msg)
+            Return(False, "Error executing '" .. scriptName .. "' script.")
+            
+          Else
+            ; Nessun errore, dovrebbero esserci i pid dei processi
+            ; trovati.
+            Return(True)
+            
+          EndIf
+          
+        EndIf
+        
+      Else
+        ; Nessun outfile, nessun pid trovato
+        Return(False)
+        
+      EndIf
+    
+    Case "MacOS"
+    ;===========
+      ; USING: pgrep <taskname> (same Linux implementation)
+      ; Create a script for this purpose
+      Local outfile    = GetTempFileName()
+      Local scriptFile = GetTempFileName()
+      Local result = FS.Files.Open(Nil, scriptFile, #MODE_WRITE)
+      If result.ok
+        WriteLine(result.handler, "pgrep " .. taskName .. " >" .. outfile .. " 2>&1")
+        CloseFile(result.handler)
+        
+      Else
+        Local msg = "FS.Task.IsRunning(taskName, supportApp_Win)\n" ..
+                    "Cannot create the script file: " .. scriptFile .. "\n" ..
+                    "Error: " .. result.errorDesc .. "\n" ..
+                    "-- Hit Enter to continue --"
+        DebugPrompt(msg)
+        Return(False, "Error creating '" .. scriptName .. "' script.")
+        
+      EndIf
+      
+      ; Remove old output file
+      If Exists(outFile)
+        DeleteFile(outFile)
+        
+      EndIf
+      
+      ; Execute the script
+      Execute("sh " .. scriptFile)
+      
+      ; Check results
+      If Exists(outfile)
+        ; A file was generate, check id it empty
+        Local outContent = FileToString(outFile)
+        outContent = ReplaceStr(outContent, Chr(10), "")
+        outContent = ReplaceStr(outContent, Chr(13), "")
+        If StrLen(outContent) = 0
+          ; File vuoto, task non trovato, not running
+          Return(False)
+          
+        Else
+          ; Verifica se c'è qualche errore
+          If FindStr(outContent, "err", False) <> -1
+            Local msg = "FS.Task.IsRunning(taskName, supportApp_Win)\n" ..
+                        "Error executing the script: " .. scriptFile .. "\n" ..
+                        "Error: " .. outContent .. "\n" ..
+                        "-- Hit Enter to continue --"
+            DebugPrompt(msg)
+            Return(False, "Error executing '" .. scriptName .. "' script.")
+            
+          Else
+            ; Nessun errore, dovrebbero esserci i pid dei processi
+            ; trovati.
+            Return(True)
+            
+          EndIf
+          
+        EndIf
+        
+      Else
+        ; Nessun outfile, nessun pid trovato
+        Return(False)
+        
+      EndIf
+    
+
+    Default
+      Local msg = "FS.Task.IsRunning(taskName, supportApp_Win)\n" ..
+                  "SYSTEM " .. v.Platform .. " is not supported.\n" ..
+                  "-- Hit Enter to continue --"
+      DebugPrompt(msg)
+      
+      Return(False, "SYSTEM " .. v.Platform .. " is not supported.")
+      
+  EndSwitch
+  
+  ; Qua non dovrebbe arrivarci mai
+  Return(False)
+  
+EndFunction
+
+Function FS.Ini.ReadValue(file, key, sep)
+  ; Read a value identified by the given key in the specified
+  ; ini file.
+  ; sep is the separator used to separate the key and the value
+  ;
+  ; Returns Nil if the key or the file does not exists
+  
+  ; Check if the file exists
+  If Not(Exists(file))
+    Return()
+    
+  EndIf
+  
+  ; Load the file into a table
+  Local t = FS.Files.LoadToTable(file)
+  
+  ; Search all lines for our key, spaces in front of
+  ; the key are accepted and ignored, any other character
+  ; will make the search fail
+  For i, v In Pairs(t)
+    ; Removes spaces at the beginning
+    l = TrimStr(v, " ", False)
+    
+    ; Is it our key?
+    If LeftStr(l, StrLen(key)) = key
+      ; Yes, split using the separator
+      splitted = SplitStr(l, sep)
+      
+      ; Return the trimmed result
+      Local result = TrimStr(splitted[1], " ", False)
+      Local result = TrimStr(result, " ", True)
+      
+      Return(result)
+      
+    EndIf
+  
+  Next
+  
+  Return(Nil)
+  
+EndFunction
+
+Function FS.Files.ExtractFromZip(archive, file, dest, pwd, continueOnError)
+  ; Extract a single, named file from a zip archive
+  ; *** REQUIRES THE ZIP MODULE ***
+  ; *** @REQUIRE "zip", { InstallAdapter = True }
+  ;
+  ; INPUT
+  ;   archive         Zip archive file
+  ;   file            File to extract or a table of files
+  ;   dest            Full destination path+file or a table of path+file
+  ;   pwd             Optional password
+  ;
+  ; OUTPUT
+  ;   result          True -> Ok, False -> Error
+  ;   data            Error description if result = False
+  ; -------------------------------------------------
+  If IsNil(continueOnError) Then continueOnError = False
+  
+  If Exists(archive)
+    ; Archive exists, open the archive
+    Local arcId = zip.OpenArchive(Nil, archive, #MODE_READ)
+
+    ; Convert single strings into tables
+    If GetType(file) = #STRING Then file = { file }
+    If GetType(dest) = #STRING Then dest = { dest }
+    
+    ; Locate the file to extract
+    For i, v In Pairs(file)
+
+      Local fileId = zip.LocateFile(arcId, v)
+      If fileId <> -1
+        ; File was found, extract it!
+        If IsNil(pwd)
+          zip.ExtractFile(arcId, fileId, dest[i])
+       
+        Else
+          zip.ExtractFile(arcId, fileId, dest[i], { password = pwd })
+          
+        EndIf
+      
+        ; Check if the file extraction failed
+        If Not(Exists(dest[i]))
+          Return(False, "Error extracting '" .. file[i] .. "' from '" .. archive .."'.")
+          
+        EndIf
+      
+      Else
+        ; File not found!
+        If Not(continueOnError)
+          zip.CloseArchive(arcId)
+          Return(False, "File '" .. file[i] .. "' not found in the archive '" .. archive .."'.")
+          
+        EndIf
+
+      EndIf
+    
+    Next
+    
+  Else
+    ; Archive not found
+    Return(False, "Archive '" .. archive .. "' not found!")
+    
+  EndIf
+  
+  Return(True)
+  
+EndFunction
+
+Function FS.Files.Script_Build(scriptFile, commands, execute)
+  ; Build and optionally execute a system script
+  ;
+  ; INPUT
+  ;   scriptFile      Script to create with full path, a
+  ;                   extension will be added to this file
+  ;                   depending on the host system.
+  ;   commands        A table of commands to add to the script
+  ;   execute         Set this flag to TRUE to execute the
+  ;                   created script.
+  ;
+  ; OUTPUT
+  ;   result          True -> ok, False -> there was an error
+  ;   data            Error description if result = False
+  ;                   Script file name if result = True
+  ;     
+  ; --------------------------------------------
+  Local v = GetVersion()
+  Local ext = ""
+  
+  Switch v.platform
+    Case "Win32"
+      ext = ".bat"
+    
+    Case "Linux"
+      ext = ".sh"
+    
+    Case "MacOs"
+      ext = ".sh"
+    
+    
+    Default
+      Return(False, "Platform " .. v.platform .. " not supported.")
+    
+  EndSwitch
+  
+  ; Open the script file
+  Local file = scriptFile .. ext
+  Local result = FS.Files.Open(Nil, file, #MODE_WRITE)
+  
+  If result.ok
+    ; Opening ok
+    Local entries = ListItems(commands)-1
+    
+    ; Write the script contents
+    For Local i = 0 To entries
+      WriteLine(result.handler, commands[i])
+    Next
+    CloseFile(result.handler)
+  
+    ; Check if we have to execute the script
+    If execute
+      If Exists(file)
+        ; The script exists
+        Switch v.Platform
+          Case "Win32"
+            Run(file)
+          
+          Case "Linux"
+            Run("sh " .. file)
+          
+          Case "MacOS"
+            Run("sh " .. file)
+          
+          
+        EndSwitch
+
+      Else
+        ; The script does not exists!
+        Return(False, "Script '" .. file .. "' not found!")
+        
+      EndIf
+      
+    EndIf
+    
+  Else
+    ; Error opening the script file
+    Return(False, result.errorDesc)
+    
+  EndIf
+  
+  Return(True, file)
+  
+EndFunction
+
+Function FS.Build_Script(script_file, commands, execute)
+/*******************************************************************************
+FS.Build_Script(scriptFile, commands, execute)
+
+Build & Execute silently and asynchronously the given <scriptFile>.
+---------------------------------------------------------------------
+INPUT
+  scriptFile      The script we want to execute.
+  commands        A table of tables with the commands & args
+    cmd
+    args
+  execute         If True also executes asynch the script
+********************************************************************************/
+  Local SystemInfos = GetVersion()
+
+  If IsNil(execute) Then execute = False
+  
+  ; Build the script
+  Local dq, extra = "\"", ""
+  
+  Local fid = OpenFile(Nil, script_File, #MODE_WRITE)
+  For Local i = 0 To ListItems(commands)-1
+    Local cmd = dq .. commands[i].cmd .. dq
+    If SystemInfos.Platform = "Win32"
+      extra = "cmd.exe /c "
+    EndIf
+    
+    Local l
+    
+    If SystemInfos.Platform = "Win32"
+      l = extra .. dq .. cmd .. " " .. commands[i].args .. dq
+    Else
+      l = cmd .. " " .. commands[i].args
+    EndIf
+    
+    WriteLine(fid, l)
+  Next
+  CloseFile(fid)
+  
+  If execute Then Run(script_File)
+  
+EndFunction
+
+Function FS.OpenFolder(path)
+/*******************************************************************************
+FS.OpenFolder(path)
+
+Open the OS host window located at the given path
+---------------------------------------------------------------------
+INPUT
+  path      Path to open
+********************************************************************************/
+   Local SystemInfos = GetVersion()
+
+   Switch SystemInfos.Platform
+      Case "AmigaOS3"
+      OpenURL(path)
+
+      Case "AmigaOS4"
+      OpenURL(path)
+
+      Case "AROS"
+      OpenURL(path)
+
+      Case "MorphOS"
+      OpenURL(path)
+
+      Case "WarpOS"
+      OpenURL(path)
+
+      Case "Win32"
+      OpenURL(path)
+
+      Case "Linux"
+      OpenURL(path)
+
+      Case "MacOS"
+      OpenURL(path)
+
+   EndSwitch
+
+EndFunction
+
+Function FS.Files.Validate(Prefix, Filename, SearchPaths)
+/*******************************************************************************
+result, fullPath = FS.Files.Validate(prefix, filename, searchPaths)
+
+Validate the string <filename> checking if the filename exists or
+not. <Prefix> can be a token that prefixes the filename, for example,
+suppose you have a field that can be a string or a filename, in the
+last case the string could be prefixed by 'file::' the remaining part
+is the filename.
+<SearchPaths> is a table of strings with valid paths where the
+filename will be searched.
+If at least one entry is found the function returns TRUE.
+If <SearchPaths> is Nil or empty the search will be performed in the
+current directory.
+---------------------------------------------------------------------
+INPUT
+  prefix      String prefix that identifies the filename, if any.
+  filename    The string with the filename and eventually its <prefix>
+  searchPaths A table of strings (or NIL) where <filename> should be
+              searched.
+OUTPUT
+  result      TRUE if <filename> was correctly validated.
+  fullPath    If <result> is TRUE stores the fullpath where <filename>
+              was found. If <prefix> was present <fullPath> will
+              preserve it.
+---------------------------------------------------------------------
+NOTE
+  Actually only AmigaOS4 and AROS are supported.
+********************************************************************************/
+   ; Checking Arguments
+   If HL.IsNil(Prefix     ) Then Prefix      = ""
+   If HL.IsNil(Filename   ) Then Filename    = ""
+   If HL.IsNil(SearchPaths) Then SearchPaths = {}
+
+   ; Search in current directory
+   If Prefix = ""
+      If Exists(Filename) Then Return(True, Filename)
+   Else
+      lPrefix = StrLen(Prefix)
+      If LeftStr(Filename, lPrefix) = Prefix
+         Filename = RightStr(Filename, StrLen(Filename)-lPrefix)
+      EndIf
+      If Exists(Filename) Then Return(True, Prefix .. Filename)
+   Endif
+
+   ; SearchPaths
+   If Prefix = ""
+      For i, v In IPairs(SearchPaths)
+         If Exists(FullPath(v, Filename)) Then Return(True, FullPath(v, Filename))
+      Next
+   Else
+      lPrefix = StrLen(Prefix)
+      If LeftStr(Filename, lPrefix) = Prefix
+         Filename = RightStr(Filename, StrLen(Filename)-lPrefix)
+      EndIf
+      For i, v In IPairs(SearchPaths)
+         If Exists(FullPath(v, Filename)) Then Return(True, Prefix .. FullPath(v, Filename))
+      Next
+   EndIf
+
+
+   Return(False, Prefix .. Filename)
+EndFunction
+
+;******************************** NEW FUNCTIONS ********************************
+;*** ADDED 01/04/2014                                                        ***
+;*******************************************************************************
+
+
+Function FS.CutLastFolder(folder)
+/*******************************************************************************
+cutter, lastPart = FS.CutLastFolder(folder)
+
+Divide the given <folder> and returns two strings, the second one is
+the last folder in the path, the first one is all the rest.
+The 'cut' is sensible to the "/", "\" and ":" path dividers. This
+function is usefull to process paths and, for example, to retrieve
+the upper level of a given <folder>.
+---------------------------------------------------------------------
+INPUT
+  folder     The path we want to process.
+OUTPUT
+  cutter     The first path part (the <folder> without the last level)
+  lastPart   The last folder detected in <folder> and removed from it.
+---------------------------------------------------------------------
+EXAMPLE
+  | first, last = FS.CutLastFolder("C:/testing/this/routine")
+  | DebugPrint("First: " .. first, "Last: " .. last)
+
+  First: C:/testing/this/       Last: routine
+********************************************************************************/
+   Local l = StrLen(folder)
+   Local cutter = ""
+   Local lastpart = folder
+
+   For p = l To 0 Step -1
+      c = MidStr(folder, p, 1)
+      If c = "/" Or c = Chr(92) Or c = ":"
+         If p <> l-1
+            cutter = LeftStr(folder, p+1)
+            lastpart = ReplaceStr(folder, cutter, "")
+            Break
+         EndIf
+      EndIf
+   Next
+
+   Return(cutter, lastpart)
+
+EndFunction
+
+Function FS.Files.applyQuotes(filename)
+  ; Apply quotes to the filename if there are spaces detected
+  
+  If FindStr(filename, " ", False) <> -1
+    Return("'" .. filename .. "'")
+  Else
+    Return(filename)
+  EndIf
+
+EndFunction
+
+Function FS.Files.ChangeExistingName(filename, filepath)
+/*******************************************************************************
+filename = FS.Files.ChangeExistingName(filename, filePath)
+
+This routine is usefull to retrieve alternative filenames to do not
+overwrite existing ones. This is particularly handy when you have to
+write several version of the same file using only one filename in
+your main code. This routine will find for you alternative names
+adding to the file name a number enclosed by round brackets.
+---------------------------------------------------------------------
+INPUT
+  filename    The filename we want to find alternatives
+  filePath    The <filename> path
+OUTPUT
+  filename    If the <filename> exists this parameter will hold the
+              found alternative otherwise the source <filename>.
+---------------------------------------------------------------------
+EXAMPLE
+  Suppose to check the path "C:/test" and in this folder are present the
+  following files:
+    C:/test/file1
+    C:/test/file2
+    C:/test/anotherFile(1)
+
+  | filename = FS.Files.ChangeExistingName("C:/test/", "anotherFile")
+  | DebugPrint("#1 Filename: " .. filename)
+  |
+  | filename = FS.Files.ChangeExistingName("C:/test/", "file2")
+  | DebugPrint("#2 Filename: " .. filename)
+  |
+  | filename = FS.Files.ChangeExistingName("C:/test/", "file")
+  | DebugPrint("#3 Filename: " .. filename)
+
+  #1 Filename: anotherFile(2)
+  #2 Filename: file2(1)
+  #3 Filename: file
+********************************************************************************/
+   Local c = 1
+   While Exists(FullPath(filepath, filename))
+      splitted, cnt = SplitStr(filename, ".")
+      filename = ""
+      splitted[0] = splitted[0] .. "(" .. c .. ")"
+      For z = 0 To cnt-1
+         filename = filename .. splitted[z]
+         If z <> cnt-1 Then filename = filename .. "."
+      Next
+      c = c + 1
+   Wend
+
+   Return(filename)
+EndFunction
+
+Function FS.Files.Delete(filename)
+/******************************************************************************
+results = FS.Files.Delete(filename)
+
+Delete the given file.
+---------------------------------------------------------------------
+INPUT
+  filename      File to delete
+OUTPUT
+  results
+    ok          True if the file was deleted
+    error       Error code if <ok> is False
+    errordesc   Error description
+******************************************************************************/
+  
+  ExitOnError(False)
+    DeleteFile(filename)
+    lasterror = GetLastError()
+  ExitOnError(True)
+  
+   If lasterror = 0
+      Return({ ok        = True,
+               error     = lasterror,
+               errordesc = "None",
+               arguments = args })
+   Else
+      Return({ ok        = False,
+               error     = lasterror,
+               errordesc = GetErrorName(lasterror),
+               arguments = args })
+   EndIf
+  
+EndFunction
+
+Function FS.Files.LoadToTable(file)
+  ; Load a file, line by line, into a table
+  ; ---------------------------------------
+  Local result = {}
+  If Exists(file)
+    Local fid = OpenFile(Nil, file, #MODE_READ)
+    While Not(Eof(fid))
+      InsertItem(result, ReadLine(fid))
+    Wend
+    CloseFile(fid)
+  EndIf
+  
+  Return(result)
+EndFunction
+
+Function FS.Files.Open(id, filename, mode)
+/******************************************************************************
+results = FS.Files.Open(id, filename, mode)
+
+Safely opens file function without the risk to break the code. If
+there is a file error during the opening, instead of crashing the
+program with this functions you will get a result with error
+informations.
+---------------------------------------------------------------------
+INPUT
+  id        File id or NIL
+  filename  Filename to open
+  mode      Access mode
+OUTPUT
+  result    A table with the following fields:
+              - handler    File handler
+              - ok         TRUE if the opening was successful
+              - error      Error code if <ok> is FALSE
+              - errordesc  Error description
+              - arguments  Calling arguments
+******************************************************************************/              
+   Local lasterror, fh = 0, id
+   If HL.IsNil(id)
+      ExitOnError(False)
+      fh = OpenFile(Nil, filename, mode)
+      lasterror = GetLastError()
+      ExitOnError(True)
+   Else
+      ExitOnError(False)
+      OpenFile(id, filename, mode)
+      lasterror = GetLastError()
+      ExitOnError(True)
+   EndIf
+
+   Local args = "(id = " .. ToString(id) .. ", " ..
+                "file = " .. ToString(filename) .. ", " ..
+                "mode = " .. ToString(mode) .. ")"
+
+   If lasterror = 0
+      Return({ handler   = fh,
+               ok        = True,
+               error     = lasterror,
+               errordesc = "None",
+               arguments = args })
+   Else
+      Return({ handler   = fh,
+               ok        = False,
+               error     = lasterror,
+               errordesc = GetErrorName(lasterror),
+               arguments = args })
+   EndIf
+
+EndFunction
+
+Function FS.Files.ReadString(handler, length, bytes)
+/******************************************************************************
+result = FS.Files.ReadString(handler)
+
+You can use this function to safely read a string from an opened file.
+If there is an error while reading the string the program will not
+crash, instead you will get informations about the error.
+---------------------------------------------------------------------
+INPUT
+  handler     File handler where we have to read the string
+  length      String length
+  bytes       True to read bytes instead of string
+OUTPUT
+  result      A table with the following fields:
+              - string     Retrieved table
+              - ok         TRUE if the operation was successful
+              - error      Error code if <ok> is FALSE
+              - errordesc  Error description
+              - arguments  Calling arguments
+******************************************************************************/              
+   Local lasterror, tbl = 0, {}
+   If IsNil(bytes) Then bytes = False
+   
+   ExitOnError(False)
+   Local tbl
+   If bytes
+    tbl = ReadBytes(handler, length)
+   Else
+    tbl = ReadString(handler, length)
+   EndIf
+
+   lasterror = GetLastError()
+   ExitOnError(True)
+
+   Local args = "(handler = " .. ToString(handler) .. ")"
+
+   If lasterror = 0
+      Return({ string    = tbl,
+               ok        = True,
+               error     = lasterror,
+               errordesc = "None",
+               arguments = args })
+   Else
+      Return({ string    = Nil,
+               ok        = False,
+               error     = lasterror,
+               errordesc = GetErrorName(lasterror),
+               arguments = args })
+   EndIf
+
+EndFunction
+
+Function FS.Files.ReadTable(handler)
+/******************************************************************************
+result = FS.Files.ReadTable(handler)
+
+You can use this function to safely read a table from an opened file.
+If there is an error while reading the table the program will not
+crash, instead you will get informations about the error.
+---------------------------------------------------------------------
+INPUT
+  handler     File handler where we have to read the table
+OUTPUT
+  result      A table with the following fields:
+              - table      Retrieved table
+              - ok         TRUE if the operation was successful
+              - error      Error code if <ok> is FALSE
+              - errordesc  Error description
+              - arguments  Calling arguments
+******************************************************************************/              
+   Local lasterror, tbl = 0, {}
+
+   ExitOnError(False)
+   tbl = ReadTable(handler)
+   lasterror = GetLastError()
+   ExitOnError(True)
+
+   Local args = "(handler = " .. ToString(handler) .. ")"
+
+   If lasterror = 0
+      Return({ table     = tbl,
+               ok        = True,
+               error     = lasterror,
+               errordesc = "None",
+               arguments = args })
+   Else
+      Return({ table     = {},
+               ok        = False,
+               error     = lasterror,
+               errordesc = GetErrorName(lasterror),
+               arguments = args })
+   EndIf
+
+EndFunction
+
+Function FS.Files.ReadFloat(handler)
+/******************************************************************************
+result = FS.Files.ReadFloat(handler)
+
+You can use this function to safely read a float from an opened file.
+If there is an error while reading the float the program will not
+crash, instead you will get informations about the error.
+---------------------------------------------------------------------
+INPUT
+  handler     File handler where we have to read the float
+OUTPUT
+  result      A table with the following fields:
+              - float      Retrieved float
+              - ok         TRUE if the operation was successful
+              - error      Error code if <ok> is FALSE
+              - errordesc  Error description
+              - arguments  Calling arguments
+******************************************************************************/              
+   Local lasterror, tbl = 0, {}
+
+   ExitOnError(False)
+   tbl = ReadFloat(handler)
+   lasterror = GetLastError()
+   ExitOnError(True)
+
+   Local args = "(handler = " .. ToString(handler) .. ")"
+
+   If lasterror = 0
+      Return({ float     = tbl,
+               ok        = True,
+               error     = lasterror,
+               errordesc = "None",
+               arguments = args })
+   Else
+      Return({ float     = Nil,
+               ok        = False,
+               error     = lasterror,
+               errordesc = GetErrorName(lasterror),
+               arguments = args })
+   EndIf
+
+EndFunction
+
+Function FS.Files.WriteTable(handler, tbl)
+/******************************************************************************
+result = FS.Files.WriteTable(handler, tbl)
+
+You can use this function to safely write a table from an opened file.
+If there is an error while reading the table the program will not
+crash, instead you will get informations about the error.
+---------------------------------------------------------------------
+INPUT
+  handler     File handler where we have to write
+  tbl         Table to write
+OUTPUT
+  result      A table with the following fields:
+              - ok         TRUE if the operation was successful
+              - error      Error code if <ok> is FALSE
+              - errordesc  Error description
+              - arguments  Calling arguments
+******************************************************************************/              
+   Local lasterror = 0
+
+   ExitOnError(False)
+   WriteTable(handler, tbl)
+   lasterror = GetLastError()
+   ExitOnError(True)
+
+   Local args = "(handler = " .. ToString(handler) .. ", table = " .. ToString(tbl) .. ")"
+
+   If lasterror = 0
+      Return({ ok        = True,
+               error     = lasterror,
+               errordesc = "None",
+               arguments = args })
+   Else
+      Return({ ok        = False,
+               error     = lasterror,
+               errordesc = GetErrorName(lasterror),
+               arguments = args })
+   EndIf
+
+EndFunction
+
+Function FS.Files.WriteString(handler, string, bytes)
+/******************************************************************************
+result = FS.Files.WriteTable(handler, string)
+
+You can use this function to safely write a string from an opened file.
+If there is an error while writing the string the program will not
+crash, instead you will get informations about the error.
+---------------------------------------------------------------------
+INPUT
+  handler     File handler where we have to write
+  string      String to write
+  bytes       True to write bytes instead of strings
+OUTPUT
+  result      A table with the following fields:
+              - ok         TRUE if the operation was successful
+              - error      Error code if <ok> is FALSE
+              - errordesc  Error description
+              - arguments  Calling arguments
+******************************************************************************/              
+   Local lasterror = 0
+   If IsNil(bytes) Then bytes = False
+   
+   ExitOnError(False)
+   If bytes
+    WriteBytes(handler, string)
+   Else
+    WriteString(handler, string)
+   EndIf
+   
+   lasterror = GetLastError()
+   ExitOnError(True)
+
+   Local args = "(handler = " .. ToString(handler) .. ", table = " .. ToString(tbl) .. ")"
+
+   If lasterror = 0
+      Return({ ok        = True,
+               error     = lasterror,
+               errordesc = "None",
+               arguments = args })
+   Else
+      Return({ ok        = False,
+               error     = lasterror,
+               errordesc = GetErrorName(lasterror),
+               arguments = args })
+   EndIf
+
+EndFunction
+
+Function FS.Files.SetExecutable(file)
+  /* Set the executable flag for the given file if it is missing
+     This is applied on all not-Win32 systems
+     
+     Returns True if the flag has been set or it is already set
+     Returns False if the flag has not been set, or if the file does not exists
+     */
+  
+  If Not(Exists(file)) Then Return(False)
+  
+  Local sysinfo = GetVersion()
+  
+  ; Verifica che l'eseguibile abbia il flag settato
+  Local exeAttrs = GetFileAttributes(file)
+  If (exeAttrs.flags & #FILEATTR_EXECUTE_USR <> 0) Or sysinfo.Platform = "Win32"
+    ; Executable flag is set
+    Return(True)
+    
+  ElseIf exeAttrs.flags & #FILEATTR_EXECUTE_USR = 0
+    SetFileAttributes(file, { Flags = exeAttrs.flags | #FILEATTR_EXECUTE_USR })
+    
+    Return(True)
+  
+  Else
+    Return(True)
+
+  EndIf
+  
+EndFunction
+
+Function FS.Files.WriteInt(handler, value)
+/******************************************************************************
+result = FS.Files.WriteInt(handler, value)
+
+You can use this function to safely write a integer from an opened file.
+If there is an error while writing the integer the program will not
+crash, instead you will get informations about the error.
+---------------------------------------------------------------------
+INPUT
+  handler     File handler where we have to write
+  value       Integer to write
+OUTPUT
+  result      A table with the following fields:
+              - ok         TRUE if the operation was successful
+              - error      Error code if <ok> is FALSE
+              - errordesc  Error description
+              - arguments  Calling arguments
+******************************************************************************/              
+   Local lasterror = 0
+
+   ExitOnError(False)
+   WriteInt(handler, value)
+   lasterror = GetLastError()
+   ExitOnError(True)
+
+   Local args = "(handler = " .. ToString(handler) .. ", integer = " .. ToString(value) .. ")"
+
+   If lasterror = 0
+      Return({ ok        = True,
+               error     = lasterror,
+               errordesc = "None",
+               arguments = args })
+   Else
+      Return({ ok        = False,
+               error     = lasterror,
+               errordesc = GetErrorName(lasterror),
+               arguments = args })
+   EndIf
+
+EndFunction
+
+Function FS.Config.Write(filename, source, fid)
+  ; Write a configuration file
+  
+  fid = OpenFile(Nil, filename, #MODE_WRITE)
+  Local entries = ListItems(source)-1
+  Local level = 0
+  
+  For Local i = 0 To entries
+    
+    Local t = ""
+    If level > 0 Then t = RepeatStr(" ", level*2)
+    
+    Switch source[i].type
+      Case "include"
+        WriteLine(fid, t .. "[+++]=" .. source[i].Data.Value)
+        
+      Case "comment"
+        WriteLine(fid, source[i].Raw) ; t .. -> removed
+        
+      Case "variable"
+        Local l = ""
+        If TB.Item.Exists(source[i].Data, "value")
+          l = source[i].Data.Type .. source[i].Data.Index .. "=" .. source[i].Data.Value
+        ElseIf TB.Item.Exists(source[i].Data, "values")
+          Local values, items = "", ListItems(source[i].Data.Values)-1
+          Local sign = ","
+          If source[i].Data.Type = "[CNS]"
+            sign = "+"
+          EndIf
+          For Local iv = 0 To items
+            If iv <= items And iv <> 0 Then values = values .. sign
+            values = values .. source[i].Data.Values[iv]
+          Next
+          l = source[i].Data.Type .. source[i].Data.Index .. "=" .. values
+        EndIf
+        WriteLine(fid, t .. l)
+
+      Case "special"
+        Local l = ""
+        If TB.Item.Exists(source[i].Data, "value")
+          l = source[i].Data.Type .. source[i].Data.Index .. "=" .. source[i].Data.Special .. source[i].Data.Value
+        ElseIf TB.Item.Exists(source[i].Data, "values")
+          Local values, items = "", ListItems(source[i].Data.Values)-1
+          Local sign = ","
+          For Local iv = 0 To items
+            If iv <= items And iv <> 0 Then values = values .. sign
+            values = values .. source[i].Data.Special[iv] .. source[i].Data.Values[iv]
+          Next
+          l = t .. source[i].Data.Type .. source[i].Data.Index .. "=" .. values
+        EndIf
+        WriteLine(fid, l)
+              
+      Case "section"
+        Local l = t .. TrimStr(source[i].Raw, " ", False)
+        WriteLine(fid, l)
+        level = level + 1
+        t = RepeatStr(" ", level)
+
+      Case "end section"
+        level = level - 1
+        If level > 0 Then t = RepeatStr(" ", level*2) Else t = ""
+        Local l = t .. TrimStr(source[i].Raw, " ", False)
+        WriteLine(fid, l)
+      
+    EndSwitch
+  Next
+  
+  CloseFile(fid)
+
+EndFunction
+
+Function FS.TEST_ConfigLoad()
+  Local file = "FS_Test_config.txt"
+  DebugPrint(":::: TEST ::::")
+  DebugPrint("Loading -> " .. file)
+  Local config, source = FS.Config.Load(file)
+  
+  DebugPrint("\nTABLE CONTENT")
+  
+  DebugPrint("\nSOURCE CONTENT")
+  
+  DebugPrint("\nSETTING SOME ITEMS")
+  /*
+  FS.Config.Set(config, source, "font1", "tahoma")
+  FS.Config.Set(config.sezione2.sezione21, source, "deepness", 999)
+  FS.Config.Set(config.sezione2.sezione21.sezione211, source, "deepness", 123456789)
+  FS.Config.Set(config, source, "decimali", { 1.99, 2.99, 3.99 })
+  FS.Config.Set(config, source, "bool", 99, "[SIN]")
+  FS.Config.Set(config, source, "speflo", 55)
+  */
+
+  Local r, e = FS.Config.Add(config, source, Nil, "#2", "section", Nil, Nil)
+  If Not(r) Then DebugPrint(e)
+
+  DebugPrint("\n************************************************\n")
+  
+  
+  Local r, e = FS.Config.Add(config, source, Nil, "#2", "section", Nil, Nil)
+  If Not(r) Then DebugPrint(e)
+  
+  /*
+  Local r, e = FS.Config.Add(config.livelloA[2], source, "field", "nuovo2", "variable", "[SST]", Nil)
+  If Not(r) Then DebugPrint(e)
+      */
+  DebugPrint("\nWRITING BACK")
+  FS.Config.Write("FS_test_config_write.txt", source)
+  
+  DebugPrompt("\nDone.")
+  
+EndFunction
+
+Function FS.TEST_GoDirectoryUp()
+  Local p = GetCurrentDirectory()
+  DebugPrint("Current Dir  : ", p)
+  For i = 1 To 5
+    DebugPrint("up " .. i .. " levels -> ", FS.Files.GoDirectoryUp(p, i))
+  Next
+  
+  DebugPrint("---")
+  Local p = FullPath(GetCurrentDirectory(), "ansi.hws")
+  DebugPrint("Current Dir  : ", p)
+  For i = 1 To 5
+    DebugPrint("up " .. i .. " levels -> ", FS.Files.GoDirectoryUp(p, i))
+  Next
+  
+  DebugPrompt("Hit enter")
+EndFunction
+
+;FS.TEST_GoDirectoryUp()
+;FS.TEST_ConfigLoad()

@@ -1,0 +1,49 @@
+/*******************************************************************************
+HGUI : Tutorial 207 - Window's Size                          v1.2 : 09/02/2023 *
+********************************************************************************
+We have seen how to specify the window size at creation time using the 'size'
+subtable in the 'options' table. 
+Every resizeable window can also change its size because of the the system
+window's gagdet that allow user to shrink/maximize the window.
+Ther user can also manually resize the window dragging the window's borders. 
+
+HGui allow you to control the minimum and maximum sizes the window can reach
+limiting the user's action and preserving the GUI avoiding too small windows
+that could result in a complete mess of the interface.
+
+When you define a new window the specified size is also called 'native size'
+and will be referenced by the HGui library when handling the GUI resizing.
+If you do not specify the minimum size it will be set by default to the native
+size.
+If you do not specify the maximum size it will be set to the host screen
+resolution.
+********************************************************************************/
+
+;---| INCLUDE THE LIBRARIES DEFINITIONS |---------------------------------------
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+;DBG.Console.Enable(True)
+;DBG.Console.AddChannel(HGui.DebugChannel)
+
+/*******************************************************************************
+ Let's create a window with a minimum and maximum resize values.
+********************************************************************************/
+
+; Window creation
+Local myWin1 = HGui.Window:new(
+                 { title    = "Min size : 100x100, Max size : 700x400",
+                   name     = "win1",
+                   position = { x = #CENTER, y = #CENTER },
+                   size     = { w = 300, h = 300 },   ; Native size
+                   sizemin  = { w = 100, h = 100 },   ; Minimum allowed size
+                   sizemax  = { w = 700, h = 400 },   ; Maximum allowed size
+                   })
+
+Repeat
+   WaitEvent()
+Forever
+
+/*******************************************************************************
+  -> Try to change minimum and maximum sizes.
+********************************************************************************/

@@ -1,0 +1,63 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>ctextObj:Render()</h1>
+
+    <p><span class="text-big"><code>result = CTextObj:Render(area, clipArea)</code></span>
+    </p>
+    <p>Renders the CText object in its parent window, using its area object.
+      <br>You can override the area using a custom <code>area</code>, object furthermore
+      you can apply a <code>cliparea</code> to delimit the rendering area.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>area </strong>: A table with at least the following fields:
+        <ul>
+          <li><strong>position </strong>: Area position table
+            <ul>
+              <li><strong>x</strong> : Horizontal position</li>
+              <li><strong>y</strong> : Vertical position</li>
+            </ul>
+          </li>
+          <li><strong>size </strong>: Area size table
+            <ul>
+              <li><strong>w</strong> : Width</li>
+              <li><strong>h</strong> : Height</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><strong>clipArea </strong>: A table with the following fields
+        <ul>
+          <li><strong>x</strong> : Horizontal position</li>
+          <li><strong>y</strong> : Vertical position</li>
+          <li><strong>w</strong> : Width</li>
+          <li><strong>h</strong> : Height</li>
+        </ul>
+      </li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <ul>
+      <li><strong>result </strong>: <code>True</code> if there was no error otherwise <code>False</code>
+      </li>
+    </ul>
+    <p><u>NOTES</u>
+    </p>
+    <p style="margin-left:40px;"><span style="background-color:hsl(0, 0%, 30%);"><i>This function needs improvements to render only the visible lines, &nbsp;actually it renders all the text lines from the first to the last.</i></span>
+    </p>
+    <p><u>EXAMPLES</u>&nbsp;</p>
+    <p><u>SEE ALSO</u>
+    </p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

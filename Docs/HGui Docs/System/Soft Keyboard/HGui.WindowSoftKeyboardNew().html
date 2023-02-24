@@ -1,0 +1,79 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>HGui.Window:SoftKeyboardNew()</h1>
+
+    <p><span class="text-big"><code>HGui.Window:SoftKeypadNew(params)</code></span>
+    </p>
+    <p>Show a softKeyboard to the screen so the user can input numbers using
+      the mouse or the touch screen, input by keyboard is supported.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>params </strong>: A Table used to customize the soft keypad
+        <ul>
+          <li><strong>text</strong> : Box description</li>
+          <li><strong>callbackOk </strong>: Callback function on entered text</li>
+          <li><strong>callbackClose</strong> : Callback function on requester close</li>
+          <li><strong>isPassword</strong> : Flag to mask password strings, default = <code>False</code>
+          </li>
+          <li><strong>pasteBtn</strong> : Paste button is available? Default = <code>True</code>
+          </li>
+          <li><strong>copyBtn</strong> : Copy button is available? Default = <code>True</code>
+          </li>
+          <li><strong>value</strong> : Default value</li>
+          <li><strong>textCopy</strong> : Text for the copy button</li>
+          <li><strong>textPaste</strong> : Text for the paste button</li>
+          <li><strong>textOk</strong> : Text for the ok button</li>
+          <li><strong>textCancel</strong> : Text for the cancel button</li>
+          <li><strong>textClear</strong> : Text for the clear button</li>
+          <li><strong>textCountry</strong> : Text for the country button</li>
+          <li><strong>maxLen</strong> : Max string length</li>
+          <li><strong>waitInput</strong> : If <code>TRUE</code> the requester is blocking</li>
+          <li><strong>configPath</strong> : Path where to load/save the configuration
+            file (used for thr layout, language, character set, ecc...)</li>
+          <li><strong>font</strong> : Font to be used for the keyboard (needed for all
+            the symbols and foreign characters)</li>
+          <li><strong>allowNewLine </strong>: Flag to allow or not new lines</li>
+          <li><strong>enterToClose </strong>: Flag to close the requester with the enter
+            key/button</li>
+          <li><strong>adjustFontSize </strong>: Flag to adjust the font size to the
+            button size automatically</li>
+        </ul>
+      </li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <p>This function always returns the SoftKeyboard window object, but be aware
+      that &nbsp;in most of the cases it is completely useless because this requester
+      is able to close the window and free the resources by itself when a text
+      is entered or when the requester is cancelled.
+      <br>&nbsp;
+      <br>The <code>callbackOk</code> function will be called with the entered text.
+      <br>The <code>callbackClose</code> function will be called when the requester
+      is closed by its close gadget.</p>
+    <p><u>NOTES</u>
+      <br>Actually only the following countries are supported:</p>
+    <ul>
+      <li>Italian</li>
+      <li>English</li>
+      <li>German</li>
+      <li>French</li>
+    </ul>
+    <p><span style="background-color:hsl(60,75%,60%);color:hsl(0,0%,0%);">This is a very complex object and needs deeper tests.</span>
+    </p>
+    <p><u>EXAMPLES</u>&nbsp;</p>
+    <p><u>SEE ALSO</u>
+      <br>&nbsp;</p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

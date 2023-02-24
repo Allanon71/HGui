@@ -1,0 +1,113 @@
+/************************************************
+ * HGui Test Script                             *
+ * Fabio Falcucci                               *
+ * Feb-2023                                     *
+ ************************************************
+
+BOX GADGET
+----------
+  The box gadget is mainly used to group other gadgets,
+  it is a passive gadget and it means that no actions 
+  can be attached to it, and it does not generate any
+  event.
+  It is a simple box with a single skin.
+ ************************************************/
+ 
+; INCLUDE THE LIBRARIES DEFINITIONS
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; Creates a new HGui window
+Local myWin = 
+  HGui.Window:new(
+    { title = "Box Gadget",
+      name  = "myWindow",
+      position   = { x = #CENTER, y = #CENTER },
+      size = { w = 400, h = 500 }
+      })
+
+; Disable auto-rendering to avoid flickering
+HGui.SetAutoRendering(False)
+
+; Here is the box gadget, as you can see we can create a gadget
+; without specifying any arguments.
+Local gBox = HGui.Gadget:new(#HGUI_BOX_GADGET)
+
+; We need a group gadget where we will group some buttons
+; to perform our tests (in this case there is only one button).
+Local gGroup = HGui.Gadget:new(#HGUI_GROUP_GADGET, 
+  { Caption = { "Actions" },              ; A little label to name the group
+    Group_LabelGap = 10,                  ; Label size in pixels
+    Group_LabelSide = #HGUI_ALIGN_LEFT }) ; On which side you want to place the label?
+    
+; Now we are going to build some buttons for our tests and examples.
+
+; The box gadget does not have many options or things that can be changed at
+; runtime except the theme.
+; We are going to define only a button that will change the box theme when clicked.
+gChangeTheme = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Push to change the theme" }, 
+    Caption = { "Change Theme" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          ; You can change the theme using several methods, for example you can
+          ; change the skin using one of the following options:
+          ;   :set() method
+          ;     Only this gadget will be changed but if in the future you will
+          ;     use the HGui.Theme.SetGlobalTheme() function to set/change a theme
+          ;     current settings will be overwritten.
+          ;   :setTheme() method
+          ;     Changing the theme with this method will protect this gadget from global
+          ;     changes.
+          ;   HGui.Theme.SetGlobalTheme() function
+          ;     Change the theme to all gadgets excluding the ones that have been
+          ;     changed usinfg the :setTheme() method.
+          ; -------------------------------------
+          ; We are going to use the :setTheme() method
+          ; The Box gadget has only one skin for the normal states called 'nskin',
+          ; we will generate a simple skin using an helper function.
+          gBox:setTheme(
+            { nskin = HGui.Theme.Generate_SkinBevel(
+                        GFX.BevelType_Standard, ; Type
+                        GFX.BevelFx_Recessed,   ; Fx
+                        Rnd(10+1),              ; Height
+                        GetRandomColor(),       ; Bright edges color
+                        GetRandomColor(),       ; Dark edges color
+                        GetRandomColor()        ; Middle area color
+                        )
+              },
+            True ;  <- Refresh the parent window
+            )
+          
+        EndFunction
+      } 
+    })
+
+; Now let's build the layout
+; -- gBox and gGroup are inside the window's root gadget
+myWin.rootgadget:layoutSet(
+  { gadgets = { gBox, gGroup },
+    weights = { 0.80, 0.20 },
+    gap     = 1,
+    type    = #HGUI_VERTICAL_LAYOUT,
+    }, True)
+
+; -- gChangeTheme button is inside the gGroup gadget
+gGroup:layoutSet(
+  { gadgets = { gChangeTheme },
+    weights = { 1 },
+    gap     = 1,
+    type    = #HGUI_VERTICAL_LAYOUT,
+    borders = { left = 1, right = 1, top = 1, bottom = 1 }
+    }, True)
+
+; Restores the auto-rendering
+HGui.SetAutoRendering(True)
+
+; Finally renders the window and enters the event loop
+myWin:Render()
+
+Repeat
+  WaitEvent()
+Forever

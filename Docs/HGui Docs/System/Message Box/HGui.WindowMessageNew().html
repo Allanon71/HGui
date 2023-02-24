@@ -1,0 +1,50 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>HGui.Window:MessageNew()</h1>
+
+    <p><span class="text-big"><code>winObj = HGui.Window:MessageNew(params)</code></span>
+    </p>
+    <p>Create a new window for ‘please wait’ messages kind.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>params </strong>: A table that defines the window, see <code>:New()</code> method
+        for details. Also these additional tags are supported:
+        <ul>
+          <li><strong>message</strong> : The text message to show in the box.</li>
+          <li><strong>size </strong>: A table with the <code>w</code> and <code>h</code> fields
+            that represent the InputBox size in pixels, default is <code>{ w = 300, h = 100 }</code>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <ul>
+      <li><strong>winObj</strong> : The created window's object.</li>
+    </ul>
+    <p><u>NOTES</u>
+      <br>You can close this window by calling the <code>:Free()</code> method as
+      for normal windows.
+      <br>
+      <br><u>EXAMPLES</u>
+    </p>
+    <p><u>SEE ALSO</u>
+    </p>
+    <ul>
+      <li><a href="HGui.WindowMessageNew().html"><u>HGui.Window:MessageNew()</u></a>
+      </li>
+    </ul>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

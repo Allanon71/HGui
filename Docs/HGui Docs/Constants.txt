@@ -1,0 +1,101 @@
+Here are all the constants defined within HGui, you may need them to run certain methods & functions.
+
+GADGET CLASSES
+--------------
+#HGUI_AREA = 1                        AREA object type
+#HGUI_BOX_GADGET = 2                  BEVELBOX gadget
+#HGUI_VDIVIDER_GADGET = 3             VERTICAL DIVIDER gadget
+#HGUI_HDIVIDER_GADGET = 4             HORIZONTAL DIVIDER gadget
+#HGUI_LABEL_GADGET = 5                LABEL gadget
+#HGUI_GROUP_GADGET = 6                GROUP gadget
+  #HGUI_GTYPE_GENERIC = 9               GROUP/GENERIC gadget
+  #HGUI_GTYPE_CHECK = 10                GROUP/CHECK Boxes gadget
+  #HGUI_GTYPE_RADIO = 11                GROUP/RADIO Checkmarks gadget
+#HGUI_BUTTON_GADGET = 12              BUTTON gadget
+#HGUI_SWITCH_GADGET = 13              SWITCH gadget
+#HGUI_SCROLLBAR_GADGET = 14           SCROLLBAR gadget
+#HGUI_PROGRESSBAR_GADGET = 15         PROGRESSBAR gadget
+#HGUI_SLIDER_GADGET = 16              SLIDER gadget
+#HGUI_KNOB_GADGET = 17                KNOB gadget
+#HGUI_TEXT_GADGET = 18                TEXT gadget
+#HGUI_LISTVIEW_GADGET = 19            LISTVIEW GADGET
+#HGUI_TREEVIEW_GADGET = 20            TREEVIEW GADGET
+#HGUI_DROPDOWN_GADGET = 21            DROPDOWN Gadget
+#HGUI_IMAGE_GADGET = 22               IMAGE Gadget
+#HGUI_VIRTUAL_GADGET = 23             VIRTUAL Gadget
+#HGUI_CANVAS_GADGET = 24              CANVAS Gadget
+
+#HGUI_PREBUILT_GROUP = 99             PREBUILT GROUP (used mostly for Menus)
+
+HGui.GadgetDescriptions =                      | In this table all gadgets type has been described
+  { [#HGUI_BOX_GADGET         ] = "BOX",       | to be able to print more understandable debug
+    [#HGUI_VDIVIDER_GADGET    ] = "VDIVIDER",  | messages and logs.
+    [#HGUI_HDIVIDER_GADGET    ] = "HDIVIDER",
+    [#HGUI_LABEL_GADGET       ] = "LABEL",
+    [#HGUI_GROUP_GADGET       ] = "GROUP",
+    [#HGUI_BUTTON_GADGET      ] = "BUTTON",
+    [#HGUI_SWITCH_GADGET      ] = "SWITCH",
+    [#HGUI_SCROLLBAR_GADGET   ] = "SCROLL BAR",
+    [#HGUI_PROGRESSBAR_GADGET ] = "PROGRESS BAR",
+    [#HGUI_SLIDER_GADGET      ] = "SLIDER",
+    [#HGUI_KNOB_GADGET        ] = "KNOB",
+    [#HGUI_TEXT_GADGET        ] = "TEXT",
+    [#HGUI_LISTVIEW_GADGET    ] = "LISTVIEW",
+    [#HGUI_TREEVIEW_GADGET    ] = "TREEVIEW",
+    [#HGUI_DROPDOWN_GADGET    ] = "DROP DOWN",
+    [#HGUI_IMAGE_GADGET       ] = "IMAGE",
+    [#HGUI_VIRTUAL_GADGET     ] = "VIRTUAL",
+    [#HGUI_CANVAS_GADGET      ] = "CANVAS",
+    [#HGUI_PREBUILT_GROUP     ] = "MENU GROUP"
+    }
+    
+#HGUI_ENABLED  = True                 ENABLED gadget status
+#HGUI_DISABLED = False                DISABLED gadget status
+
+GADGET STATES
+-------------
+#HGUI_NORMAL_STATE    = 1             NORMAL gadget state
+#HGUI_HILIGHTED_STATE = 2             HILIGHTED gadget state
+#HGUI_PUSHED_STATE    = 4             PUSHED gadget state
+#HGUI_DISABLED_STATE  = 8             DISABLED gadget state
+#HGUI_NPUSHED_STATE   = 16            NORMAL PUSHED
+#HGUI_HPUSHED_STATE   = 32            HILIGHTED PUSHED
+#HGUI_DPUSHED_STATE   = 64            DISABLED PUSHED
+
+HGui.StatusDescriptions =                      | This table hold all status description to be able
+  { [#HGUI_NORMAL_STATE]   = "Normal",         | to print undestandable debug messages and logs.
+    [#HGUI_HILIGHTED_STATE]= "Hilighted",
+    [#HGUI_PUSHED_STATE]   = "Pushed",
+    [#HGUI_DISABLED_STATE] = "Disabled",
+    [#HGUI_NPUSHED_STATE]  = "Normal/Pushed",
+    [#HGUI_HPUSHED_STATE]  = "Hilighted/Pushed",
+    [#HGUI_DPUSHED_STATE]  = "Disabled/Pushed"
+    }
+    
+#HGUI_VISIBLE = True                 VISIBLE gadget
+#HGUI_HIDDEN  = False                HIDDEN gadget
+
+GADGET'S LAYOUTS
+----------------
+#HGUI_VERTICAL_LAYOUT   = 1          VERTICAL Layout
+#HGUI_HORIZONTAL_LAYOUT = 2          HORIZONTAL Layout
+#HGUI_GRID_LAYOUT       = 3          GRID Layout
+
+ALIGNMENT CONSTANTS
+-------------------
+#HGUI_ALIGN_LEFT   = 1               LEFT alignment
+#HGUI_ALIGN_RIGHT  = 2               RIGHT alignment
+#HGUI_ALIGN_TOP    = 4               TOP alignment
+#HGUI_ALIGN_BOTTOM = 8               BOTTOM alignment
+#HGUI_ALIGN_HCENTER = 16             HORIZONTALLY CENTERED
+#HGUI_ALIGN_VCENTER = 32             VERTICALLY CENTERD
+#HGUI_ALIGN_CENTER  = 48             HORIZONATLLY & VERTICALLY CENTERED
+
+#HGUI_TEXTEDGE_FLAT     = 1          FLAT Text effect
+#HGUI_TEXTEDGE_RAISED   = 2          RAISED Text effect
+#HGUI_TEXTEDGE_RECESSED = 3          RECESSED Text effect
+
+#HGUI_IMAGEMODE_FITMIN  = 1          IMAGE FIT MIN scaling
+#HGUI_IMAGEMODE_FITMAX  = 2          IMAGE FIT MAX scaling
+#HGUI_IMAGEMODE_SCALE   = 3          IMAGE SCALE scaling
+#HGUI_IMAGEMODE_STRETCH = 4          IMAGE STRETCH scaling

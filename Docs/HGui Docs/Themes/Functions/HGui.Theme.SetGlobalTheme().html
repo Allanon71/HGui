@@ -1,0 +1,47 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>HGui.Theme.SetGlobalTheme()</h1>
+
+    <p><span class="text-big"><code>result = HGui.Theme.SetGlobalTheme(gadgetType, Theme)</code></span>
+    </p>
+    <p>Apply the given <code>Theme</code> to all gadget classes specified by <code>gadgetType</code> only
+      if the gadget's theme has not been customized at creation time.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>gadgetType </strong>: Can be any of the gadget constant specified
+        <a
+        href="../../Constants.txt">here</a>or you can use the <code>#ALL</code> constant to apply the theme
+          to all the supported gadgets.</li>
+      <li><strong>Theme </strong>: A complete theme table to apply to the gadgets
+        as described <a href="../Data%20Structures.html">here</a>
+      </li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <ul>
+      <li><strong>result </strong>: True if the operation was completed without
+        errors otherwise False</li>
+    </ul>
+    <p><u>NOTES</u>
+    </p>
+    <p style="margin-left:40px;">Custom skins will not be changed. &nbsp;A custom skin is a skin that has
+      been set using the gadget's method <code>:setTheme()</code>
+      <br><span style="background-color:hsl(0,75%,60%);">&nbsp;This function is in are build/fix state&nbsp;</span>
+    </p>
+    <p><u>EXAMPLES</u>&nbsp;</p>
+    <p><u>SEE ALSO</u>
+    </p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

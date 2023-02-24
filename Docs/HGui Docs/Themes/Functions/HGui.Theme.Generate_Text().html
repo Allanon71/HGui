@@ -1,0 +1,56 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>HGui.Theme.Generate_Text()</h1>
+
+    <p><span class="text-big"><code>skinDef = HGui.Theme.Generate_Text(size, style, color, align, edge, shadow, margins)</code></span>
+    </p>
+    <p>Generate a simple a CText object you can used to skin gadgets.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>size </strong>: Font size in pixels</li>
+      <li><strong>style </strong>: Font style using Hollywood inbuilt constants</li>
+      <li><strong>color </strong>: ARGB text color</li>
+      <li><strong>align </strong>: Text alignment using one or more of the following
+        constants:</li>
+    </ul><pre><code class="language-text-plain">	#HGUI_ALIGN_LEFT
+	#HGUI_ALIGN_RIGHT
+	#HGUI_ALIGN_TOP
+	#HGUI_ALIGN_BOTTOM
+	#HGUI_ALIGN_HCENTER
+	#HGUI_ALIGN_VCENTER
+	#HGUI_ALIGN_CENTER</code></pre>
+    <ul>
+      <li><strong>edge </strong>: Set to True to apply a raised effect</li>
+      <li><strong>shadow </strong>: Set to True to apply a shadow effect</li>
+      <li><strong>margins </strong>: An optional table with the text margins in
+        pixels with the following items:</li>
+    </ul><pre><code class="language-text-plain">	top
+	bottom
+	left
+	right</code></pre>
+    <p><u>OUTPUT</u>
+    </p>
+    <ul>
+      <li><strong>CTextObj </strong>: A CText object</li>
+    </ul>
+    <p><u>NOTES</u>
+    </p>
+    <p><u>EXAMPLES</u>
+    </p>
+    <p style="margin-left:40px;"><code>f006 - HGui.Theme.Generate_Text().hws</code>
+    </p>
+    <p><u>SEE ALSO</u>
+    </p>
+  </body>
+
+</html>

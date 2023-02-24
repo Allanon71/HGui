@@ -1,0 +1,69 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>HGui.Theme.Generate_Set_SkinGradient()</h1>
+
+    <p><span class="text-big"><code>states = HGui.Theme.Generate_Set_SkinGradient(color1, color2)</code></span>
+    </p>
+    <p>Generate a set of skins, one for each gadget state, with a 2 colors gradient
+      in two layers, one with the gradient and one with a bevel box. Colors are
+      modified for each generated state as described below:</p>
+    <ul>
+      <li>nskin : normal state, color 1 is brighten by 10 units, color 2 is darken
+        by 10 units.</li>
+      <li>hskin : hilighted state, color1 is brighten by 20 units, color 2 is brighten
+        by 20 units.</li>
+      <li>pskin : pushed state, as hskinDef but colors are inverted</li>
+      <li>dskin : disabled state, color 1 is darken by 20 units, color 2 is brighten
+        by 20 units, gradient is not applied</li>
+    </ul>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>color1 </strong>: color used for the bright edges and as the starting
+        gradient color</li>
+      <li><strong>color2 </strong>: color used for the dark edges and as the ending
+        gradient color</li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <ul>
+      <li><strong>states </strong>: A set of skinDef tables with the following items
+        <ul>
+          <li>nskin (normal state skin)</li>
+          <li>hskin (hilighted state&nbsp;skin)</li>
+          <li>pskin (pushed state&nbsp;skin)</li>
+          <li>dskin (disabled state skin)</li>
+        </ul>
+      </li>
+    </ul>
+    <p><u>NOTES</u>
+    </p>
+    <p style="margin-left:40px;">This function is particularly suited for generating button skins</p>
+    <p><u>EXAMPLES</u>
+    </p>
+    <p style="margin-left:40px;"><code><u>f005 - HGui.Theme.Generate_Set_SkinGradient().hws</u></code>
+    </p>
+    <p><u>SEE ALSO</u>
+    </p>
+    <ul>
+      <li><a href="HGui.Theme.Generate_SkinBevel(.html">HGui.Theme.Generate_SkinBevel()</a>
+      </li>
+      <li><a href="HGui.Theme.Generate_SkinColor(.html">HGui.Theme.Generate_SkinColor()</a>
+      </li>
+      <li><a href="HGui.Theme.Generate_SkinDouble.html">HGui.Theme.Generate_SkinDoubleGradient()</a>
+      </li>
+      <li><a href="HGui.Theme.Generate_SkinGradie.html">Hgui.Theme.Generate_SkinGradient()</a>
+        <br>&nbsp;</li>
+    </ul>
+  </body>
+
+</html>

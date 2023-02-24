@@ -1,0 +1,135 @@
+/******************************************************************************
+HGUI : Tutorial 218 - Window's Menu 2, persistent values    v1.2 : 09/02/2023 *
+*******************************************************************************
+In order to let the menu gadget's values persist we need to handle them in
+our callback function.
+Basically we need to update the menu definition with the value we want to see
+when the menu is reopened and we will use a callback function for this
+purpose.
+If a gadget triggers a close menu event you can use the callback field to 
+specify a callback function, but if the gadget does not trigger a close menu
+event you have to use the gadget event handler to take action.
+For example with sliders, scrollers and knobs you can use the OnChange event
+to take care of their values and store them into the menu definition.
+
+We have already said that every gadget stored in a menu has an additional
+field called menuDef that points to its menu definition, so it's easy:
+  1. Read the value using the OnChange event
+  2. Put the value into the menuDef
+  
+Have a look at the 'handleSlider()' callback function.
+******************************************************************************/
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+DebugPrint("Let's go!")
+
+;DBG.Console.Enable(True)
+;DBG.Console.AddChannel(HGui.DebugChannel)
+
+; Let's start creating a window where we will attach the menu.
+win = HGui.Window:new({ Title = "Menu items with (*) works..." })
+
+; This function will handle all Menu callbacks, callback functions
+; will be called with the caller gadget structure as argument:
+Function MenuHandler(gad)
+  DebugPrint("RECEIVED A MENU EVENT FROM GADGET " .. gad.Name)
+  
+  ; Let's make values persistent
+  ; ----------------------------
+  ; Any gadget attached to a menu have a field called 'menuDef' that
+  ; points to the menu item definition, you have full access to the
+  ; gadget definition at runtime allowing you to do wonderful things
+  ; but for now will just handle the values persistance :)
+  ; Don't forget to set the callback for every gadget you wish to handle!
+  
+  Switch gad.menuDef.type
+    ; We want to handle only switches here
+    Case #HGUI_SWITCH_GADGET
+      ; Here we can handle switches
+      Local params = gad.menuDef.params
+      If params.value = 0
+        params.value = 1
+      Else
+        params.value = 0
+      EndIf
+           
+  EndSwitch
+  
+EndFunction
+
+; To handle our slider we will use another callback function
+Function handleSlider(gad)
+  ; Let's read the slider value
+  Local v = gad.private.value
+  
+  ; and put it on the menu definition
+  gad.menuDef.params.value = v
+  
+  DebugPrint("Slider value changed to: ", v)
+  
+EndFunction
+
+; Here is the menu definition
+Local myMenu =
+  { { type    = #HGUI_BUTTON_GADGET,     ; The HGui gadget class
+      params  = { Caption = "File" },    ; The button's caption, and optionally other button's parameters!
+      submenu =                          ; This button leads to a submenu that we can define here
+        { ; First submenu item (index 0)
+          { type     = #HGUI_BUTTON_GADGET,    ; This is a button
+            params   = { Name = "menuNEW",     ; We are setting the name to better recognize the gadget that will raise the callback
+                         Caption = "*New"   }, ; The button's caption
+            callback = MenuHandler },
+          ; Second submenu item (index 1)
+          { type = #HGUI_BUTTON_GADGET, params = { Name = "menuOPEN",  Caption = "*Open"  }, callback = MenuHandler },
+          
+          ; and so on...
+          { type = #HGUI_BUTTON_GADGET, params = { Name = "menuSAVE",  Caption = "*Save"  }, callback = MenuHandler },
+          { type = #HGUI_BUTTON_GADGET, params = { Name = "menuCLOSE", Caption = "*Close" }, callback = MenuHandler },
+          { type = #HGUI_VDIVIDER_GADGET, params = {} },
+          { type = #HGUI_BUTTON_GADGET, params = { Caption = "*Export as" }, ; This one lead to another submenu!
+            submenu = 
+              { { type = #HGUI_BUTTON_GADGET,   params = { Name = "menuExportPNG", Caption = "*PNG" }, callback = MenuHandler },
+                { type = #HGUI_BUTTON_GADGET,   params = { Name = "menuExportJPG", Caption = "*JPG" }, callback = MenuHandler },
+                { type = #HGUI_BUTTON_GADGET,   params = { Name = "menuExportBMP", Caption = "*BMP" }, callback = MenuHandler },
+                { type = #HGUI_VDIVIDER_GADGET, params = {} },
+                { type = #HGUI_SWITCH_GADGET,   params = { Caption = "Auto Export",  Value = 0 }, callback = Menuhandler }, ; <-- event handler added!
+                { type = #HGUI_SWITCH_GADGET,   params = { Caption = "Make Backups", Value = 1 }, callback = Menuhandler }, ; <-- event handler added!
+                { type = #HGUI_VDIVIDER_GADGET, params = {} },
+                { type = #HGUI_LABEL_GADGET,    params = { Caption = "Compression Level" } },
+                { type = #HGUI_SLIDER_GADGET,   params = { name = "Slider",      ; Here is a slider and its parameters!
+                                                           range = { 1, 100 }, 
+                                                           value = 70,
+                                                           cursorsize = 0.1,
+                                                           orientation = #HGUI_HORIZONTAL_LAYOUT,
+                                                           actions = { OnChange = handleSlider } ; <-- native gadget event handler!
+                                                           },
+                                                callback = Nil } ; <-- we don't set the event handler here!
+              } 
+            },
+          { type = #HGUI_BUTTON_GADGET, params = { Caption = "Import as" },
+            submenu = 
+              { { type = #HGUI_BUTTON_GADGET, params = { Caption = "Vector Image..." } },
+                { type = #HGUI_BUTTON_GADGET, params = { Caption = "Bitmap Image..." } },
+                { type = #HGUI_BUTTON_GADGET, params = { Caption = "IFF Image..." } }
+              } 
+          },
+          { type = #HGUI_VDIVIDER_GADGET, params = {} },
+          { type = #HGUI_BUTTON_GADGET, params = { Caption = "Quit" } },
+        } 
+    },
+    { type = #HGUI_BUTTON_GADGET, params = { Caption = "Edit" } },
+    { type = #HGUI_BUTTON_GADGET, params = { Caption = "Tools" } },
+    { type = #HGUI_BUTTON_GADGET, params = { Caption = "Help" } }
+  }
+  
+; Setup the menu using menuDef
+win:menuSet(myMenu)
+
+; -----------------------------------------------------------------------------
+; This menu system is very powerful but a bit complex :)
+; -----------------------------------------------------------------------------
+
+Repeat
+  WaitEvent()
+Forever

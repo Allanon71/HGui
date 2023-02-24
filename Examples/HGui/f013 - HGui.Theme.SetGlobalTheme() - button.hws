@@ -1,0 +1,84 @@
+/*
+********************
+* HGui Test Script *
+* Fabio Falcucci   *
+*    Feb-2023      *
+********************
+  This script is used as a test and to show how it's possible to use the
+helper function 
+  HGui.Theme.SetGlobalTheme()
+to globally change the theme for a specific gadget class, in this case for
+BUTTON gadgets.
+-------------------
+
+HGui.Theme.SetGlobalTheme(GadgetType, Theme)
+  Set the specified theme to the given gadget class
+*/
+
+; INCLUDE THE LIBRARIES DEFINITIONS
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; Creates a new HGui window
+Local myWin = HGui.Window:new(
+                { title = "HGui.Theme.SetGlobalTheme()",
+                  name  = "myWindow",
+                  position   = { x = #CENTER, y = #CENTER }
+                  })
+                   
+; Disable auto-rendering to avoid flickering
+HGui.SetAutoRendering(False)
+
+; Let's create 3 skins that we will use with our BUTTON gadget
+Local current, skins = 0, {}
+skins = { [0] = { nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $44EEEE, $008888, $33DDDD),
+                  hSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $bbbbbb, $666666, $ffeedd),
+                  pSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEEEEE, $888888, $AAAAAA),
+                  dSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $BBBBBB),
+                  nText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, False),
+                  hText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True),
+                  pText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True),
+                  dText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $666666, #HGUI_ALIGN_CENTER, False, False)
+                  },
+          [1] = { nSkin = HGui.Theme.Generate_SkinDoubleGradient($444444, $DDDDDD, 3),
+                  hSkin = HGui.Theme.Generate_SkinDoubleGradient($DDDDDD, $444444, 3),
+                  pSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $FFFFFF, $666666, $AAAAAA),
+                  dSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $BBBBBB),
+                  nText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, False),
+                  hText = HGui.Theme.Generate_Text(18, #ANTIALIAS+#BOLD, $000000, #HGUI_ALIGN_CENTER, False, True),
+                  pText = HGui.Theme.Generate_Text(20, #ANTIALIAS+#BOLD, $000000, #HGUI_ALIGN_CENTER, True, True),
+                  dText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $666666, #HGUI_ALIGN_CENTER, False, False)
+                  }
+          }
+
+; We are going to create a KNOB for our test and a button we will use
+; to rotate the skins we have defined above.
+Local myBtn    = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { Caption = "BUTTON GADGET"})
+Local myButton = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { caption = { "Click me", "to change the BUTTON skin"},
+    actions = {
+      onpushed =
+        Function(gadObj)
+          ; Change the buttons skin everytime the button is pushed
+          ; As you will see, both button will change their skins since
+          ; it is globally set.
+          HGui.Theme.SetGlobalTheme(#HGUI_BUTTON_GADGET, skins[current])
+          current = current+1
+          If current > 1 Then current = 0
+        EndFunction }
+      })
+
+
+; Let's arrange the gadgets into the window
+mywin.rootgadget:layoutSet({ gadgets = { myBtn, myButton },
+                             weights = { 0.70, 0.30 },
+                             gap     = 1
+                             }, True )
+                             
+; Finally enable the auto-rendering and refresh the window
+HGui.SetAutoRendering(True)
+myWin:Render()
+                 
+Repeat
+   WaitEvent()
+Forever

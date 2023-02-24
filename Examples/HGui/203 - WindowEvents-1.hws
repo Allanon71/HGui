@@ -1,0 +1,77 @@
+/*******************************************************************************
+* HGUI : Tutorial 203 - Window's Events - part 1             v1.2 : 09/02/2023 *
+********************************************************************************
+In this tutorial we will see how we can attach callback functions to window's
+events.
+This way you will be able to detect and automatically execute your functions
+(called callback functions) when a window's event occurs.
+********************************************************************************/
+
+;::: INCLUDE THE LIBRARIES DEFINITIONS :::::::::::::::::::::::::::::::::::::::::
+@INCLUDE "../../+Includes.hws"          ; Path relative to this application
+@INCLUDE #INC_HGUI                      ; Include the HGui library
+
+; UNCOMMENT THE FOLLOWING TWO LINES IF YOU WANT TO SEE WHAT EXACTLY HAPPEN.
+; DBG.Console.Enable(True)
+; DBG.Console.AddChannel(HGui.DebugChannel)
+
+/*******************************************************************************
+Since we want to attach callback functions to the window's events we have to
+define them. Each window can react on one or more of the following events:
+    OnClose                  Occurs when the window is closed
+    OnMove                   Occurs when the window is moved
+    OnActivate               Occurs when the window get the focus
+    OnDeactivate             Occurs when the window loose the focus
+    OnHide                   Occurs when the window is hidden/iconified
+    OnShow                   Occurs when the window is shown/deiconified
+    OnSize                   Occurs when the window is resized
+    OnDrop                   Occurs when an item is dropped into the window
+All callback functions can be defined at creation time using the 'options' table
+where you can specify to track the windows in the 'events' subtable field.
+Note that all callback functions will be called with two arguments, the first
+one is a table describing the occurred event, the second one is the window
+object that have raised the event.
+********************************************************************************/
+
+;::: LET'S DEFINE SOME CALLBACK FUNCTIONS ::::::::::::::::::::::::::::::::::::::
+Function windowMoved(msg, win)
+  ; This function will be attached to the 'OnMove' event and will be called every
+  ; time the window is moved around.
+  DebugPrint("+-- OnMove callback function ---")
+  DebugPrint("| " .. GetTime(True) .. " : The window " .. win.name .. " has been moved!")
+  DebugPrint("+-- Message Contents --\n")
+  DBG.DumpTable(msg) ; This function is part of the debug library and is used to
+                     ; dump tables with identation.
+  DebugPrint("+----------------------------------------\n")
+EndFunction
+
+Function windowResized(msg, win)
+   ; This one will be attached to the 'OnSize' event and will be called every
+   ; time the window is resized.
+   DebugPrint("+-- OnSize callback function ---")
+   DebugPrint("| " .. GetTime(True) .. " : The window " .. win.name .. " has been resized!")
+   DebugPrint("+-- Message Contents --\n")
+   DBG.DumpTable(msg)
+   DebugPrint("+----------------------------------------\n")
+EndFunction
+
+; Window creation
+Local myWin0 = HGui.Window:new(
+                 { title = "My First Window!",
+                   name  = "win0",
+                   position = { x = 20,  y = 20 },
+                   size     = { w = 400, h = 100 },
+                   Events   = ;  In this table you have to specify the window's events you wish to track.
+                     { OnMove = windowMoved,  ; <- Just specify the functions previously defined.
+                       OnSize = windowResized
+                       }
+                   })
+
+
+Repeat
+   WaitEvent()
+Forever
+
+/*******************************************************************************
+ -> Try to detect more events from the supported ones.
+********************************************************************************/

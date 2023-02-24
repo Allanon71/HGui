@@ -1,0 +1,43 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>HGui.gadgetExistsByName()</h1>
+
+    <p><span class="text-big"><code>result, gadObj = HGui.gadgetExistsByName(name)</code></span>
+    </p>
+    <p>Returns <code>TRUE</code> if a gadget with the specified name exists, otherwise
+      returns <code>FALSE</code>.
+      <br>As second argument returns the gadget object if it was found.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>name </strong>: Gadget name to find</li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <ul>
+      <li><strong>result</strong> : <code>TRUE</code> if exists or <code>FALSE</code> if
+        not.</li>
+      <li><strong>gadget</strong> : If result is <code>TRUE</code> returns the gadget
+        object.</li>
+    </ul>
+    <p><u>NOTES</u>
+    </p>
+    <p><u>EXAMPLES</u>&nbsp;</p><pre><code class="language-text-plain"> ; Check if a gadget named 'myButton' exists
+ If HGui.gadgetExistsByName("myButton")
+   DebugPrint("FOUND!")
+ EndIf</code></pre>
+    <p><u>SEE ALSO</u>
+    </p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

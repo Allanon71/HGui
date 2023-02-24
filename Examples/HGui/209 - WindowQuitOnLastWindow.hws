@@ -1,0 +1,63 @@
+/*******************************************************************************
+HGUI : Tutorial 209 - Quit on last window                    v1.2 : 09/02/2023 *
+********************************************************************************
+There is a flag that allow you to quit automatically your program when the last
+opened window is closed.
+That's usefull to shorten your code since all needed stuff and controls are made
+by HGui.
+Below you will find an example using this feature. 
+By default when the latest opened window is closed your application is
+terminated but using this feature you can let your program continue to live
+even if there are no more windows opened.
+
+You can switch this feature using the function:
+  HGui.SetQuitOnLastWindow(True|False)
+*******************************************************************************/
+
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; Change the QuitOnLastWindow behaviour using a requester
+Local answer = SystemRequest("Question!",
+                             "Do you want to quit the application when all the opened windows are closed?",
+                             "Yes|No")
+If answer = 0
+  HGui.SetQuitOnLastWindow(False)
+  
+Else
+  HGui.SetQuitOnLastWindow(True)
+  
+EndIf
+
+; Open two windows for our tests
+win1 = HGui.Window:new(
+   { title    = "Close me! (1)",
+     position = { x = 200, y = 200 },
+     size     = { w = 400, h = 200 },
+     flags    = { closeable = True }
+     })
+
+win2 = HGui.Window:new(
+   { title    = "Close me! (2)",
+     position = { x = 300, y = 300 },
+     size     = { w = 400, h = 200 },
+     flags    = { closeable = True }
+     })
+
+; To demonstrate that the program is still running we will setup an interval
+; function, you will need to press CTRL-C in the console window to break the
+; program.
+Function StillAlive()
+  DebugPrint(GetDate(True) .. " : I'm still running! (CTRL-C or close this window to end)")
+EndFunction
+
+SetInterval(Nil, StillAlive, 1000)
+
+DebugPrint("--- Program started ---")
+Repeat
+  WaitEvent
+Forever
+
+
+
+

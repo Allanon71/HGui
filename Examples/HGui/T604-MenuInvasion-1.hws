@@ -1,0 +1,433 @@
+/*******************************************************************************
+HGUI : Tutorial 212 - Complex stuff                          v1.0 : 04.09.2017 *
+********************************************************************************
+In this last tutorial about window's system menus and window's contextual
+menus we see some complex stuff about intercation between menu's items and
+interface gadgets.
+********************************************************************************/
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; We are going to create two windows, each with its own menu and its own
+; contextual menu.
+
+; Let's go with the first window
+; Menu definition table of the first window
+;   +-> File -+-> Open file
+;   |         +-> Process file
+;   +-> About
+
+Local menu1 =
+ { { type = #HGUI_BUTTON_GADGET,
+     params = { Caption = "File..." },
+     submenu = {
+      { type = #HGUI_BUTTON_GADGET,
+        params = { Caption = "Open file" },
+        callback = Function()
+                     SystemRequest("Window 1 : OPEN FILE", "You have select the <Open file> item", "OK", #REQICON_INFORMATION)
+                   EndFunction
+        }, 
+      { type = #HGUI_BUTTON_GADGET,
+        params = { Caption = "Process file" },
+        callback = Function()
+                     SystemRequest("Window 1 : PROCESS FILE", "You have select the <Process file> item", "OK", #REQICON_INFORMATION)
+                   EndFunction
+        }
+      }
+    },
+
+    { type = #HGUI_BUTTON_GADGET,
+      params = { Caption = "About" },
+      callback = Function()
+                   SystemRequest("About Window 1", "This is the top menu of window 1", "OK", #REQICON_INFORMATION)
+                 EndFunction
+      }
+    }
+          
+; Here is the contextual menu definition table of the first window
+;   +-> Label (for the menu title)
+;   +-> Submenu +-> Setup data
+;   |           +-> Replace data
+;   +-> About
+
+Local menu1C =
+ {{ type = #HGUI_LABEL_GADGET,
+    params = { Caption = "[color=#RED]This is the context menu of [b]window 1[/b][/color]" } },
+  { type = #HGUI_BUTTON_GADGET,
+    params = { Caption = "Submenu" },
+    submenu = {
+      { type = #HGUI_BUTTON_GADGET,
+        params = { Caption = "Setup data" },
+        callback = Function()
+                     SystemRequest("Window 1 Context", "You have selected <Setup data> from context menu of window 1", "OK", #REQICON_INFORMATION)
+                   EndFunction
+        },
+      { type = #HGUI_BUTTON_GADGET,
+        params = { Caption = "Replace data" },
+        callback = Function()
+                     SystemRequest("Window 1 Context", "You have selected <Replace data> from context menu of window 1", "OK", #REQICON_INFORMATION)
+                   EndFunction
+        },
+      }
+    },
+    { type = #HGUI_BUTTON_GADGET,
+      params = { Caption = "About" },
+      callback = Function()
+                   SystemRequest("About Context menu of Window 1", "This is the context menu of window 1", "OK", #REQICON_INFORMATION)
+                 EndFunction
+      }
+    }
+          
+; Now we are goin' to define a contextual menu for the first button of the
+; first window.
+Local menu1G =
+       {{ type = #HGUI_LABEL_GADGET,
+          params = { Caption = "[color=#PURPLE]This is the context window 1, Button 1[/color]" } },
+        { type = #HGUI_BUTTON_GADGET,
+          params = { Caption = "Options" },
+          submenu = {
+            { type = #HGUI_BUTTON_GADGET,
+              params = { Caption = "Set button 1 description..." },
+              callback = Function(gadget)
+                           ; Selecting this item we are going to change the button
+                           ; <myButton1A> description!
+                           Local gad = HGui.gadgetFindByName("myButton1A")
+                           gad:set({ Caption = { "Description changed!", 
+                                                 "Action called from:", 
+                                                 "<Set button description> menu item",
+                                                 ToString(GetDate(True)) 
+                                                 } 
+                                     }, True)
+                         EndFunction
+              },
+            { type = #HGUI_BUTTON_GADGET,
+              params = { Caption = "Change *THIS* menu item description..." },
+              callback = Function(gadget)
+                           ; When we select this menu item we will receive its gadget
+                           ; structure, so we can access its menu definition and change
+                           ; its description like this:
+                           gadget.menuDef.params.caption = "This description has been changed from this same item! (" .. ToString(GetDate(True)) .. ")"
+                         EndFunction
+              },
+            }
+          },
+          { type = #HGUI_BUTTON_GADGET,
+            params = { Caption = "About" },
+            callback = Function()
+                         SystemRequest("About Context menu of Window 1, Button 1", "This is the context menu of window 1 coming from Button 1", "OK", #REQICON_INFORMATION)
+                       EndFunction
+            }
+        }
+
+; Let's go with the second window and its menus
+
+; Top menu for the second window
+
+Local menu2 =
+ {  { type = #HGUI_BUTTON_GADGET,
+     params = { Caption = "Elaborate..." },
+     submenu = {
+      ; We are going to force the menu width with the following
+      ; parameter
+      menuWidth = 180,
+      
+      { type = #HGUI_BUTTON_GADGET,
+        params = { Caption = "Available operations" },
+        submenu = 
+          { { type = #HGUI_BUTTON_GADGET,
+              params = { Caption = "Click me" },
+              callback = Function()
+                           SystemRequest("Window 2 : Top menu", "You have selected <Click me> from <Available operations> submenu", "OK", #REQICON_INFORMATION)
+                         EndFunction
+              }
+            }
+        },
+
+      ; Prebuilt groups are used to group several gadgets in one menu item
+      ; in this example we are going to create a group with two <Check> gadgets
+      { type = #HGUI_PREBUILT_GROUP,
+        params = { root = 
+                    { type = #HGUI_GROUP_GADGET, 
+                      params = { Caption = { "CHECK" }, GroupType = #HGUI_GTYPE_CHECK, Group_LabelGap = 4, Group_LabelSide = #HGUI_ALIGN_LEFT }
+                      },
+                   childs = 
+                    { { type = #HGUI_SWITCH_GADGET, params = { Value = 0, Caption = { "Check 1" } } },
+                      { type = #HGUI_SWITCH_GADGET, params = { Value = 1, Caption = { "Check 2" } } }
+                      },
+                   layout = #HGUI_VERTICAL_LAYOUT,
+                  },
+        size = 60,
+        },
+
+      ; The same here but with two <RADIO> gadgets, arranged horizontally
+      { type = #HGUI_PREBUILT_GROUP,
+        params = { root = 
+                    { type = #HGUI_GROUP_GADGET, 
+                      params = { Caption = { "RADIO" }, GroupType = #HGUI_GTYPE_RADIO, Group_LabelGap = 4, Group_LabelSide = #HGUI_ALIGN_LEFT }
+                      },
+                   childs = 
+                    { { type = #HGUI_SWITCH_GADGET, params = { Value = 0, Caption = { "Radio 1" } } },
+                      { type = #HGUI_SWITCH_GADGET, params = { Value = 1, Caption = { "Radio 2" } } }
+                      },
+                   layout = #HGUI_HORIZONTAL_LAYOUT,
+                   gap = 2
+                  },
+        size = 60,
+        },
+      
+      ; Finally we have a big button item
+      { type = #HGUI_BUTTON_GADGET,
+        params = { Caption = "Click and look at the\nwindow 1 top bar menu!!" },
+        callback = Function()
+                     ; This nice callback function will activate an interval
+                     ; function to change the top menu item description (window 1)
+                     If Not(IsNil(IntervalID))
+                       ; If an interval is already running clear it before
+                       ; creating the new one
+                       ClearInterval(IntervalID)
+                       IntervalID = Nil
+                       counter = 0
+                     EndIf
+                     
+                     ; Setup the interval function to set the menu1, item 1,
+                     ; description!
+                     IntervalID = SetInterval(Nil, 
+                       Function()
+                         counter = counter + 1
+                         menu1[0].gadget:Set({ caption = ToString(counter) }, True)
+                       EndFunction,
+                     250)
+                   EndFunction,
+        ; Let's force the item height to 55 pixels
+        size = 55
+        
+        },
+      }
+    },
+    { type = #HGUI_BUTTON_GADGET,
+      params = { Caption = "About" },
+      callback = Function()
+                   SystemRequest("About Window 2", "This is the top menu of window 2", "OK", #REQICON_INFORMATION)
+                 EndFunction
+      }
+    }
+
+; Before going to define the second window's menus we need to
+; define some callback functions we will use on our menu items.
+
+Function _updateSLider(gadget)
+  ; This one will set the label above the slider with the
+  ; slider's value, it will be called whenever the slider's
+  ; value is changed.
+  
+  ; This is for real time update, in the opened menu
+  Local lab = HGui.gadgetFindByName("SliderLabel")
+  Local sliderValue = Int(gadget.private.value*10)/10
+  lab:set({ Caption = { "Slider value : " .. ToString(sliderValue)} }, True)
+  
+  ; This is to store values in the current menu, so when it will
+  ; be opened again the values will be correct.
+  gadget.MenuDef.Params.Value = gadget.private.value
+  gadget.MenuRoot[0].Params.Caption = "Slider value : " .. ToString(sliderValue)
+  
+EndFunction
+
+Function _handleSwitches(gadget)
+  ; Store the switch values
+  ; Radio buttons must be handled manually at this time
+  
+  ; RADIO HANDLING
+  ; If this item has a value of 0 means that it has been switched OFF but
+  ; this behaviour is not allowed in radio buttons because at least one
+  ; must be active so in this case we just skip
+  If gadget.private.value = 0 Then Return()
+  
+  ; Otherwise we store the value of this gadget and we switch off all the other
+  ; the simplest methiod is to switch them all off and turn on the called
+  ; gadget
+  For i = 0 To 3 Do gadget.menuRoot[i].Params.Value = 0
+  gadget.menuDef.Params.Value = 1
+  
+EndFunction
+
+Function _resetSliderNative(gadget)
+  ; Using native gadget's events can allow esotic/complex operations because
+  ; you can listen to all gadget's supported events and additionaly to this
+  ; feature the menu is not closed automatically, you can close all opened
+  ; menus when you like simply calling HGui.Menu_Close()
+  
+  ; Update the visible gadgets
+  Local lab = HGui.gadgetFindByName("SliderLabel")
+  lab:set({ Caption = { "Slider value : ---" } }, True)
+  Local slider = HGui.gadgetFindByName("VertSlider")
+  slider:set({ Value = 1 }, True)
+  
+  ; Store these values for later use
+  gadget.MenuRoot[1].Params.Value = 1
+  gadget.MenuRoot[0].Params.Caption = "Slider value : ---"
+  
+EndFunction
+
+Function _resetSliderCallback(gadget)
+  ; Since using callback menu function will close immediately all
+  ; opened menus there is no need to update the visible gadgets.
+  gadget.MenuRoot[1].Params.Value = 1
+  gadget.MenuRoot[0].Params.Caption = "Slider value : ---"
+EndFunction
+
+; Let's define the menus attached to the second window.
+Local menu2C =
+ {{ type = #HGUI_LABEL_GADGET,
+    params = { Caption = "[color=#GREEN]This is the context menu for the window 2[/color]" } },
+  { type = #HGUI_BUTTON_GADGET,
+    params = { Caption = "Another submenu" },
+    submenu = {
+      { type = #HGUI_LABEL_GADGET,
+        ; Override global menu skin
+        params = { Caption = "Slider value : ---",
+                   Look = { nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $FF0000, $440000, $AA2200),
+                            nText = { Font = { Color = $FFFF00 } }},
+                   name = "SliderLabel" } },
+      { type = #HGUI_SLIDER_GADGET,
+        size = 15,
+        params = { name = "VertSlider",
+                   range = { 1, 100 }, value = 1,
+                   cursorsize = 0.1,
+                   orientation = #HGUI_HORIZONTAL_LAYOUT,
+                   Actions = { onChange = _updateSlider }
+                   } 
+        },
+      { type = #HGUI_BUTTON_GADGET,
+        params = { Caption = "Reset Slider (using native event)",
+                   Actions = { OnPushed = _resetSliderNative } } 
+        },
+      { type = #HGUI_BUTTON_GADGET,
+        params = { Caption = "Reset Slider (using callback event)" },
+        callback = _resetSliderCallback
+        }
+
+      }
+    }    
+  }          
+
+; Contex menu for the first button of the second window
+Local menu2G =
+       {{ type = #HGUI_LABEL_GADGET,
+          params = { Caption = "[color=#BLUE]This the context window 2, button 1[/color]" } },
+        { type = #HGUI_BUTTON_GADGET,
+          params = { Caption = "Some other stuff" },
+          submenu = {
+            { type = #HGUI_BUTTON_GADGET,
+              params = { Caption = "Enable button 2, Window 1" },
+              callback = Function()
+                           Local b = HGui.gadgetFindByName("myButton1B")
+                           b:Enable()
+                         EndFunction
+              },
+            { type = #HGUI_BUTTON_GADGET,
+              params = { Caption = "Disable button 2, Window 1" },
+              callback = Function()
+                           Local b = HGui.gadgetFindByName("myButton1B")
+                           b:Disable()
+                         EndFunction
+              },              
+            }
+          },
+        { type = #HGUI_BUTTON_GADGET,
+          params = { Caption = "Some other cool stuff" },
+          submenu = {
+            { type = #HGUI_SWITCH_GADGET, 
+              size = 30,
+              params = { Name = "Switch1", Angle = 15, Value = 1, Caption = "Radio 1" },
+              callback = _handleSwitches
+              },
+            { type = #HGUI_SWITCH_GADGET, 
+              size = 30,
+              params = { Name = "Switch2", Angle = -15, Value = 0, Caption = "Radio 2" },
+              callback = _handleSwitches
+              },
+            { type = #HGUI_SWITCH_GADGET, 
+              params = { Name = "Switch3", Angle = 0, Value = 0, Caption = "Radio 3" },
+              callback = _handleSwitches
+              },      
+            { type = #HGUI_SWITCH_GADGET, 
+              size = 60,
+              params = { Name = "Switch4", Angle = 90, Value = 0, Caption = "Radio 4" },
+              callback = _handleSwitches
+              }              
+          }
+        }
+      }
+          
+; Fine, now we can create the two windows, we will attach to them
+; both the contextual menu and the window's menu.
+Local myWin1 = HGui.Window:new(
+                { title = "WINDOW 1",
+                  name  = "myWindow1",
+                  position   = { x = 100, y = #CENTER },
+                  contextual = menu1C,
+                  menu = menu1
+                  })
+                  
+Local myWin2 = HGui.Window:new(
+                { title = "WINDOW 2",
+                  name  = "myWindow2",
+                  position   = { x = 400, y = #CENTER },
+                  contextual = menu2C,
+                  menu = menu2
+                  })                  
+
+; We are going to create some gadgets for the windows, to avoid flickering
+; and unneeded drawings we will switch off the gadgets rendering.
+; We will restore the rendering at the end of this creation phase.
+HGui.SetAutoRendering(False)
+
+Local myLabel1A = HGui.Gadget:new(#HGUI_LABEL_GADGET,  { window = myWin1, caption = { "This is the classic", "Hello World program", "modified to show the Contextual Menus", "Right click on the button to open the menu..." } })
+Local myButton1A = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { window = myWin1, 
+    caption = { "Hello World!", "(with context menu)" },
+    name = "myButton1A",
+    contextual = menu1G
+    })
+Local myButton1B = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { window = myWin1, 
+    caption = { "Hello World!", "(without context menu)" },
+    name = "myButton1B"
+    })
+
+Local myLabel2A = HGui.Gadget:new(#HGUI_LABEL_GADGET,  { window = myWin2, caption = { "This is the classic", "Hello World program", "modified to show the Contextual Menus", "Right click on the button to open the menu..." } })
+Local myButton2A = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { window = myWin2, 
+    caption = { "Hello World!", "(with context menu)" },
+    name = "myButton2A",
+    contextual = menu2G
+    })
+Local myButton2B = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { window = myWin2, 
+    caption = { "Hello World!", "(without context menu)" },
+    name = "myButton2B"
+    })
+
+; Let's build the layout for the first window
+mywin1.rootgadget:layoutSet({ gadgets = { myLabel1A, myButton1A, myButton1B },
+                             weights = { 0.40, 0.30, 0.30 },
+                             gap     = 1
+                             }, True )
+
+; The same applies to the second window
+mywin2.rootgadget:layoutSet({ gadgets = { myLabel2A, myButton2A, myButton2B },
+                             weights = { 0.40, 0.30, 0.30 },
+                             gap     = 1
+                             }, True )
+
+; Restore the gadgets rendering
+HGui.SetAutoRendering(True)
+
+; Finally we force a window refresh
+myWin1:Render()
+myWin2:Render()
+
+; DONE!
+Repeat
+   WaitEvent()
+Forever

@@ -1,0 +1,85 @@
+/*******************************************************************************
+HGUI : Tutorial 301 - Gadget Basics : The root gadget        v1.1 : 10/02/2023 *
+********************************************************************************
+In this tutorial you will be introduced to the core of this library and you will
+learn some basic concepts around this library.
+First of all you have to know something about the root gadget. This gadget is
+where all your stuff will be attached to, it's a rectangular area created during
+the window creation process and it's stored in the window object.
+
+In this first example we will create a button inside a window.
+*******************************************************************************/
+
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; Uncomment the following two lines to see what's happening inside the library
+; DBG.Console.Enable(True)
+; DBG.Console.AddChannel(HGui.DebugChannel)
+
+; Our test window
+Local myWin = HGui.Window:new(
+  { title = "Gadget's basics : root gadget.",
+    name  = "myWindow",
+    position = { x = 200, y = 200 },
+    size     = { w = 600, h = 400 },
+    bgcolor  = $CCCCCC
+    })
+                   
+; Switching off the rendering system is a good practice because speed up the
+; creation process and avoid flickering.
+HGui.SetAutoRendering(True)
+
+; Now let's add a simple button to the window, without customizations, a simple
+; default button.
+Local myButton = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { Caption = "PUSH ME" })
+
+; Once you have finished creating your gadgets you have to build the layout
+; of your GUI, as we have said previously all your gadgets must be children of
+; the Root Gadget, that's why, with the next command, we will attach our
+; button to it using the :layoutSet() method available to every gadget:
+mywin.rootgadget:layoutSet({ gadgets = { myButton },
+                             weights = { 1 },
+                             gap     = 0,
+                             borders = { top    = 80, 
+                                         bottom = 80, 
+                                         left   = 80, 
+                                         right  = 80 } }, True)
+                             
+; The complete documentation is embedded in the method itself in the library, 
+; here is just a brief description just to give you an idea:
+; - Gadgets         It's a table holding all the gadget you want to place
+;                   inside the current one, you have to specify them using
+;                   their objects.
+; - Weights         This table is used to define the gadget weights (sizes) 
+;                   each value is interpreted as follow:
+;                     value < 0     : percentual fixed size
+;                     0 < value < 1 : percentual variable size
+;                     value > 1     : fixed pixel size
+;                   Fixed size means that the gadget size will not change when
+;                   the window's size is changed.
+;                   If you do not specify this table the available space will
+;                   be divided equaly by all gadgets.
+; - Gap             This value is the space between each gadget and it is
+;                   expressed in pixels. Defaults to 1.
+; - Borders         It's a table used to define the blank space between the 
+;                   gadgets and its father, it must have these fields: 
+;                     Top, Bottom, Left, Right. 
+;                   Each value is expressed in pixels, defaults to 0. Note that
+;                   using 0 means that the gadgets will be rendered over the
+;                   father's border, if it has one.
+;
+; Ok, now you have an idea and you can try to change some values to make practice.
+
+; Below we are restoring the AutoRendering flag to True
+HGui.SetAutoRendering(True)
+
+; And here we are forcing a window refresh to show the finished GUI.
+myWin:Render()
+
+NPrint("PUSH THE BUTTON!")
+                   
+Repeat
+   WaitEvent()
+Forever
+

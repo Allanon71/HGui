@@ -1,0 +1,142 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>HGui.Window:InputBoxNew()</h1>
+
+    <p><span class="text-big"><code>result = HGui.Window:InputBoxNew(params)</code></span>
+    </p>
+    <p>Create an input box window to allow users to type in or edit texts.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>params </strong>: A table that defines the window, see <code>:New()</code> method
+        for details. Also these additional tags are supported:
+        <ul>
+          <li><strong>text</strong> : Optional string to preload the input box with some
+            text, defaults to an empty string</li>
+          <li><strong>caption </strong>: Optional description text</li>
+          <li><strong>ok </strong>: Optional text to put in the <code>ok</code> button,
+            default = “Ok”</li>
+          <li><strong>cancel </strong>: Optional text to put in the <code>cancel</code> button,
+            default = “Cancel”</li>
+          <li><strong>callbackOk </strong>: Callback function called when the <code>ok</code> button
+            is pressed</li>
+          <li><strong>callbackCancel </strong>: Callback function called when the <code>cancel</code> button
+            is pressed</li>
+          <li><strong>callbackClose</strong> : Callback function called when the requester
+            is closed with its close gadget</li>
+          <li><strong>waitInput</strong> : Set this flag to <code>True</code> to make a
+            blocking requester, default value is <code>False</code>
+          </li>
+          <li><strong>isPassword</strong> : Set this flag to <code>True</code> to mask
+            the typed text with asterisks, default value is <code>False</code>
+          </li>
+          <li><strong>activateInput</strong> : Set this flag to <code>True</code> to auto
+            activate the InputBox input field, default value is <code>False</code>
+          </li>
+          <li><strong>allowNewLine </strong>: Optional flag to allow multiline input,
+            default = <code>True</code>
+          </li>
+          <li><strong>enterToClose </strong>: Optional flag to confirm the input by
+            hitting the Enter key, default = <code>False</code>
+          </li>
+          <li><strong>adjustFontSize </strong>: Optional flag to adjust the font size
+            to the size of the gadgets, default = <code>False</code>
+          </li>
+          <li><strong>captionWeight </strong>: Optional value to modify the space reserved
+            to the inputBox caption's area, default = 0.5</li>
+          <li><strong>Gfx</strong> : A table with additional parameters to adjust the
+            graphics (actually used internally but will be used to extend the customization
+            options)</li>
+        </ul>
+      </li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <ul>
+      <li><strong>result </strong>: It's the Window object of the created requester
+        if <code>waitInput = False</code>, otherwise, if <code>waitInput = True</code>,
+        the following table will be returned:
+        <br>&nbsp; &nbsp;&nbsp;<code> { text = &lt;typedtext&gt;, ok = True|False, cancel = True|False, close = True|False }&nbsp;</code>
+      </li>
+    </ul>
+    <p><u>NOTES</u>
+      <br>If <code>waitInput = False</code> you have to close manually the requester
+      using the <code>:Free()</code> method, otherwise the window close is managed
+      automatically.</p>
+    <p>As said the InputBox must be closed manually by the callback functions,
+      when you set the flag <code>waitInput</code> to <code>False</code>, this way
+      the requester does not block the code flow while listening to the user's
+      input.
+      <br>&nbsp;
+      <br>The callback functions will be executed and will you get the gadget object
+      that have generated the event (the one that has been clicked) with an additional
+      subtable stored in the field <code>result</code> holding the following addtional
+      data fields:</p><pre><code class="language-text-plain">{ text   = InputBox contents
+  ok     = True if the OK button has been pressed
+  cancel = True if the CANCEL button has been pressed
+  window = InputBox window
+  }</code></pre>
+    <p>&nbsp;Note that the <code>result</code> subtable is available only when
+      one of the two buttons has been pressend, the <code>result</code> field is
+      not present if the InputBox has been closed using the window's close gadget.</p>
+    <p>Here are some default values for additinoal fields that will be used if
+      you do not specify them:</p>
+    <ul>
+      <li><strong>size </strong>: A table with the <code>w</code> and <code>h</code> fields
+        that represent the InputBox size in pixels, default is <code>{ w = 500, h = 300 }</code>
+      </li>
+    </ul>
+    <p><u>EXAMPLES</u>&nbsp;</p><pre><code class="language-text-plain">This example is part of the provided Showcase.hws script available in the HGui distribution:
+; Let's define a callback function for all our possible events...
+Local callback = 
+  Function(Gadget)
+    If TB.Item.IsNil(Gadget, "result")
+      ; No result field here, the window has been closed with the close gadget
+      SystemRequest("Why???", "You have closed the window...\n\nUse the gadget below :D", "Too bad...")
+    
+    Else
+      ; We are here only if the event has been generated by one of the two
+      ; available buttons.
+      
+      ; Let's free the InputBox window
+      Gadget.Result.Window:Free()
+      
+      SystemRequest("Great! You have confirmed!",
+                    "Text : " .. Gadget.Result.text .. "\n\n" ..
+                    "ok : " .. ToString(Gadget.Result.ok) .. "\n" ..
+                    "cancel : " .. ToString(Gadget.Result.cancel) .. "\n\n" ..
+                    "window : " .. ToString(Gadget.Result.window),
+                    "GOT IT!")
+    EndIf
+  EndFunction
+            
+; Now that we have defined the callback function we can build the Input Box:
+Local myWin = HGui.Window:InputBoxNew(
+  { text = "Please type something!",
+    ok = "Well done!",
+    cancel = "Don't bother please!",
+    callbackOk = callback,
+    callbackCancel = callback,
+    callbackClose = callback,
+    ;--- some standard window's tags ---
+    size = { w = 600, h = 130 },
+    title = "The HGui Input Box..."
+    })
+
+; Done! This is a nice, non-blocking input box!
+</code></pre>
+    <p><u>SEE ALSO</u>
+      <br>&nbsp;</p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

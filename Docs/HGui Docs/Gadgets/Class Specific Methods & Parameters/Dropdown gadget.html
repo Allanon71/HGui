@@ -1,0 +1,52 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>Dropdown gadget</h1>
+
+    <p>For common methods have a look <a href="../Common%20Methods.html">here</a>,</p>
+    <p>&nbsp;</p>
+    <p><span class="text-big"><strong>DROPDOWN GADGET METHODS</strong></span>
+    </p>
+    <ul>
+      <li><span class="text-big"><code>gadObj:selectItem(index, refresh)</code></span>
+        <br>Select the item with the specified index
+        <br>- <strong>index </strong>: Index of the item to select
+        <br>- <strong>refresh</strong> : <code>True</code> to refresh the gadget</li>
+    </ul>
+    <p>&nbsp;</p>
+    <p><span class="text-big"><strong>Additional arguments accepted by :New() method</strong></span>
+    </p>
+    <ul>
+      <li><strong>value </strong>: Initial value. It can be a string, a table of
+        string or the index of the items list</li>
+      <li><strong>column </strong>: Column associtaed with the control</li>
+      <li><strong>data </strong>: Items list data format:
+        <ul>
+          <li><strong>ColumnSizes </strong>: A table with each column size in pixels</li>
+          <li><strong>Headers </strong>: A table with the column headers</li>
+          <li><strong>Items </strong>: A table with the items to show in the gadget</li>
+          <li><strong>Selected </strong>: A table with the selected items</li>
+          <li><strong>SortOrder </strong>: A table specifing the sort order for each
+            columns</li>
+        </ul>
+      </li>
+    </ul>
+    <p>&nbsp;</p>
+    <p><span class="text-big"><strong>Additional actions accepted by :New() method</strong></span>
+    </p>
+    <ul>
+      <li><strong>OnSelect</strong> : Triggered when an item has been select from
+        the list
+        <br>&nbsp;</li>
+    </ul>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

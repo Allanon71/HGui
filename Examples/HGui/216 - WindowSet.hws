@@ -1,0 +1,113 @@
+/******************************************************************************
+HGUI : Tutorial 216 - Window's :set() method                v1.2 : 09/02/2023 *
+*******************************************************************************
+The :set() method allows you to change on the fly window's parameters. 
+You have to pass the parameters you want to change in a table, like you do
+when creating a window.
+The second parameter is a flag and is used to specify if you want to refresh
+the window's contents or not.
+
+Almost all parameters can be changed and here is a list of what you
+can modify using :set() method:
+    .title     Window's title
+    .vsync     Vertical synchronization
+    .position  Window's position
+      .x       Horizontal coordinate
+      .y       Vertical coordinate
+    .size      Window's size
+      .w       Width
+      .h       Height
+    .sizemax   Maximum window's size
+      .w       Width
+      .h       Height
+    .sizemin   Minimum window's size
+      .w       Width
+      .h       Height
+    .flags      Window's flags
+      .resizeable Resizeable window? (True|False)
+      .closeable  Closeable window? (True|False)
+      .moveable   Moveable window? (True|False)
+      .borderless Borderless window? (True|False)
+      .modal      Modal window? (True|False)
+      .hideable   Hideable window? (True|False)
+      .hidefromtaskbar Hide from the taskbar (True|False)
+      
+      .autoclose  <False> to receive the event but to keep the
+                  window opened, you have to close it in your
+                  callback function.
+    .events       Callback functions
+      .onclose      Called when the window is closed
+      .onmove       Called when the window is move
+      .onactivate   Called when the window get the focus
+      .ondeactivate Called when the window lost the focus
+      .onhide       Called when the window is hided
+      .onshow       Called when the window is showed
+      .onsize       Called when the window is resized
+      .ondrop       Called when a file is dropped into the window
+      
+    .hotkeys      Hot keys
+      .hide
+      .show
+      .activate
+      .close
+      .open
+    customhotkeys A table with custom hotkeys, each entry with the following fields:
+      .qualifier  Key qualifier (LCONTROL, RCONTROL, etc...)
+      .key        Assigned key
+      .event      Event (OnKeyDown, ...)
+      .callback   Callback function
+    .contextual   Contextual menu (same structure as .menu field) 
+    .menu         Top menu definition, please have a look at :menuSet() method
+                  for detailed informations.    
+
+For a complete list have a look at the window's data structure.
+******************************************************************************/
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+;DBG.Console.Enable(True)
+;DBG.Console.AddChannel(HGui.DebugChannel)
+
+; Let's create the windows using anonymous functions attached to the
+; custom hotkeys callback fields:
+Local myWin1 = HGui.Window:new(
+                { title = "Try pressing <a> or <b>, <q> to Quit.",
+                  name  = "win1",
+                  position   = { x = 100, y = 100 },
+                  size       = { w = 400, h = 400 },
+                  background = "Resources/background.jpg",
+                  
+                  ; Here are some hotkeys definition for our example:
+                  CustomHotKeys = { 
+                    { Qualifier = "", Key = "a", Event = "OnKeyUp", Callback = 
+                      Function (w, m)
+                        ; Pressing the <a> key the program will change the window
+                        ; position using random coordinates.
+                        w:Set({ position = { x = Rnd(300), y = Rnd(300) }}, False)
+                      EndFunction },
+                      
+                    { Qualifier = "", Key = "b", Event = "OnKeyUp", Callback = 
+                      Function (w, m)
+                        ; Pressing the <b> key the program will change the window
+                        ; size using random dimensions.
+                        w:set({ size = { w = Rnd(300)+300, h = Rnd(300)+300 }}, True)
+                      EndFunction },
+                      
+                    { Qualifier = "", Key = "q", Event = "OnKeyDown", Callback = 
+                      Function (w, m)
+                        ; Finally, pressing <q> the program will end after
+                        ; 3 seconds.
+                        NPrint("************************")
+                        NPrint("* YOU HAVE PRESSED <q> *")
+                        NPrint("*    G O O D B Y E !   *")
+                        NPrint("************************")
+                        Wait(3000, #MILLISECONDS)
+                        End
+                      EndFunction }
+                      }
+                  }
+                )
+
+Repeat
+   WaitEvent()
+Forever                  

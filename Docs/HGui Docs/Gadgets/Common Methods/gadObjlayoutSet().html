@@ -1,0 +1,98 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>gadObj:layoutSet()</h1>
+
+    <p><span class="text-big"><code>result = gadObj:layoutSet(options, update)</code></span>
+    </p>
+    <p>This method is used to build the interface layout, here you can define
+      which gadget must be placed inside this one and in which way.&nbsp;
+      <br><code>update</code> is a switch : if set to <code>True</code> the involved
+      gadgets will be updated/refreshed at the end of the elaboration.
+      <br>All definitions must be specified inside the <code>options</code> table.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>options</strong> : A table used to specify the gadgets layout
+        <ul>
+          <li><strong>gadgets </strong>: A table with all the gadget objects you want
+            to place inside this one.</li>
+          <li><strong>type </strong>: Used to define the arrangement type, you can choice
+            from :&nbsp;
+            <br><code>#HGUI_VERTICAL_LAYOUT (default), #HGUI_HORIZONTAL_LAYOUT, #HGUI_GRID_LAYOUT</code>
+          </li>
+          <li><strong>weights </strong>: This table is used to define the gadget weights
+            (sizes) and <u>it isn't needed for the GRID layout</u>. If you do not specify
+            this table the available space will be divided equally by all the gadgets.
+            Each value is interpreted as follow:
+            <br>&nbsp; &nbsp; &nbsp;- value &lt; 0 : percentual fixed size
+            <br>&nbsp; &nbsp; &nbsp;- 0 &lt; value &lt; 1 : percentual variable size (variable
+            with the parent's size)
+            <br>&nbsp; &nbsp; &nbsp;- value &gt; 1 : fixed pixel size</li>
+          <li><strong>gap </strong>: This value is the space between each gadget expressed
+            in pixels. Default is 1.</li>
+          <li><strong>borders </strong>: It's a table used to define the blank space
+            between the gadgets and it's father, each value is expressed in pixels,
+            default is 0. Note that using 0 means that the gadgets will be renderd
+            over the father's border, if it have one. It must have these fields:&nbsp;
+            <ul>
+              <li><strong>Top</strong>
+              </li>
+              <li><strong>Bottom</strong>
+              </li>
+              <li><strong>Left</strong>
+              </li>
+              <li><strong>Right</strong>
+              </li>
+            </ul>
+          </li>
+          <li>co<strong>l</strong>umns : <u>Only used with GRID layout</u>: sets how
+            many columns the grid must have. Needed rows will be computed by the system.</li>
+          <li><strong>rows </strong>: <u>Only used with GRID layout</u>: sets how many
+            rows the grid must have. Columns will be computed by the system.</li>
+        </ul>
+      </li>
+      <li><strong>update</strong> : True to force an update/refresh of the involved
+        gadgets.</li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <ul>
+      <li><strong>result </strong>: <strong>True</strong> if all went without errors.</li>
+    </ul>
+    <p><u>NOTES</u>
+    </p>
+    <p style="margin-left:40px;">With the GRID layout you have to specify the <code>columns</code> parameter
+      OR the <code>rows</code> parameter, if you define both then <code>columns</code> will
+      get the precedence and <code>rows</code> will be ignored.</p>
+    <p><u>EXAMPLES</u>&nbsp;</p><pre><code class="language-text-plain"> ; Defines a box gadget
+ Local boxGadget = HGui.Gadget:New(#HGUI_BOX_GADGET)
+ 
+ ; Now defines two more boxes that will be adjusted in a vertical
+ ; layout inside the 'boxGadget'
+
+ Local smallerBox1 = HGui.Gadget:New(#HGUI_BOX_GADGET)
+ Local smallerBox2 = HGui.Gadget:New(#HGUI_BOX_GADGET)
+ 
+ ; Arranges the two smaller box inside the first one
+ boxGadget:SetLayout(
+   { gadgets = { smallerBox1, smallerBox2 },
+     weights = { 0.30, 0.70 },
+     type = #HGUI_VERTICAL_LAYOUT,
+     gap = 1,
+     borders = { Top = 2, Bottom = 2, Right = 1, Left = 1 }
+     }, True)</code></pre>
+    <p><u>SEE ALSO</u>
+    </p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

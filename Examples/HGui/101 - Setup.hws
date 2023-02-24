@@ -1,0 +1,73 @@
+/*******************************************************************************
+* HGUI : Tutorial 101 - System Setup                         v1.2 : 09/02/2023 *
+********************************************************************************
+Welcome to the first tutorial of the HGui library. First of all what is the HGui
+library? 
+HGui library is an addon for the Hollywood programming language and it's aimed
+to give a complete GUI toolkit compatible with every platform supported by
+Hollywood, this means that applications using HGui will compile for every
+targeted machine without any issue.
+
+Below you will find how to setup an application to make use of the HGui library.
+
+STEP 1
+------
+You need to install the library package where you wish and edit the file
+'+includes.hws' to adjust a path that will let you load the HGui module and all
+the needed dependancies, which are additional pure Hollywood includes. 
+
+Open '+includes.hws' file and change the first constant :
+  > Const #INC_PATH = "put_here/the_absolute_path/where_this_file_is_located/"
+
+If you have a look at the code all the other paths will be calculated taking
+as base the constant you have just changed. 
+This mechanism is pretty easy and works well to include modules with ease.
+
+STEP 2
+------
+The next step is to create a new source file for your project and include
+the master include file we have just modified with:
+  > @INCLUDE "path/to/include/+includes.hws"
+
+Now all the available libraries/modules can be easily added to your projects
+just using the constants defined into the master include file.
+For our purposes we only need to include the HGui library with:
+  > @INCLUDE #INC_HGUI
+
+Easy! Isn't it?
+
+Now that you have got the basics about including my modules on your projects
+let's start with this first tutorial.
+********************************************************************************/
+
+;::: INCLUDE THE LIBRARIES DEFINITIONS :::::::::::::::::::::::::::::::::::::::::
+@INCLUDE "../../+Includes.hws"         ; Path relative to this application
+@INCLUDE #INC_HGUI                     ; Include the HGui library
+
+/*******************************************************************************
+NOTE:
+Every event-driven application should be built setting up your program and wait
+for events in a While/Wend or Repeat/Forever loop using the WaitEvent() command
+to reduce the CPU impact and HGui does not make axception to this technique: 
+once your GUI has been defined and all callback functions has been attached to
+the events, the program will enter in an event detection loop where your code
+should handle all the events you are listening for. You can do anything like
+modify the GUI or whatever you like, but always without blocking the application
+from detecting events: this is really important for the final user experience
+and for a clean coding style.
+This is a basic rule to make your GUIs react as fast as possible to the user's
+input.
+
+For this first tutorial we only need to add the neverending loop at the end of
+the GUI definition (ok, right now there is no GUI definition!).
+********************************************************************************/
+
+Repeat
+   WaitEvent()
+Forever
+
+/*******************************************************************************
+DONE!
+Ok, nothing fancy but i hope this have helped you with some good informations at
+least.
+********************************************************************************/

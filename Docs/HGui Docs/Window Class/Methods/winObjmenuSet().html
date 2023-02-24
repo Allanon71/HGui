@@ -1,0 +1,122 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>winObj:menuSet()</h1>
+
+    <p><span class="text-big"><code>winObj:menuSet(menuDef, params)</code></span>
+    </p>
+    <p>Attach or redefine a window's top menu group.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>menuDef </strong>: A menu definition is a table with the following
+        structure:
+        <ul>
+          <li><strong>menuWidth</strong> : Optional menu width in pixels</li>
+          <li><strong>index 0</strong> : The menu item's definition
+            <ul>
+              <li><strong>type</strong> : Item's type (gadget class <a href="../../Constants.txt">constant</a>)</li>
+              <li><strong>params</strong> : Item's parameters (gadget options)</li>
+              <li><strong>callback</strong> : Callback function attached to the menu item
+                (optional)</li>
+              <li><strong>size</strong> : Item height in pixels to override the default one
+                (optional)</li>
+              <li><strong>submenu</strong> : An optional submenu table with a <code>menuDef</code> structure.
+                <ul>
+                  <li>…</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li><strong>index 1</strong> ...</li>
+        </ul>
+      </li>
+      <li><strong>params</strong> : A table that allow you to override the theme
+        settings.</li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <p><u>NOTES</u>
+      <br>There is no limits to the menu complexity, you can use any gadget you
+      want inside a menu but you have to handle manually menu actions and values,
+      for example, if you insert a switch and the user select it you have to
+      update the value manually using a callback function so that the next time
+      the user will open the menu he will find the switch with the updated value.
+      <br>&nbsp;
+      <br>Since the <code>menuDef</code> is used directly you can keep updated its
+      values. The first level only accepts <code>#HGUI_BUTTON_GADGET</code>, these
+      items are &nbsp;the ones that goes into the top bar. The <code>size</code> field
+      allow you to specify the item's height, if not specified the <code>HGui.Theme.SubMenu.Height</code> value
+      will be used.
+      <br>&nbsp;
+      <br>During the creation process all created gadgets will be assigned to the <code>Gadge</code>'
+      field of each element, gadgets will also have a circular reference to the
+      menu table in the <code>menuRoot</code> field, while <code>menuDef</code> will
+      point to the definition used to generate the gadget.
+      <br>
+      <br><u>EXAMPLES</u>&nbsp;</p>
+    <p>Here is an menuDef table as example:</p><pre><code class="language-text-plain"> ; myWindow is a Window object already defined and created.
+
+ Function showProgramInfos(gadget)
+    DebugPrint("ShowProgramInfos has been selected!")
+ EndFunction
+
+ Function AboutBox(gadget)
+   DebugPrint("AboutBox has been selected!")
+ EndFunction
+
+ Local myMenu =
+  { { type = #HGUI_BUTTON_GADGET, params = { Caption = "File" },
+      submenu = { { type = #HGUI_BUTTON_GADGET, params = { Caption = "New" } },
+                  { type = #HGUI_BUTTON_GADGET, params = { Caption = "Save As" },
+                    submenu = { { type = #HGUI_BUTTON_GADGET, size = 20, params = { Caption = "PNG" } },
+                                { type = #HGUI_BUTTON_GADGET, size = 25, params = { Caption = "JPG" } },
+                                { type = #HGUI_BUTTON_GADGET, size = 30, params = { Caption = "BMP" } },
+                                { type = #HGUI_VDIVIDER_GADGET, size = 5, params = {} },
+                                { type = #HGUI_SWITCH_GADGET, size = 35, params = { Caption = "Compression", Value = 0 } },
+                                { type = #HGUI_SWITCH_GADGET, size = 40, params = { Caption = "Smart Save", Value = 1 } },
+                                { type = #HGUI_SLIDER_GADGET, size = 20, params = { Range = { 1, 100 }, value = 2,
+                                                                                    CursorSize = 0.2,
+                                                                                    Orientation = #HGUI_HORIZONTAL_LAYOUT } }
+                                } },
+                  { type = #HGUI_VDIVIDER_GADGET, params = {} },
+                  { type = #HGUI_BUTTON_GADGET, params = { Caption = "Preferences" },
+                    submenu = { { type = #HGUI_BUTTON_GADGET, params = { Caption = "Load" } },
+                                { type = #HGUI_BUTTON_GADGET, params = { Caption = "Save" } },
+                                { type = #HGUI_BUTTON_GADGET, params = { Caption = "Edit" } },
+                                { type = #HGUI_VDIVIDER_GADGET, params = {} },
+                                { type = #HGUI_SWITCH_GADGET, params = { Caption = "Encrypt data", Value = 0 } },
+                                { type = #HGUI_SWITCH_GADGET, params = { Caption = "Compress data", Value = 1 } },
+                                { type = #HGUI_BUTTON_GADGET, params = { Caption = "Set master keyword" } },
+                                { type = #HGUI_BUTTON_GADGET, params = { Caption = "Recover master keyword" } },
+                                { type = #HGUI_BUTTON_GADGET, params = { Caption = "Reset all" } },
+                                { type = #HGUI_VDIVIDER_GADGET, params = {} },
+                                { type = #HGUI_SWITCH_GADGET, params = { Caption = "Lock all files", Value = 0 } },
+                                { type = #HGUI_SWITCH_GADGET, params = { Caption = "Reset preferences", Value = 1 } }
+                                } },
+                  { type = #HGUI_VDIVIDER_GADGET, params = {} },
+                  { type = #HGUI_BUTTON_GADGET, params = { Caption = "Close" } },
+                  { type = #HGUI_BUTTON_GADGET, params = { Caption = "Quit" } }
+                  } },
+      { type = #HGUI_BUTTON_GADGET, params = { Caption = "Edit (empty)" } },
+      { type = #HGUI_BUTTON_GADGET, params = { Caption = "Search (empty)" } },
+      { type = #HGUI_BUTTON_GADGET, params = { Caption = "Help" }, 
+        submenu = { { type = #HGUI_BUTTON_GADGET, params = { Caption = "Version" }, callback = ShowProgramInfos },
+                    { type = #HGUI_BUTTON_GADGET, params = { Caption = "About" }, callback = AboutBox }
+        } }
+      }
+
+myWindow:menuSet(myMenu)</code></pre>
+    <p><u>SEE ALSO</u>
+    </p>
+  </body>
+
+</html>

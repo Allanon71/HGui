@@ -1,0 +1,147 @@
+/*******************************************************************************
+HGUI : Tutorial 211 - Window's Contextual Menu               v1.0 : 23.05.2016 *
+********************************************************************************
+Windows can have a contextual menù that is opened whenever the user click on the
+window's body with the right mouse button.
+********************************************************************************/
+
+;---| INCLUDE THE LIBRARIES DEFINITIONS |---------------------------------------
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+;DBG.Console.Enable(False)
+;DBG.Console.AddChannel(HGui.DebugChannel)
+;DBG.Console.AddChannel(HGui.WChannel)
+
+/*******************************************************************************
+ MENU DEFINITION
+ The contextual menu structure is the same as the window's top menu.
+ Creating a menu it's quiet complex because of the tree structure that menus
+ have, you can define window's menu in two way, at creation time or at runtime,
+ now we will see how to create a menu at creation time.
+ In the <option> table you have to setup a tag called <contextual> that have the
+ following structure:
+   <menu>         The menu structure
+      <item0>        First menu entry
+         <type>      The gadget type (#BOX, #BUTTON, ...)
+         <params>    The gadget parameters needed for its creation
+         <size>      The menu width (optional)
+         <callback>  A function called when this item is selected (optional)
+         <submenu>   A sub menu attached to this item (optional)
+      <item1>        Second menu entry
+         ...
+         
+  In this example you can also see how you can interact with menu gadgets.
+  Look at all the SWITCH gadget items : everytime one of this item is clicked
+  the callback function <handleSwitches> will be called, this function will
+  change the switch state to ON or OFF depending on the gadget current state
+  so that the next time the menu is showed the right gadget state will be
+  showed.
+  
+  The 'Exit' item has an anonymous function in the callback field to quit the
+  application.
+ *******************************************************************************/
+
+ Function handleSwitches(gadget)
+  ; This function is called when any switch defined in our contextual menu
+  ; is clicked, if the switch is ON it will be changed to OFF and vice-versa.
+  ;
+  ; As you can see any gadget attached to a menu has a field called <menuDef>
+  ; pointing to the item menu definition, so you have full access to the
+  ; gadget definition at runtime!
+  If gadget.menuDef.params.value = 0
+    gadget.menuDef.params.value = 1
+  Else
+    gadget.menuDef.params.value = 0
+  EndIf
+  
+EndFunction
+
+Local myMenu =
+       { { type = #HGUI_BUTTON_GADGET,
+           params = { Caption = "File" },
+           submenu = {
+              { type = #HGUI_BUTTON_GADGET,
+                params = { Caption = "Open file" } },
+              { type = #HGUI_BUTTON_GADGET,
+                params = { Caption = "Process as" },
+                submenu = {
+                   { type = #HGUI_BUTTON_GADGET,
+                     size = 20,
+                     params = { Caption = "Text file" } },
+                   { type = #HGUI_BUTTON_GADGET,
+                     size = 20,
+                     params = { Caption = "Project file" } },
+                   { type = #HGUI_BUTTON_GADGET,
+                     size = 20,
+                     params = { Caption = "Document file" } },
+                   { type = #HGUI_VDIVIDER_GADGET,
+                     size = 5,
+                     params = {} },
+                   { type = #HGUI_SWITCH_GADGET,
+                     size = 20,
+                     callback = handleSwitches,
+                     params = { Caption = "Compress file (SWITCH)", Value = 0 } },
+                   { type = #HGUI_SLIDER_GADGET,
+                     size = 15,
+                     params = { name = "VertSlider",
+                                range = { 1, 200 }, value = 1,
+                                cursorsize = 0.1,
+                                orientation = #HGUI_HORIZONTAL_LAYOUT } }
+                 }
+               },
+               { type = #HGUI_BUTTON_GADGET,
+                 params = { Caption = "Utilities" },
+                 submenu = {
+                    { type = #HGUI_BUTTON_GADGET,
+                      params = { Caption = "Clean" } },
+                    { type = #HGUI_BUTTON_GADGET,
+                      params = { Caption = "Backup" } },
+                    { type = #HGUI_BUTTON_GADGET,
+                      params = { Caption = "Restore" } },
+                    { type = #HGUI_VDIVIDER_GADGET,
+                      params = {} },
+                    { type = #HGUI_SWITCH_GADGET,
+                      params = { Caption = "Automatic backup (SWITCH)", Value = 0 },
+                      callback = handleSwitches },
+                    { type = #HGUI_SWITCH_GADGET,
+                      params = { Caption = "Automatic Restore (SWITCH)", Value = 1 },
+                      callback = handleSwitches },
+                    { type = #HGUI_BUTTON_GADGET,
+                      params = { Caption = "Sign" } },
+                    { type = #HGUI_BUTTON_GADGET,
+                      params = { Caption = "Upload" } },
+                    { type = #HGUI_BUTTON_GADGET,
+                      params = { Caption = "Encode" } }
+                   }
+                 },
+               { type = #HGUI_VDIVIDER_GADGET,
+                 params = {} },
+               { type = #HGUI_BUTTON_GADGET,
+                 params = { Caption = "Close" } },
+               { type = #HGUI_BUTTON_GADGET,
+                 params = { Caption = "Exit" },
+                 ; Let's use an anonymous function to quit the app
+                 callback = Function() End EndFunction },
+             }
+           },
+         { type = #HGUI_BUTTON_GADGET,
+           params = { Caption = "Project" } },
+         { type = #HGUI_BUTTON_GADGET,
+           params = { Caption = "Edit" } }
+      }
+
+
+Local myWin1 = HGui.Window:new(
+                 { title = "Window's Menu : 3 Contextual",
+                   name  = "win3",
+                   position   = { x = #CENTER, y = #CENTER },
+                   size       = { w = 600, h = 400 },
+                   bgtexture  = "Resources/texture.jpg",    ; Texture
+                   contextual = myMenu })
+
+
+
+Repeat
+   WaitEvent()
+Forever

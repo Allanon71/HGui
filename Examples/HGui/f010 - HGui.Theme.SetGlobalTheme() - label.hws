@@ -1,0 +1,71 @@
+/*
+********************
+* HGui Test Script *
+* Fabio Falcucci   *
+*    Feb-2023      *
+********************
+  This script is used as a test and to show how it's possible to use the
+helper function 
+  HGui.Theme.SetGlobalTheme()
+to globally change the theme for a specific gadget class, in this case for
+LABEL gadgets.
+-------------------
+
+HGui.Theme.SetGlobalTheme(GadgetType, Theme)
+  Set the specified theme to the given gadget class
+*/
+
+; INCLUDE THE LIBRARIES DEFINITIONS
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; Creates a new HGui window
+Local myWin = HGui.Window:new(
+                { title = "HGui.Theme.SetGlobalTheme()",
+                  name  = "myWindow",
+                  position = { x = #CENTER, y = #CENTER }
+                  })
+                   
+; Disable auto-rendering to avoid flickering
+HGui.SetAutoRendering(False)
+
+; Let's create 3 skins that we will use with our LABEL gadget
+Local current, skins = 0, {}
+skins = { [0] = { nSkin = HGui.Theme.Generate_SkinColor($FF0000),
+                  nText = HGui.Theme.Generate_Text(20, #ANTIALIAS, $000000, #HGUI_ALIGN_LEFT, True, False)},
+          [1] = { nSkin = HGui.Theme.Generate_SkinGradient(GetRandomColor(), GetRandomColor()),
+                  nText = HGui.Theme.Generate_Text(30, #ANTIALIAS+#BOLD, $FF0000, #HGUI_ALIGN_RIGHT, False, True)},
+          [2] = { nSkin = HGui.Theme.Generate_SkinDoubleGradient(GetRandomColor(), GetRandomColor(), 10),
+                  nText = HGui.Theme.Generate_Text(40, #ITALIC, $0000FF, #HGUI_ALIGN_CENTER, True, True)}
+          }
+
+; We are going to create two LABELS for our test and a button we will use
+; to rotate the skins we have defined above.
+Local myBox   = HGui.Gadget:new(#HGUI_LABEL_GADGET, { Caption = "LABEL 1 GADGET"})
+Local myBox2  = HGui.Gadget:new(#HGUI_LABEL_GADGET, { Caption = "LABEL 2 GADGET"})
+Local myButton = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { caption = { "Click me", "to change the Label skin"},
+    actions = {
+      onpushed =
+        Function(gadObj)
+          ; Change the vdivider skin everytime the button is pushed
+          HGui.Theme.SetGlobalTheme(#HGUI_LABEL_GADGET, skins[current])
+          current = current+1
+          If current > 2 Then current = 0
+        EndFunction }
+      })
+
+
+; Let's arrange the gadgets into the window
+mywin.rootgadget:layoutSet({ gadgets = { myBox, myBox2, myButton },
+                             weights = { 0.35, 0.35, 0.30 },
+                             gap     = 1
+                             }, True )
+                             
+; Finally enable the auto-rendering and refresh the window
+HGui.SetAutoRendering(True)
+myWin:Render()
+                 
+Repeat
+   WaitEvent()
+Forever

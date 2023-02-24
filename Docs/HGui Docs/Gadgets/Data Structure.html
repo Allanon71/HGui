@@ -1,0 +1,118 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>Data Structure</h1>
+
+<pre><code class="language-text-plain">.name					Gadget Name
+.type                   Gadget Type (see #HGUI_..._GADGET constants)
+.area                   Area object
+.status                 Current status (see #HGUI_..._STATE constants)
+.Look                   Subtable that defines the look for every possible status
+  .Borders              Subtable that defined the gadget borders
+    .top                Top border
+    .bottom             Bottom border
+    .left               Left border
+    .right              Right border
+  .Offset               Subtable that defines the global skin offset
+    .x                  Horizontal offset
+    .y                  Vertical offset
+  .isCustom             Is it a customized skin?
+  .nSkin                Normal state multiSkin table
+  .hSkin                Hilighted state multiSkin table
+  .pSkin                Pushed state multiSkin table
+  .dSkin                Disabled state multiSkin table
+  .npSkin               Normal-Pushed state multiSkin table
+  .hpSkin               Hilighted-Pushed state multiSkin table
+  .dpSkin               Disabled-Pushed state multiSkin table
+  .nText                Normal state cText object
+  .hText                Hilighted state cText object
+  .pText                Pushed state cText object
+  .dText                Disabled state cText object
+  .npText               Normal-Pushed state cText object
+  .hpText               Hilighted-Pushed state cText object
+  .dpText               Disabled-Pushed state cText object
+  .Icons                Subtable that defines the icons to use with the gadget
+    .iName              Global state Icon's name (to set all icons in one go)
+    .nName              Normal state Icon's name
+    .hName              Hilighted state Icon's name
+    .pName              Pushed state Icon's name
+    .dName              Disabled state Icon's name
+    .npName             Normal-Pushed state Icon's name
+    .hpName             Hilighted-Pushed state Icon's name
+    .dpName             Disabled-Pushed
+    .alignment          Icon's alignment
+    .gap                Distance between the icon and the text
+    .adjText            Enable automatic cText adjustment
+.caption                Gadget caption text, a string or a table of strings
+.tip                    Floating text tip, a string or a table of strings
+.Contextual             Contextual Menu (a menu table)
+.Flags                  Gadget's flags
+  .visible              Is it visible?
+  .enabled              Is it enabled?
+  .draggableIs it draggable?
+.Shortcut               Gadget's keyboard shortcuts
+  .qualifier            Shortcut qualifier
+  .key                  Shortcut key
+  .altCode              Shortcut Alt-Code
+.useCache               Enable graphic cache?
+.Sounds                 Table used to store sound associated with events
+  .onOver               OnOver event sound
+  .onOut                OnOut event sound
+  .onPushed             OnPushed event sound
+  .onDown               OnDown event sound
+.Actions                Table used to store all event callbacks
+  .onGotFocus           The gadget has got the focus (not yet implemented)
+  .onLostFocus          The gadget has lost the focus (not yet implemented)
+  .onPushed             The gadget has been pushed (released)
+  .onDown               The gadget has been pushed down
+  .onOver               The mouse is over the gadget
+  .onOut                The mouse is exited from the gadget
+  .onDrop               Something dropped on the gadget
+  .onDropOut            The gadget has been dropped
+.window                 Window object linked to the gadget
+.background             Gadget background
+.userData               Callback userdata
+.childs                 Children gadget list
+.parent                 Parent object
+.VirtualSize            If this gadget is virtual stores the virtual area size
+  .w                    Virtual area width
+  .h                    Virtual area height
+.VirtualOffset          If this gadget is virtual stores the virtual area offset
+  .x                    Horizontal offset
+  .y                    Vertical offset
+.isVirtualized          TRUE if this gadget is virtual
+.VirtualRoot            Virtual gadget root
+.IsKilled               TRUE if this gadget has been killed
+
+.Private                Table used to store private data
+  .Cache                Table used to store cached informations
+    .normal             Normal state brush
+    .hilight            Hilighted state brush
+    .pushed             Pushed state brush
+    .disabled           Disabled state brush
+    .nPushed            Normal-Pushed state brush
+    .hPushed            Hilighted-Pushed state brush
+    .dPushed            Disabled-Pushed state brush
+  .Links                Table used to link gadgets between each others
+  .group_labelSide      If this gadget is a group stores the label side
+  .group_LabelGap       If this gadget is a group stores the label gap
+  .group_initMode       Internal flag to setup the group gagdte
+  .grouped              TRUE if the gadget is a group
+  .subType              Gadget sub-type : CHECK or RADIO
+  .isCursor             TRUE if this gadget is a slider/scrollbal cursor
+  .isRoot               TRUE if this gadget is a window's root gadget
+  .isVirtual            TRUE if this gadget is a virtual gadget
+  .isVirtualRoot        Root gadget of a virtual gadget
+  .IsMenu               TRUE if this gadget belongs to a menu
+  .IsMasterRoot         TRUE if this gadget is a master root</code></pre>
+
+  </body>
+
+</html>

@@ -1,0 +1,67 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>HGui.Window:ProgressNew()</h1>
+
+    <p><span class="text-big"><code>winObj = HGui.Window:ProgressNew(params)</code></span>
+    </p>
+    <p>Create a new window with a progress bar.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>params </strong>: A table that defines the window, see <code>:New()</code> method
+        for details. Also these additional tags are supported:
+        <ul>
+          <li><strong>valueMin</strong> : Minimum value for the progress bar, default
+            = 1</li>
+          <li><strong>valueMax</strong> : Maximum value for the progress bar, default
+            = 100</li>
+          <li><strong>value</strong> : Current value for the progress bar, default =
+            1</li>
+          <li><strong>message</strong> : Text message to show, default is an empty string.</li>
+          <li><strong>cursor</strong> : Custom cursor (optional)</li>
+          <li><strong>cursorText </strong>: Text to place into the cursor (default is <code>"{value}/{rangeend}"</code>),
+            it supports the following tags (you can use more than one tag):
+            <ul>
+              <li><strong>{value}</strong> : Value</li>
+              <li><strong>{value.##}</strong> : Value rounded to &nbsp;2 decimal numbers</li>
+              <li><strong>{intvalue}</strong> : Integer value</li>
+              <li><strong>{rangstart}</strong> : The value specified in valueMin</li>
+              <li><strong>{rangeend}</strong> : The value specified in valueMax</li>
+              <li><strong>{perc}</strong> : The current value percentual</li>
+            </ul>
+          </li>
+          <li><strong>size </strong>: A table with the <code>w</code> and <code>h</code> fields
+            that represent the InputBox size in pixels, default is <code>{ w = 300, h = 100 }</code>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <ul>
+      <li><strong>winObj </strong>: Returns the pointer to the progress window.</li>
+    </ul>
+    <p><u>NOTES</u>
+      <br>You can close this window by calling the <code>:Free()</code> method as
+      for normal windows.
+      <br>
+      <br><u>EXAMPLES</u>&nbsp;</p>
+    <p><u>SEE ALSO</u>
+    </p>
+    <ul>
+      <li><a href="HGui.WindowProgressUpdate().html"><u>HGui.Window:ProgressUpdate()</u></a>
+        <br>&nbsp;</li>
+    </ul>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

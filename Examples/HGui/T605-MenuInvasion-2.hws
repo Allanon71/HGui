@@ -1,0 +1,171 @@
+/*******************************************************************************
+HGUI : Tutorial 212 - Any Gadgets in Menus                 v1.0 : 01.09.2017 *
+********************************************************************************
+Any Menus (Window's menus and context menus) give you the freedom to add any
+supported gadget class: ANY! Even ListViews!
+********************************************************************************/
+
+;---| INCLUDE THE LIBRARIES DEFINITIONS |---------------------------------------
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+;DBG.Console.Enable(False)
+;DBG.Console.AddChannel(HGui.DebugChannel)
+;DBG.Console.AddChannel(HGui.WChannel)
+
+; In this example we will build a menu, with a submenu storing some
+; knobs, there is also an example om how tou manage knob events and how
+; to assign values to menu items, this is quite complex due to the
+; menu tree structure a bit hard to follow. :)
+
+Function handleKnob(gadget)
+  ; This function is a callback invoked by each knob, it receives the
+  ; gadget that has generated the event.
+  
+  ; We will check which gadget has generated the event using a Switch statement.
+  Switch gadget.Name
+    Case "Knob-LowPass"
+      ;-- This is for real time update --
+      ; We have to find the label we want to update and we will find it using
+      ; its name.
+      Local lab = HGui.gadgetFindByName("Label-LowPass")
+      
+      ; Let's round the knob's value to one decimal
+      Local knobValue = Int(gadget.private.value*10)/10
+      
+      ; Here is the label'caption assignment with the knob value
+      lab:set({ Caption = { "Value : " .. ToString(knobValue)} }, True)
+      
+      ; We will also modify the value of two other knobs using the same
+      ; method : searching for their names
+      Local bass = HGui.gadgetFindByName("Knob-Bass")
+      bass:set({ Value = knobValue }, True)
+      Local treb = HGui.gadgetFindByName("Knob-Treble")
+      treb:set({ Value = 100-knobValue }, True)
+      
+      ; The changes we have made above are not static, infact without the
+      ; code below, when the menu is opened again, the items will get
+      ; their initial values, that's why we need to modify also the menu
+      ; definition with the updated values.
+      ;
+      ; <MenuDef> in each menu item stores its item menu definition so we can
+      ; access it directly.
+      ; <MenuRoot> instead give you access to the menu where the item definition
+      ; is. If you need to access the parent menu or any submenu you have to
+      ; use your menu definition table or you can retrieve it from the window
+      ; object, it is stored in the <contextual> field.
+      gadget.MenuDef.Params.Value = gadget.private.value
+      Local labelDef = HGui.Menu_FindItem(gadget.MenuRoot, "Label-LowPass")
+      labelDef.Params.Caption = "Value : " .. ToString(knobValue)
+      
+      ; You can use the following utility function to obtain a menu item
+      ; definition
+      Local knobDef = HGui.Menu_FindItem(gadget.MenuRoot, "Knob-Bass")
+      knobDef.Params.Value = knobValue
+      
+      ; Or you can access the menu ite definition directly
+      Local knobDef = gadget.MenuRoot[8].Params.Childs[2]
+      knobDef.Params.Value = 100-knobValue
+      
+    Case "Knob-HiPass"
+      ; This is for real time update
+      Local lab = HGui.gadgetFindByName("Label-HiPass")
+      Local knobValue = Int(gadget.private.value*10)/10
+      lab:set({ Caption = { "Value : " .. ToString(knobValue)} }, True)
+      
+      ; This is to store values in the current menu for the next opening      
+      gadget.MenuDef.Params.Value = gadget.private.value
+      
+      Local labelDef = HGui.Menu_FindItem(gadget.MenuRoot, "Label-HiPass")
+      labelDef.Params.Caption = "Value : " .. ToString(knobValue)      
+      
+    Case "Knob-Bass"
+      gadget.MenuDef.Params.Value = gadget.private.value
+
+    Case "Knob-Middle"
+      gadget.MenuDef.Params.Value = gadget.private.value
+      
+    Case "Knob-Treble"
+      gadget.MenuDef.Params.Value = gadget.private.value
+      
+  EndSwitch
+
+EndFunction
+
+Local myMenu =
+       { { type = #HGUI_LABEL_GADGET,
+           params = { Caption = "--- [i]KNOBS IN MENUS ?[/i] ---" } },
+         { type = #HGUI_BUTTON_GADGET,
+           params = { Caption = "Knobs" },
+           submenu = {
+              MenuWidth = 150,
+              { type = #HGUI_LABEL_GADGET,
+                params = { Caption = "Low Pass Filter" } },
+              { type = #HGUI_KNOB_GADGET, size = 70,
+                params = { Name = "Knob-LowPass",
+                           OnChange = handleKnob,
+                           Range = { 0, 100 },
+                           Value = 0 } },
+              { type = #HGUI_LABEL_GADGET,
+                params = { Name = "Label-LowPass",
+                           Caption = "Value : --- " } },
+              { type = #HGUI_VDIVIDER_GADGET, params = {} },
+              { type = #HGUI_LABEL_GADGET,
+                params = { Caption = "Hi Pass Filter" } },
+              { type = #HGUI_KNOB_GADGET,
+                params = { Name = "Knob-HiPass",
+                           OnChange = handleKnob,
+                           Range = { 0, 100 },
+                           Value = 0 } },
+              { type = #HGUI_LABEL_GADGET,
+                params = { Name = "Label-HiPass",
+                           Caption = "Value : --- " } },
+              { type = #HGUI_VDIVIDER_GADGET, params = {} },
+                                              
+              { type = #HGUI_PREBUILT_GROUP,
+                params = 
+                  { root = 
+                    { type = #HGUI_GROUP_GADGET, 
+                      params = { Caption = { "GAIN" }, GroupType = #HGUI_GTYPE_CHECK, Group_LabelGap = 4, Group_LabelSide = #HGUI_ALIGN_LEFT }
+                      },
+                    childs = 
+                      { { type = #HGUI_KNOB_GADGET,
+                          params = { Name = "Knob-Bass",
+                                     OnChange = handleKnob,
+                                     Range = { 0, 100 },
+                                     Value = 0 } },
+                        { type = #HGUI_KNOB_GADGET,
+                          params = { Name = "Knob-Middle",
+                                     OnChange = handleKnob,
+                                     Range = { 0, 100 },
+                                     Value = 0 } },
+                        { type = #HGUI_KNOB_GADGET,
+                          params = { Name = "Knob-Treble",
+                                     OnChange = handleKnob,
+                                     Range = { 0, 100 },
+                                     Value = 0 } },
+                                },
+                    layout = #HGUI_HORIZONTAL_LAYOUT,
+                    ;borders = { top = 2, bottom = 2, left = 4, right = 4 }
+                    },
+                size = 50
+                }
+
+            }
+          }
+      }
+
+; Here is the window creation, nothing new at this point.
+Local myWin1 = HGui.Window:new(
+                 { title = "Window's Menu : 4 Any Gadget Class",
+                   name  = "win3",
+                   position   = { x = #CENTER, y = #CENTER },
+                   size       = { w = 600, h = 400 },
+                   bgtexture  = "Resources/texture.jpg",    ; Texture
+                   contextual = myMenu })
+
+
+
+Repeat
+   WaitEvent()
+Forever

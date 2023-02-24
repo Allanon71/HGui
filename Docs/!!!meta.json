@@ -1,0 +1,4432 @@
+{
+	"formatVersion": 1,
+	"appVersion": "0.58.7",
+	"files": [
+		{
+			"isClone": false,
+			"noteId": "DRyPY4DonWPN",
+			"notePath": [
+				"DRyPY4DonWPN"
+			],
+			"title": "HGui Docs",
+			"notePosition": 0,
+			"prefix": null,
+			"isExpanded": true,
+			"type": "text",
+			"mime": "text/html",
+			"attributes": [],
+			"format": "html",
+			"dirFileName": "HGui Docs",
+			"children": [
+				{
+					"isClone": false,
+					"noteId": "PUqMrGiCVBNv",
+					"notePath": [
+						"DRyPY4DonWPN",
+						"PUqMrGiCVBNv"
+					],
+					"title": "Data Structures & Main Settings",
+					"notePosition": 80,
+					"prefix": null,
+					"isExpanded": false,
+					"type": "code",
+					"mime": "text/plain",
+					"attributes": [],
+					"dataFileName": "Data Structures & Main Setting.txt"
+				},
+				{
+					"isClone": false,
+					"noteId": "haZUNZ2FkAph",
+					"notePath": [
+						"DRyPY4DonWPN",
+						"haZUNZ2FkAph"
+					],
+					"title": "Constants",
+					"notePosition": 90,
+					"prefix": null,
+					"isExpanded": false,
+					"type": "code",
+					"mime": "text/plain",
+					"attributes": [],
+					"dataFileName": "Constants.txt"
+				},
+				{
+					"isClone": false,
+					"noteId": "DLTuOEqJrKo6",
+					"notePath": [
+						"DRyPY4DonWPN",
+						"DLTuOEqJrKo6"
+					],
+					"title": "Themes",
+					"notePosition": 160,
+					"prefix": null,
+					"isExpanded": false,
+					"type": "text",
+					"mime": "text/html",
+					"attributes": [],
+					"format": "html",
+					"dataFileName": "Themes.html",
+					"dirFileName": "Themes",
+					"children": [
+						{
+							"isClone": false,
+							"noteId": "XQCvEZZmYlDU",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"DLTuOEqJrKo6",
+								"XQCvEZZmYlDU"
+							],
+							"title": "Data Structures",
+							"notePosition": 0,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dataFileName": "Data Structures.html"
+						},
+						{
+							"isClone": false,
+							"noteId": "SIDlTRFN9gkL",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"DLTuOEqJrKo6",
+								"SIDlTRFN9gkL"
+							],
+							"title": "Functions",
+							"notePosition": 10,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dataFileName": "Functions.html",
+							"dirFileName": "Functions",
+							"children": [
+								{
+									"isClone": false,
+									"noteId": "aBLU6VvJambi",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"DLTuOEqJrKo6",
+										"SIDlTRFN9gkL",
+										"aBLU6VvJambi"
+									],
+									"title": "HGui.Theme.Generate_SkinColor()",
+									"notePosition": 30,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "XA8JpPhd89BS",
+											"isInheritable": false,
+											"position": 1
+										},
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "tM2Gnt85WGzU",
+											"isInheritable": false,
+											"position": 2
+										},
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "548n38VQPlNm",
+											"isInheritable": false,
+											"position": 3
+										},
+										{
+											"type": "label",
+											"name": "iconClass",
+											"value": "bx bxs-tag-alt",
+											"isInheritable": false,
+											"position": 4
+										},
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "OS2lLD6akz1E",
+											"isInheritable": false,
+											"position": 6
+										}
+									],
+									"format": "html",
+									"dataFileName": "HGui.Theme.Generate_SkinColor(.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "XA8JpPhd89BS",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"DLTuOEqJrKo6",
+										"SIDlTRFN9gkL",
+										"XA8JpPhd89BS"
+									],
+									"title": "HGui.Theme.Generate_SkinBevel()",
+									"notePosition": 20,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "aBLU6VvJambi",
+											"isInheritable": false,
+											"position": 1
+										},
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "tM2Gnt85WGzU",
+											"isInheritable": false,
+											"position": 3
+										},
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "548n38VQPlNm",
+											"isInheritable": false,
+											"position": 4
+										},
+										{
+											"type": "label",
+											"name": "iconClass",
+											"value": "bx bxs-tag-alt",
+											"isInheritable": false,
+											"position": 5
+										},
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "OS2lLD6akz1E",
+											"isInheritable": false,
+											"position": 6
+										}
+									],
+									"format": "html",
+									"dataFileName": "HGui.Theme.Generate_SkinBevel(.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "tM2Gnt85WGzU",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"DLTuOEqJrKo6",
+										"SIDlTRFN9gkL",
+										"tM2Gnt85WGzU"
+									],
+									"title": "HGui.Theme.Generate_SkinDoubleGradient()",
+									"notePosition": 40,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "XA8JpPhd89BS",
+											"isInheritable": false,
+											"position": 1
+										},
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "aBLU6VvJambi",
+											"isInheritable": false,
+											"position": 2
+										},
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "548n38VQPlNm",
+											"isInheritable": false,
+											"position": 3
+										},
+										{
+											"type": "label",
+											"name": "iconClass",
+											"value": "bx bxs-tag-alt",
+											"isInheritable": false,
+											"position": 4
+										},
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "OS2lLD6akz1E",
+											"isInheritable": false,
+											"position": 5
+										}
+									],
+									"format": "html",
+									"dataFileName": "HGui.Theme.Generate_SkinDouble.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "OS2lLD6akz1E",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"DLTuOEqJrKo6",
+										"SIDlTRFN9gkL",
+										"OS2lLD6akz1E"
+									],
+									"title": "HGui.Theme.Generate_Set_SkinGradient()",
+									"notePosition": 60,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "label",
+											"name": "iconClass",
+											"value": "bx bxs-tag-alt",
+											"isInheritable": false,
+											"position": 2
+										},
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "XA8JpPhd89BS",
+											"isInheritable": false,
+											"position": 3
+										},
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "aBLU6VvJambi",
+											"isInheritable": false,
+											"position": 4
+										},
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "tM2Gnt85WGzU",
+											"isInheritable": false,
+											"position": 5
+										},
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "548n38VQPlNm",
+											"isInheritable": false,
+											"position": 7
+										}
+									],
+									"format": "html",
+									"dataFileName": "HGui.Theme.Generate_Set_SkinGr.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "548n38VQPlNm",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"DLTuOEqJrKo6",
+										"SIDlTRFN9gkL",
+										"548n38VQPlNm"
+									],
+									"title": "HGui.Theme.Generate_SkinGradient()",
+									"notePosition": 50,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "XA8JpPhd89BS",
+											"isInheritable": false,
+											"position": 1
+										},
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "aBLU6VvJambi",
+											"isInheritable": false,
+											"position": 2
+										},
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "tM2Gnt85WGzU",
+											"isInheritable": false,
+											"position": 3
+										},
+										{
+											"type": "label",
+											"name": "iconClass",
+											"value": "bx bxs-tag-alt",
+											"isInheritable": false,
+											"position": 4
+										},
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "OS2lLD6akz1E",
+											"isInheritable": false,
+											"position": 6
+										}
+									],
+									"format": "html",
+									"dataFileName": "HGui.Theme.Generate_SkinGradie.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "LHC3DN4W7tpF",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"DLTuOEqJrKo6",
+										"SIDlTRFN9gkL",
+										"LHC3DN4W7tpF"
+									],
+									"title": "HGui.Theme.Generate_Text()",
+									"notePosition": 70,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "label",
+											"name": "iconClass",
+											"value": "bx bxs-tag-alt",
+											"isInheritable": false,
+											"position": 1
+										}
+									],
+									"format": "html",
+									"dataFileName": "HGui.Theme.Generate_Text().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "n5sXFvL1vl5P",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"DLTuOEqJrKo6",
+										"SIDlTRFN9gkL",
+										"n5sXFvL1vl5P"
+									],
+									"title": "HGui.Theme.SetGlobalTheme()",
+									"notePosition": 80,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "haZUNZ2FkAph",
+											"isInheritable": false,
+											"position": 1
+										},
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "XQCvEZZmYlDU",
+											"isInheritable": false,
+											"position": 2
+										}
+									],
+									"format": "html",
+									"dataFileName": "HGui.Theme.SetGlobalTheme().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "Rnbbl1xG2AaB",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"DLTuOEqJrKo6",
+										"SIDlTRFN9gkL",
+										"Rnbbl1xG2AaB"
+									],
+									"title": "HGui.Theme.WindowBGColor()",
+									"notePosition": 100,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.Theme.WindowBGColor().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "twJ47pWoT68h",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"DLTuOEqJrKo6",
+										"SIDlTRFN9gkL",
+										"twJ47pWoT68h"
+									],
+									"title": "HGui.Theme.TipsBGColor()",
+									"notePosition": 90,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.Theme.TipsBGColor().html"
+								}
+							]
+						}
+					]
+				},
+				{
+					"isClone": false,
+					"noteId": "IF16JNacuxW7",
+					"notePath": [
+						"DRyPY4DonWPN",
+						"IF16JNacuxW7"
+					],
+					"title": "Change Log",
+					"notePosition": 150,
+					"prefix": null,
+					"isExpanded": false,
+					"type": "code",
+					"mime": "text/plain",
+					"attributes": [],
+					"dataFileName": "Change Log.txt"
+				},
+				{
+					"isClone": false,
+					"noteId": "f11On0rTklGQ",
+					"notePath": [
+						"DRyPY4DonWPN",
+						"f11On0rTklGQ"
+					],
+					"title": "Project Description",
+					"notePosition": 10,
+					"prefix": null,
+					"isExpanded": true,
+					"type": "text",
+					"mime": "text/html",
+					"attributes": [],
+					"format": "html",
+					"dataFileName": "Project Description.html"
+				},
+				{
+					"isClone": false,
+					"noteId": "hrXWipvB9qXa",
+					"notePath": [
+						"DRyPY4DonWPN",
+						"hrXWipvB9qXa"
+					],
+					"title": "Internal Notes & Docs",
+					"notePosition": 140,
+					"prefix": null,
+					"isExpanded": false,
+					"type": "code",
+					"mime": "text/plain",
+					"attributes": [],
+					"dataFileName": "Internal Notes & Docs.txt"
+				},
+				{
+					"isClone": false,
+					"noteId": "bMxnkxIcEqRP",
+					"notePath": [
+						"DRyPY4DonWPN",
+						"bMxnkxIcEqRP"
+					],
+					"title": "Dependancies",
+					"notePosition": 40,
+					"prefix": null,
+					"isExpanded": false,
+					"type": "code",
+					"mime": "text/plain",
+					"attributes": [],
+					"dataFileName": "Dependancies.txt"
+				},
+				{
+					"isClone": false,
+					"noteId": "Q28f9OnJZDiu",
+					"notePath": [
+						"DRyPY4DonWPN",
+						"Q28f9OnJZDiu"
+					],
+					"title": "Keyboard",
+					"notePosition": 170,
+					"prefix": null,
+					"isExpanded": false,
+					"type": "text",
+					"mime": "text/html",
+					"attributes": [],
+					"format": "html",
+					"dataFileName": "Keyboard.html",
+					"dirFileName": "Keyboard",
+					"children": [
+						{
+							"isClone": false,
+							"noteId": "eYlr5OdktFWM",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"Q28f9OnJZDiu",
+								"eYlr5OdktFWM"
+							],
+							"title": "HGui.setDragKey()",
+							"notePosition": 0,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dataFileName": "HGui.setDragKey().html"
+						}
+					]
+				},
+				{
+					"isClone": false,
+					"noteId": "IoPvm3a3A00h",
+					"notePath": [
+						"DRyPY4DonWPN",
+						"IoPvm3a3A00h"
+					],
+					"title": "System",
+					"notePosition": 190,
+					"prefix": null,
+					"isExpanded": true,
+					"type": "text",
+					"mime": "text/html",
+					"attributes": [],
+					"format": "html",
+					"dataFileName": "System.html",
+					"dirFileName": "System",
+					"children": [
+						{
+							"isClone": false,
+							"noteId": "7eIJfTXKneNS",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"IoPvm3a3A00h",
+								"7eIJfTXKneNS"
+							],
+							"title": "HGui.SetQuitOnLastWindow()",
+							"notePosition": 0,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dataFileName": "HGui.SetQuitOnLastWindow().html"
+						},
+						{
+							"isClone": false,
+							"noteId": "2FuA7mQLAqps",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"IoPvm3a3A00h",
+								"2FuA7mQLAqps"
+							],
+							"title": "HGui.GetVersion()",
+							"notePosition": 10,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dataFileName": "HGui.GetVersion().html"
+						},
+						{
+							"isClone": false,
+							"noteId": "mT4S4pXVg2eK",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"IoPvm3a3A00h",
+								"mT4S4pXVg2eK"
+							],
+							"title": "System Requester",
+							"notePosition": 60,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dirFileName": "System Requester",
+							"children": [
+								{
+									"isClone": false,
+									"noteId": "OKn9sywqJg6e",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"IoPvm3a3A00h",
+										"mT4S4pXVg2eK",
+										"OKn9sywqJg6e"
+									],
+									"title": "HGui.Window._closeSysRequest()",
+									"notePosition": 10,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.Window._closeSysRequest().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "uPXpEoIVoBZB",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"IoPvm3a3A00h",
+										"mT4S4pXVg2eK",
+										"uPXpEoIVoBZB"
+									],
+									"title": "HGui.Window._reactivateModalWindow()",
+									"notePosition": 20,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.Window._reactivateModalWi.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "3SxJ1n4KymXZ",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"IoPvm3a3A00h",
+										"mT4S4pXVg2eK",
+										"3SxJ1n4KymXZ"
+									],
+									"title": "HGui.Window._handleSysRequestButtons()",
+									"notePosition": 30,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.Window._handleSysRequestB.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "5DBAEysfUf0B",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"IoPvm3a3A00h",
+										"mT4S4pXVg2eK",
+										"5DBAEysfUf0B"
+									],
+									"title": "HGui.Window:SysRequestNew()",
+									"notePosition": 0,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.WindowSysRequestNew().html"
+								}
+							]
+						},
+						{
+							"isClone": false,
+							"noteId": "q0cFMbX3M7x7",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"IoPvm3a3A00h",
+								"q0cFMbX3M7x7"
+							],
+							"title": "Text Box",
+							"notePosition": 70,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dirFileName": "Text Box",
+							"children": [
+								{
+									"isClone": false,
+									"noteId": "idJo8waHXXB0",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"IoPvm3a3A00h",
+										"q0cFMbX3M7x7",
+										"idJo8waHXXB0"
+									],
+									"title": "HGui.Window:textBoxNew()",
+									"notePosition": 0,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.WindowtextBoxNew().html"
+								}
+							]
+						},
+						{
+							"isClone": false,
+							"noteId": "ue4DRTGADHZi",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"IoPvm3a3A00h",
+								"ue4DRTGADHZi"
+							],
+							"title": "Waiter Box",
+							"notePosition": 80,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dirFileName": "Waiter Box",
+							"children": [
+								{
+									"isClone": false,
+									"noteId": "pQR3YvUXCHLu",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"IoPvm3a3A00h",
+										"ue4DRTGADHZi",
+										"pQR3YvUXCHLu"
+									],
+									"title": "HGui.Window:WaiterNew()",
+									"notePosition": 0,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.WindowWaiterNew().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "RjQkFYOkHk3h",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"IoPvm3a3A00h",
+										"ue4DRTGADHZi",
+										"RjQkFYOkHk3h"
+									],
+									"title": "HGui.Window:WaiterUpdate()",
+									"notePosition": 10,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.WindowWaiterUpdate().html"
+								}
+							]
+						},
+						{
+							"isClone": false,
+							"noteId": "ypDNB3ulH1iU",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"IoPvm3a3A00h",
+								"ypDNB3ulH1iU"
+							],
+							"title": "Soft Keypad",
+							"notePosition": 90,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dirFileName": "Soft Keypad",
+							"children": [
+								{
+									"isClone": false,
+									"noteId": "JnbzwI0ABjuB",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"IoPvm3a3A00h",
+										"ypDNB3ulH1iU",
+										"JnbzwI0ABjuB"
+									],
+									"title": "HGui.Window:SoftKeypadNew()",
+									"notePosition": 0,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.WindowSoftKeypadNew().html"
+								}
+							]
+						},
+						{
+							"isClone": false,
+							"noteId": "4oys5CupIHYU",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"IoPvm3a3A00h",
+								"4oys5CupIHYU"
+							],
+							"title": "Soft Keyboard",
+							"notePosition": 100,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dirFileName": "Soft Keyboard",
+							"children": [
+								{
+									"isClone": false,
+									"noteId": "h3aTXdI8u1Hz",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"IoPvm3a3A00h",
+										"4oys5CupIHYU",
+										"h3aTXdI8u1Hz"
+									],
+									"title": "HGui.Window:SoftKeyboardNew()",
+									"notePosition": 0,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.WindowSoftKeyboardNew().html"
+								}
+							]
+						},
+						{
+							"isClone": false,
+							"noteId": "zP3NWC33dVYl",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"IoPvm3a3A00h",
+								"zP3NWC33dVYl"
+							],
+							"title": "Input Box",
+							"notePosition": 110,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dirFileName": "Input Box",
+							"children": [
+								{
+									"isClone": false,
+									"noteId": "ZzVzkBVPF6Cz",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"IoPvm3a3A00h",
+										"zP3NWC33dVYl",
+										"ZzVzkBVPF6Cz"
+									],
+									"title": "HGui.Window:InputBoxNew()",
+									"notePosition": 0,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.WindowInputBoxNew().html"
+								}
+							]
+						},
+						{
+							"isClone": false,
+							"noteId": "jAk4tBaQIEv2",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"IoPvm3a3A00h",
+								"jAk4tBaQIEv2"
+							],
+							"title": "Progress Bar",
+							"notePosition": 120,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dirFileName": "Progress Bar",
+							"children": [
+								{
+									"isClone": false,
+									"noteId": "cjw1T9nDurIy",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"IoPvm3a3A00h",
+										"jAk4tBaQIEv2",
+										"cjw1T9nDurIy"
+									],
+									"title": "HGui.Window:ProgressNew()",
+									"notePosition": 0,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "7hopvfd39aip",
+											"isInheritable": false,
+											"position": 1
+										}
+									],
+									"format": "html",
+									"dataFileName": "HGui.WindowProgressNew().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "7hopvfd39aip",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"IoPvm3a3A00h",
+										"jAk4tBaQIEv2",
+										"7hopvfd39aip"
+									],
+									"title": "HGui.Window:ProgressUpdate()",
+									"notePosition": 10,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "cjw1T9nDurIy",
+											"isInheritable": false,
+											"position": 1
+										}
+									],
+									"format": "html",
+									"dataFileName": "HGui.WindowProgressUpdate().html"
+								}
+							]
+						},
+						{
+							"isClone": false,
+							"noteId": "dVVhsXqlRqTs",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"IoPvm3a3A00h",
+								"dVVhsXqlRqTs"
+							],
+							"title": "Message Box",
+							"notePosition": 130,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dirFileName": "Message Box",
+							"children": [
+								{
+									"isClone": false,
+									"noteId": "eK6GUnNmaeHU",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"IoPvm3a3A00h",
+										"dVVhsXqlRqTs",
+										"eK6GUnNmaeHU"
+									],
+									"title": "HGui.Window:MessageNew()",
+									"notePosition": 0,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "eK6GUnNmaeHU",
+											"isInheritable": false,
+											"position": 1
+										}
+									],
+									"format": "html",
+									"dataFileName": "HGui.WindowMessageNew().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "0Xr56roCWrn8",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"IoPvm3a3A00h",
+										"dVVhsXqlRqTs",
+										"0Xr56roCWrn8"
+									],
+									"title": "HGui.Window:MessageUpdate()",
+									"notePosition": 10,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "eK6GUnNmaeHU",
+											"isInheritable": false,
+											"position": 1
+										}
+									],
+									"format": "html",
+									"dataFileName": "HGui.WindowMessageUpdate().html"
+								}
+							]
+						},
+						{
+							"isClone": false,
+							"noteId": "K2Qb5bAtOd2R",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"IoPvm3a3A00h",
+								"K2Qb5bAtOd2R"
+							],
+							"title": "HGui.Debug.Enable(channels)",
+							"notePosition": 20,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dataFileName": "HGui.Debug.Enable(channels).html"
+						}
+					]
+				},
+				{
+					"isClone": false,
+					"noteId": "aQ6G6AB8JORc",
+					"notePath": [
+						"DRyPY4DonWPN",
+						"aQ6G6AB8JORc"
+					],
+					"title": "Window Class",
+					"notePosition": 220,
+					"prefix": null,
+					"isExpanded": true,
+					"type": "text",
+					"mime": "text/html",
+					"attributes": [],
+					"format": "html",
+					"dataFileName": "Window Class.html",
+					"dirFileName": "Window Class",
+					"children": [
+						{
+							"isClone": false,
+							"noteId": "S08etee8xp55",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"aQ6G6AB8JORc",
+								"S08etee8xp55"
+							],
+							"title": "Data Structure",
+							"notePosition": 0,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dataFileName": "Data Structure.html"
+						},
+						{
+							"isClone": false,
+							"noteId": "eM8S96YVRTvo",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"aQ6G6AB8JORc",
+								"eM8S96YVRTvo"
+							],
+							"title": "Methods",
+							"notePosition": 10,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dirFileName": "Methods",
+							"children": [
+								{
+									"isClone": false,
+									"noteId": "gn8y80KdRvxD",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"eM8S96YVRTvo",
+										"gn8y80KdRvxD"
+									],
+									"title": "winObj:Move()",
+									"notePosition": 150,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "winObjMove().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "KZrQt8SikeKz",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"eM8S96YVRTvo",
+										"KZrQt8SikeKz"
+									],
+									"title": "winObj:menuSet()",
+									"notePosition": 140,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "haZUNZ2FkAph",
+											"isInheritable": false,
+											"position": 1
+										}
+									],
+									"format": "html",
+									"dataFileName": "winObjmenuSet().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "kHQ8F9xGzm5i",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"eM8S96YVRTvo",
+										"kHQ8F9xGzm5i"
+									],
+									"title": "HGui.Window:new()",
+									"notePosition": 0,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "KZrQt8SikeKz",
+											"isInheritable": false,
+											"position": 1
+										}
+									],
+									"format": "html",
+									"dataFileName": "HGui.Windownew().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "jLY8XOJnU5hi",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"eM8S96YVRTvo",
+										"jLY8XOJnU5hi"
+									],
+									"title": "winObj:Activate()",
+									"notePosition": 10,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "winObjActivate().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "i34Ups88NM6D",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"eM8S96YVRTvo",
+										"i34Ups88NM6D"
+									],
+									"title": "winObj:Activate_next()",
+									"notePosition": 20,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "winObjActivate_next().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "tVMo6vhg1AC8",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"eM8S96YVRTvo",
+										"tVMo6vhg1AC8"
+									],
+									"title": "winObj:pushToBottom()",
+									"notePosition": 210,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "winObjpushToBottom().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "DryZxA2JccuY",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"eM8S96YVRTvo",
+										"DryZxA2JccuY"
+									],
+									"title": "winObj:Activate_previous()",
+									"notePosition": 30,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "winObjActivate_previous().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "0OXATHz46u6Q",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"eM8S96YVRTvo",
+										"0OXATHz46u6Q"
+									],
+									"title": "winObj:Close()",
+									"notePosition": 40,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "winObjClose().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "R8qICgD3F1tR",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"eM8S96YVRTvo",
+										"R8qICgD3F1tR"
+									],
+									"title": "winObj:disableEvents()",
+									"notePosition": 50,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "winObjdisableEvents().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "MaWdJ4nWnTQr",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"eM8S96YVRTvo",
+										"MaWdJ4nWnTQr"
+									],
+									"title": "winObj:enableEvents()",
+									"notePosition": 70,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "winObjenableEvents().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "nHay2YaCGbQN",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"eM8S96YVRTvo",
+										"nHay2YaCGbQN"
+									],
+									"title": "winObj:disableGUI()",
+									"notePosition": 60,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "winObjdisableGUI().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "nujK6mDijYWH",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"eM8S96YVRTvo",
+										"nujK6mDijYWH"
+									],
+									"title": "winObj:enableGUI()",
+									"notePosition": 80,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "winObjenableGUI().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "q7Gfe8iJQOZQ",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"eM8S96YVRTvo",
+										"q7Gfe8iJQOZQ"
+									],
+									"title": "winObj:Free()",
+									"notePosition": 90,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "winObjFree().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "qhmlzsMAgIvk",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"eM8S96YVRTvo",
+										"qhmlzsMAgIvk"
+									],
+									"title": "winObj:Select()",
+									"notePosition": 230,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "winObjSelect().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "uErtOs8vxipS",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"eM8S96YVRTvo",
+										"uErtOs8vxipS"
+									],
+									"title": "winObj:Hide()",
+									"notePosition": 100,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "winObjHide().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "Bl80AP4Erj0t",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"eM8S96YVRTvo",
+										"Bl80AP4Erj0t"
+									],
+									"title": "winObj:IsHidden()",
+									"notePosition": 130,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "winObjIsHidden().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "UauKpE2SePhY",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"eM8S96YVRTvo",
+										"UauKpE2SePhY"
+									],
+									"title": "winObj:IsActive()",
+									"notePosition": 110,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "winObjIsActive().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "zhilk09eUSVQ",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"eM8S96YVRTvo",
+										"zhilk09eUSVQ"
+									],
+									"title": "winObj:IsClosed()",
+									"notePosition": 120,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "winObjIsClosed().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "LfXpm0M7bv0W",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"eM8S96YVRTvo",
+										"LfXpm0M7bv0W"
+									],
+									"title": "winObj:Open()",
+									"notePosition": 200,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "winObjOpen().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "TF2D4AbIeqob",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"eM8S96YVRTvo",
+										"TF2D4AbIeqob"
+									],
+									"title": "winObj:Render()",
+									"notePosition": 220,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "winObjRender().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "ZmF2v1lTkrMs",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"eM8S96YVRTvo",
+										"ZmF2v1lTkrMs"
+									],
+									"title": "winObj:Set()",
+									"notePosition": 250,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "kHQ8F9xGzm5i",
+											"isInheritable": false,
+											"position": 1
+										}
+									],
+									"format": "html",
+									"dataFileName": "winObjSet().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "faidJ6zoBUP1",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"eM8S96YVRTvo",
+										"faidJ6zoBUP1"
+									],
+									"title": "winObj:Show()",
+									"notePosition": 260,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "winObjShow().html"
+								}
+							]
+						},
+						{
+							"isClone": false,
+							"noteId": "gfvUnYuMWCDs",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"aQ6G6AB8JORc",
+								"gfvUnYuMWCDs"
+							],
+							"title": "Functions",
+							"notePosition": 20,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dirFileName": "Functions",
+							"children": [
+								{
+									"isClone": false,
+									"noteId": "IjDa9g8059lq",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"gfvUnYuMWCDs",
+										"IjDa9g8059lq"
+									],
+									"title": "HGui.windowActivateByName()",
+									"notePosition": 10,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.windowActivateByName().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "S3T5SBPUCI3u",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"gfvUnYuMWCDs",
+										"S3T5SBPUCI3u"
+									],
+									"title": "HGui.windowExists()",
+									"notePosition": 20,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.windowExists().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "x1PihS6Bh7sQ",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"gfvUnYuMWCDs",
+										"x1PihS6Bh7sQ"
+									],
+									"title": "HGui.windowFindByName()",
+									"notePosition": 40,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.windowFindByName().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "38wIpFU1nKc9",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"gfvUnYuMWCDs",
+										"38wIpFU1nKc9"
+									],
+									"title": "HGui.windowFindByHWID()",
+									"notePosition": 30,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.windowFindByHWID().html"
+								}
+							]
+						},
+						{
+							"isClone": false,
+							"noteId": "nsthHtePxnQP",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"aQ6G6AB8JORc",
+								"nsthHtePxnQP"
+							],
+							"title": "Functions (Mostly internal)",
+							"notePosition": 30,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dirFileName": "Functions (Mostly internal)",
+							"children": [
+								{
+									"isClone": false,
+									"noteId": "6PZXpBEVGt1a",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"nsthHtePxnQP",
+										"6PZXpBEVGt1a"
+									],
+									"title": "HGui.windowEvent_Active()",
+									"notePosition": 10,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.windowEvent_Active().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "EnAIVcSQv5kq",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"nsthHtePxnQP",
+										"EnAIVcSQv5kq"
+									],
+									"title": "HGui.windowEvent_Inactive()",
+									"notePosition": 50,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.windowEvent_Inactive().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "JNtkIMNoVxjx",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"nsthHtePxnQP",
+										"JNtkIMNoVxjx"
+									],
+									"title": "HGui.windowEvent_Hide()",
+									"notePosition": 40,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.windowEvent_Hide().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "PLCvfZ4rMbDj",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"nsthHtePxnQP",
+										"PLCvfZ4rMbDj"
+									],
+									"title": "HGui.windowEvent_MouseMove()",
+									"notePosition": 70,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.windowEvent_MouseMove().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "R55R7mBzdT9A",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"nsthHtePxnQP",
+										"R55R7mBzdT9A"
+									],
+									"title": "HGui.windowEvent_MouseWheel()",
+									"notePosition": 80,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.windowEvent_MouseWheel().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "tDsw5ZZDyPVx",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"nsthHtePxnQP",
+										"tDsw5ZZDyPVx"
+									],
+									"title": "HGui.windowEvent_Show()",
+									"notePosition": 110,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.windowEvent_Show().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "ONCii5BJq4Nr",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"nsthHtePxnQP",
+										"ONCii5BJq4Nr"
+									],
+									"title": "HGui.windowEvent_Close()",
+									"notePosition": 20,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.windowEvent_Close().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "sdtx7WgrxAlY",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"nsthHtePxnQP",
+										"sdtx7WgrxAlY"
+									],
+									"title": "HGui.windowEvent_Move()",
+									"notePosition": 90,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.windowEvent_Move().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "TY9lP3Qm3qmb",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"nsthHtePxnQP",
+										"TY9lP3Qm3qmb"
+									],
+									"title": "HGui.windowEvent_Drop()",
+									"notePosition": 30,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.windowEvent_Drop().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "0nGl4SBb5Kn8",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"nsthHtePxnQP",
+										"0nGl4SBb5Kn8"
+									],
+									"title": "HGui.windowEvent_LMBUp()",
+									"notePosition": 60,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.windowEvent_LMBUp().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "gjpHcEHqObNs",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"aQ6G6AB8JORc",
+										"nsthHtePxnQP",
+										"gjpHcEHqObNs"
+									],
+									"title": "HGui.windowEvent_Resize()",
+									"notePosition": 100,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.windowEvent_Resize().html"
+								}
+							]
+						}
+					]
+				},
+				{
+					"isClone": false,
+					"noteId": "O0ncaBDexhB8",
+					"notePath": [
+						"DRyPY4DonWPN",
+						"O0ncaBDexhB8"
+					],
+					"title": "Gadgets",
+					"notePosition": 180,
+					"prefix": null,
+					"isExpanded": false,
+					"type": "text",
+					"mime": "text/html",
+					"attributes": [],
+					"format": "html",
+					"dataFileName": "Gadgets.html",
+					"dirFileName": "Gadgets",
+					"children": [
+						{
+							"isClone": false,
+							"noteId": "o4itPKlFMvSZ",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"O0ncaBDexhB8",
+								"o4itPKlFMvSZ"
+							],
+							"title": "Common Methods",
+							"notePosition": 40,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dataFileName": "Common Methods.html",
+							"dirFileName": "Common Methods",
+							"children": [
+								{
+									"isClone": false,
+									"noteId": "l7r1ZoYge6E4",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o4itPKlFMvSZ",
+										"l7r1ZoYge6E4"
+									],
+									"title": "gadObj:Enable()",
+									"notePosition": 70,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "gadObjEnable().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "eu5ejXOxN423",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o4itPKlFMvSZ",
+										"eu5ejXOxN423"
+									],
+									"title": "gadObj:Disable()",
+									"notePosition": 50,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "gadObjDisable().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "lBUbdx4qb5gn",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o4itPKlFMvSZ",
+										"lBUbdx4qb5gn"
+									],
+									"title": "gadObj:Hide()",
+									"notePosition": 110,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "gadObjHide().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "XvqbPIg0RCAk",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o4itPKlFMvSZ",
+										"XvqbPIg0RCAk"
+									],
+									"title": "gadObj:Show()",
+									"notePosition": 190,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "gadObjShow().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "kQeSpThBtRon",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o4itPKlFMvSZ",
+										"kQeSpThBtRon"
+									],
+									"title": "gadObj:Render()",
+									"notePosition": 150,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "gadObjRender().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "qajuqqRnZFhp",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o4itPKlFMvSZ",
+										"qajuqqRnZFhp"
+									],
+									"title": "gadObj:adaptFontSize()",
+									"notePosition": 20,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "gadObjadaptFontSize().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "L4rhyTd42DEA",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o4itPKlFMvSZ",
+										"L4rhyTd42DEA"
+									],
+									"title": "gadObj:cacheBuild()",
+									"notePosition": 30,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "gadObjcacheBuild().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "9kButuB7oJom",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o4itPKlFMvSZ",
+										"9kButuB7oJom"
+									],
+									"title": "gadObj:cacheFree()",
+									"notePosition": 40,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "gadObjcacheFree().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "rtN1lhCfaiyZ",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o4itPKlFMvSZ",
+										"rtN1lhCfaiyZ"
+									],
+									"title": "gadObj:Draw()",
+									"notePosition": 60,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "gadObjDraw().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "Gongoa0Dkig7",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o4itPKlFMvSZ",
+										"Gongoa0Dkig7"
+									],
+									"title": "gadObj:Free()",
+									"notePosition": 90,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "gadObjFree().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "u8871EpyYe1c",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o4itPKlFMvSZ",
+										"u8871EpyYe1c"
+									],
+									"title": "gadObj:freeChildren()",
+									"notePosition": 100,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "gadObjfreeChildren().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "E3rtxNH5IQif",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o4itPKlFMvSZ",
+										"E3rtxNH5IQif"
+									],
+									"title": "gadObj:layoutSet()",
+									"notePosition": 120,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "gadObjlayoutSet().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "kFPwXGfoOi9N",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o4itPKlFMvSZ",
+										"kFPwXGfoOi9N"
+									],
+									"title": "gadObj:layoutUpdate()",
+									"notePosition": 130,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "gadObjlayoutUpdate().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "bhl5yLpNukEh",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o4itPKlFMvSZ",
+										"bhl5yLpNukEh"
+									],
+									"title": "gadObj:Link()",
+									"notePosition": 140,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "gadObjLink().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "MVw07YoN94mo",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o4itPKlFMvSZ",
+										"MVw07YoN94mo"
+									],
+									"title": "gadObj:Unlink()",
+									"notePosition": 300,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "gadObjUnlink().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "SzjulCRf5wcm",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o4itPKlFMvSZ",
+										"SzjulCRf5wcm"
+									],
+									"title": "HGui.Gadget:New()",
+									"notePosition": 10,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "haZUNZ2FkAph",
+											"isInheritable": false,
+											"position": 1
+										}
+									],
+									"format": "html",
+									"dataFileName": "HGui.GadgetNew().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "LEY0g11VX1ak",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o4itPKlFMvSZ",
+										"LEY0g11VX1ak"
+									],
+									"title": "gadObj:Set()",
+									"notePosition": 160,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "SzjulCRf5wcm",
+											"isInheritable": false,
+											"position": 1
+										}
+									],
+									"format": "html",
+									"dataFileName": "gadObjSet().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "q7whfKsJ20Gg",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o4itPKlFMvSZ",
+										"q7whfKsJ20Gg"
+									],
+									"title": "gadObj:setTheme()",
+									"notePosition": 170,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "gadObjsetTheme().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "11zabYACvXhw",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o4itPKlFMvSZ",
+										"11zabYACvXhw"
+									],
+									"title": "gadObj:skinBordersUpdate()",
+									"notePosition": 180,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "gadObjskinBordersUpdate().html"
+								}
+							]
+						},
+						{
+							"isClone": false,
+							"noteId": "FltvFUT2UYWQ",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"O0ncaBDexhB8",
+								"FltvFUT2UYWQ"
+							],
+							"title": "Data Structure",
+							"notePosition": 10,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dataFileName": "Data Structure.html"
+						},
+						{
+							"isClone": false,
+							"noteId": "o97kjvEtrpEB",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"O0ncaBDexhB8",
+								"o97kjvEtrpEB"
+							],
+							"title": "Functions (Mostly internal)",
+							"notePosition": 70,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dirFileName": "Functions (Mostly internal)",
+							"children": [
+								{
+									"isClone": false,
+									"noteId": "IRpFrnFAjWHo",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"IRpFrnFAjWHo"
+									],
+									"title": "HGui.gadgetEvent_DragScrollbarCursor()",
+									"notePosition": 70,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.gadgetEvent_DragScrollbar.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "neoJgkh3Pqpb",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"neoJgkh3Pqpb"
+									],
+									"title": "HGui.gadgetEvent_LMBDown()",
+									"notePosition": 80,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.gadgetEvent_LMBDown().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "iQBaJZdmGDRn",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"iQBaJZdmGDRn"
+									],
+									"title": "HGui.gadgetEvent_LMBUp()",
+									"notePosition": 90,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.gadgetEvent_LMBUp().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "ECHidzXPsFCU",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"ECHidzXPsFCU"
+									],
+									"title": "HGui.gadgetEvent_Out()",
+									"notePosition": 100,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.gadgetEvent_Out().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "v1wMyJbku8sd",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"v1wMyJbku8sd"
+									],
+									"title": "HGui.gadgetEvent_Over()",
+									"notePosition": 110,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.gadgetEvent_Over().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "x3rfsvnOX6ua",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"x3rfsvnOX6ua"
+									],
+									"title": "HGui.gadgetEvent_RMBUp()",
+									"notePosition": 120,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.gadgetEvent_RMBUp().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "zilaNQ3OKVWk",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"zilaNQ3OKVWk"
+									],
+									"title": "HGui.gadgetEvent_TextOnInputEnd()",
+									"notePosition": 130,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.gadgetEvent_TextOnInputEn.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "qu0zSdP2ePJw",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"qu0zSdP2ePJw"
+									],
+									"title": "HGui.validateGadgetStatus()",
+									"notePosition": 430,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.validateGadgetStatus().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "7KCXInJ8gLbu",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"7KCXInJ8gLbu"
+									],
+									"title": "HGui.ListView_ContentsUpdate()",
+									"notePosition": 140,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.ListView_ContentsUpdate().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "9Z35t0TVxX42",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"9Z35t0TVxX42"
+									],
+									"title": "HGui.ListView_HScrollerUpdate()",
+									"notePosition": 150,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.ListView_HScrollerUpdate(.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "wB3YgZjB0NcU",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"wB3YgZjB0NcU"
+									],
+									"title": "HGui.ListView_VScrollerUpdate()",
+									"notePosition": 170,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.ListView_VScrollerUpdate(.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "5WuabgshiXhy",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"5WuabgshiXhy"
+									],
+									"title": "HGui.Menu_Close()",
+									"notePosition": 220,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.Menu_Close().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "t8klIBOu8BJl",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"t8klIBOu8BJl"
+									],
+									"title": "HGui.Menu_FindItem()",
+									"notePosition": 230,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.Menu_FindItem().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "w4OSj21wptDZ",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"w4OSj21wptDZ"
+									],
+									"title": "HGui.DropDown_Open()",
+									"notePosition": 50,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.DropDown_Open().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "VI2K4vBWJ42Z",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"VI2K4vBWJ42Z"
+									],
+									"title": "HGui.DropDown_Close()",
+									"notePosition": 40,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.DropDown_Close().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "pNbV0LMHGmnj",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"pNbV0LMHGmnj"
+									],
+									"title": "HGui.DropDown_Selected()",
+									"notePosition": 60,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.DropDown_Selected().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "Mfb2I3DNpFgU",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"Mfb2I3DNpFgU"
+									],
+									"title": "HGui.Menu_MouseMoved()",
+									"notePosition": 240,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.Menu_MouseMoved().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "GIgwHZpodvSr",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"GIgwHZpodvSr"
+									],
+									"title": "HGui.Menu_Open()",
+									"notePosition": 250,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.Menu_Open().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "KcHFwgLeTI3D",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"KcHFwgLeTI3D"
+									],
+									"title": "HGui.Menu_PrebuiltItem()",
+									"notePosition": 260,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.Menu_PrebuiltItem().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "UNdQcupm4NjP",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"UNdQcupm4NjP"
+									],
+									"title": "HGui.Menu_Selected()",
+									"notePosition": 270,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.Menu_Selected().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "6jcqSqZdgZO0",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"6jcqSqZdgZO0"
+									],
+									"title": "HGui.Tip.Close()",
+									"notePosition": 280,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.Tip.Close().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "CwfX9eteEOPK",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"CwfX9eteEOPK"
+									],
+									"title": "HGui.Tip.Open()",
+									"notePosition": 290,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.Tip.Open().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "snCxm8YDxkJT",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"snCxm8YDxkJT"
+									],
+									"title": "HGui.Virtual_HScrollerUpdate()",
+									"notePosition": 440,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.Virtual_HScrollerUpdate().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "EKnD7foHo672",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"EKnD7foHo672"
+									],
+									"title": "HGui.Virtual_VScrollerUpdate()",
+									"notePosition": 450,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.Virtual_VScrollerUpdate().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "KRD8w47j00ec",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"KRD8w47j00ec"
+									],
+									"title": "HGui._ListView_ResizeColumn()",
+									"notePosition": 10,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui._ListView_ResizeColumn().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "nYZ9VDLnlHo9",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"nYZ9VDLnlHo9"
+									],
+									"title": "HGui.canvasEvent_Out()",
+									"notePosition": 20,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.canvasEvent_Out().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "qesNFdtdEcyk",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"qesNFdtdEcyk"
+									],
+									"title": "HGui.canvasEvent_Over()",
+									"notePosition": 30,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.canvasEvent_Over().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "ekjsDLpRRAoD",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"ekjsDLpRRAoD"
+									],
+									"title": "HGui.treeViewContentEvent_LMBDown()",
+									"notePosition": 390,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.treeViewContentEvent_LMBD.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "OZsNuitBTFhJ",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"OZsNuitBTFhJ"
+									],
+									"title": "HGui.listViewContentEvent_LMBDown()",
+									"notePosition": 180,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.listViewContentEvent_LMBD.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "bvZHnLzACIhp",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"bvZHnLzACIhp"
+									],
+									"title": "HGui.listViewContentEvent_LMBUp()",
+									"notePosition": 190,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.listViewContentEvent_LMBU.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "hOi6dRUbiWGG",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"hOi6dRUbiWGG"
+									],
+									"title": "HGui.treeView_SelectChilds()",
+									"notePosition": 360,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.treeView_SelectChilds().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "DoGnSP1hbN0k",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"DoGnSP1hbN0k"
+									],
+									"title": "HGui.treeView_UnSelectChilds()",
+									"notePosition": 370,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.treeView_UnSelectChilds().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "OOBpH9Yj3HfU",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"OOBpH9Yj3HfU"
+									],
+									"title": "HGui.treeViewContentEvent_LMBUp()",
+									"notePosition": 400,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.treeViewContentEvent_LMBU.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "z2efl6165Fpj",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"z2efl6165Fpj"
+									],
+									"title": "HGui.listViewContentEvent_Out()",
+									"notePosition": 210,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.listViewContentEvent_Out(.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "XPXfWENAF3ah",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"XPXfWENAF3ah"
+									],
+									"title": "HGui.treeViewContentEvent_Out()",
+									"notePosition": 410,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.treeViewContentEvent_Out(.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "HkFg2GvqtvUn",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"HkFg2GvqtvUn"
+									],
+									"title": "HGui.listViewContentEvent_Over()",
+									"notePosition": 200,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.listViewContentEvent_Over.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "xGkQIzWhAQgC",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"xGkQIzWhAQgC"
+									],
+									"title": "HGui.treeViewContentEvent_Over()",
+									"notePosition": 420,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.treeViewContentEvent_Over.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "PmCyBKePkejn",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"PmCyBKePkejn"
+									],
+									"title": "HGui.treeView_ContentsUpdate()",
+									"notePosition": 300,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.treeView_ContentsUpdate().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "ECGGizlR8bal",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"ECGGizlR8bal"
+									],
+									"title": "HGui.treeView_VScrollerUpdate()",
+									"notePosition": 380,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.treeView_VScrollerUpdate(.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "qWkQNnqUiWD6",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"qWkQNnqUiWD6"
+									],
+									"title": "HGui.treeView_HScrollerUpdate()",
+									"notePosition": 330,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.treeView_HScrollerUpdate(.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "I7OMoqguGq9G",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"I7OMoqguGq9G"
+									],
+									"title": "HGui.treeView_ElaborateList()",
+									"notePosition": 320,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.treeView_ElaborateList().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "ZicMpAmQ2UpW",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"ZicMpAmQ2UpW"
+									],
+									"title": "HGui.treeView_RecursiveSort()",
+									"notePosition": 340,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.treeView_RecursiveSort().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "uYFK5cQRNk2V",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"uYFK5cQRNk2V"
+									],
+									"title": "HGui.treeView_RecursiveSort_Childs()",
+									"notePosition": 350,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.treeView_RecursiveSort_Ch.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "q9kiBPLI216c",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"o97kjvEtrpEB",
+										"q9kiBPLI216c"
+									],
+									"title": "HGui.treeView_drawOpenCloseSign()",
+									"notePosition": 310,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.treeView_drawOpenCloseSig.html"
+								}
+							]
+						},
+						{
+							"isClone": false,
+							"noteId": "Hg9ls24v8yK6",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"O0ncaBDexhB8",
+								"Hg9ls24v8yK6"
+							],
+							"title": "Functions",
+							"notePosition": 80,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dirFileName": "Functions",
+							"children": [
+								{
+									"isClone": false,
+									"noteId": "SXgrpKl5qccd",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"Hg9ls24v8yK6",
+										"SXgrpKl5qccd"
+									],
+									"title": "HGui.gadgetExistsByName()",
+									"notePosition": 10,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.gadgetExistsByName().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "akFhihO1kRu0",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"Hg9ls24v8yK6",
+										"akFhihO1kRu0"
+									],
+									"title": "HGui.gadgetFindByHWIdAndPos()",
+									"notePosition": 20,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.gadgetFindByHWIdAndPos().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "tKV09aNq4Z12",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"Hg9ls24v8yK6",
+										"tKV09aNq4Z12"
+									],
+									"title": "HGui.gadgetFindByName()",
+									"notePosition": 30,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.gadgetFindByName().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "XpbhlHdjj7GD",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"Hg9ls24v8yK6",
+										"XpbhlHdjj7GD"
+									],
+									"title": "HGui.gadgetSetSkinCache()",
+									"notePosition": 40,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.gadgetSetSkinCache().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "jKpWZMyvfO5u",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"Hg9ls24v8yK6",
+										"jKpWZMyvfO5u"
+									],
+									"title": "HGui.gadgetSetTextCache()",
+									"notePosition": 50,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.gadgetSetTextCache().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "M3CV5s9ys7Tb",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"Hg9ls24v8yK6",
+										"M3CV5s9ys7Tb"
+									],
+									"title": "HGui.SetAutoRendering()",
+									"notePosition": 60,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.SetAutoRendering().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "HKDwxyrzfcxj",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"Hg9ls24v8yK6",
+										"HKDwxyrzfcxj"
+									],
+									"title": "HGui.SetEventHandling()",
+									"notePosition": 70,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.SetEventHandling().html"
+								}
+							]
+						},
+						{
+							"isClone": false,
+							"noteId": "J4u63HPGtiCQ",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"O0ncaBDexhB8",
+								"J4u63HPGtiCQ"
+							],
+							"title": "Class Specific Methods & Parameters",
+							"notePosition": 50,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dirFileName": "Class Specific Methods & Parameters",
+							"children": [
+								{
+									"isClone": false,
+									"noteId": "Vhq3WaNQ971c",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"J4u63HPGtiCQ",
+										"Vhq3WaNQ971c"
+									],
+									"title": "Label gadget",
+									"notePosition": 60,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "o4itPKlFMvSZ",
+											"isInheritable": false,
+											"position": 1
+										},
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "haZUNZ2FkAph",
+											"isInheritable": false,
+											"position": 2
+										}
+									],
+									"format": "html",
+									"dataFileName": "Label gadget.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "X4k86ds8IpBo",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"J4u63HPGtiCQ",
+										"X4k86ds8IpBo"
+									],
+									"title": "Group gadget",
+									"notePosition": 30,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "o4itPKlFMvSZ",
+											"isInheritable": false,
+											"position": 1
+										}
+									],
+									"format": "html",
+									"dataFileName": "Group gadget.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "HFmT7sEO43ti",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"J4u63HPGtiCQ",
+										"HFmT7sEO43ti"
+									],
+									"title": "Canvass gadget",
+									"notePosition": 10,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "o4itPKlFMvSZ",
+											"isInheritable": false,
+											"position": 1
+										}
+									],
+									"format": "html",
+									"dataFileName": "Canvass gadget.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "jAlCo4aICUfS",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"J4u63HPGtiCQ",
+										"jAlCo4aICUfS"
+									],
+									"title": "Virtual gadget",
+									"notePosition": 130,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "o4itPKlFMvSZ",
+											"isInheritable": false,
+											"position": 1
+										}
+									],
+									"format": "html",
+									"dataFileName": "Virtual gadget.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "zCVvIG3umeIJ",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"J4u63HPGtiCQ",
+										"zCVvIG3umeIJ"
+									],
+									"title": "Button gadget",
+									"notePosition": 0,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "o4itPKlFMvSZ",
+											"isInheritable": false,
+											"position": 1
+										},
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "haZUNZ2FkAph",
+											"isInheritable": false,
+											"position": 2
+										}
+									],
+									"format": "html",
+									"dataFileName": "Button gadget.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "dSQNAuuzPycR",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"J4u63HPGtiCQ",
+										"dSQNAuuzPycR"
+									],
+									"title": "Switch gadget",
+									"notePosition": 120,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "o4itPKlFMvSZ",
+											"isInheritable": false,
+											"position": 1
+										}
+									],
+									"format": "html",
+									"dataFileName": "Switch gadget.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "7mJN1VrQpy8K",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"J4u63HPGtiCQ",
+										"7mJN1VrQpy8K"
+									],
+									"title": "Scrollbar gadget",
+									"notePosition": 110,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "Scrollbar gadget.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "9b25nwgpKmb4",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"J4u63HPGtiCQ",
+										"9b25nwgpKmb4"
+									],
+									"title": "Slider gadget",
+									"notePosition": 140,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "o4itPKlFMvSZ",
+											"isInheritable": false,
+											"position": 1
+										}
+									],
+									"format": "html",
+									"dataFileName": "Slider gadget.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "ptrPA90FNF7b",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"J4u63HPGtiCQ",
+										"ptrPA90FNF7b"
+									],
+									"title": "Progressbar gadget",
+									"notePosition": 80,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "o4itPKlFMvSZ",
+											"isInheritable": false,
+											"position": 1
+										}
+									],
+									"format": "html",
+									"dataFileName": "Progressbar gadget.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "8VBNS2D679nu",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"J4u63HPGtiCQ",
+										"8VBNS2D679nu"
+									],
+									"title": "Knob gadget",
+									"notePosition": 40,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "o4itPKlFMvSZ",
+											"isInheritable": false,
+											"position": 1
+										}
+									],
+									"format": "html",
+									"dataFileName": "Knob gadget.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "J1o2vFNZRYLQ",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"J4u63HPGtiCQ",
+										"J1o2vFNZRYLQ"
+									],
+									"title": "Text gadget",
+									"notePosition": 150,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "o4itPKlFMvSZ",
+											"isInheritable": false,
+											"position": 1
+										}
+									],
+									"format": "html",
+									"dataFileName": "Text gadget.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "OtoZmrGgQTJB",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"J4u63HPGtiCQ",
+										"OtoZmrGgQTJB"
+									],
+									"title": "Listview gadget",
+									"notePosition": 70,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "o4itPKlFMvSZ",
+											"isInheritable": false,
+											"position": 1
+										},
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "haZUNZ2FkAph",
+											"isInheritable": false,
+											"position": 2
+										}
+									],
+									"format": "html",
+									"dataFileName": "Listview gadget.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "bCvxg1vex51L",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"J4u63HPGtiCQ",
+										"bCvxg1vex51L"
+									],
+									"title": "Treeview gadget",
+									"notePosition": 160,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "o4itPKlFMvSZ",
+											"isInheritable": false,
+											"position": 1
+										},
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "haZUNZ2FkAph",
+											"isInheritable": false,
+											"position": 2
+										}
+									],
+									"format": "html",
+									"dataFileName": "Treeview gadget.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "E4aPeGJsVYLF",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"J4u63HPGtiCQ",
+										"E4aPeGJsVYLF"
+									],
+									"title": "Dropdown gadget",
+									"notePosition": 20,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "o4itPKlFMvSZ",
+											"isInheritable": false,
+											"position": 1
+										}
+									],
+									"format": "html",
+									"dataFileName": "Dropdown gadget.html"
+								},
+								{
+									"isClone": false,
+									"noteId": "AVp3X9hT5LlE",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"J4u63HPGtiCQ",
+										"AVp3X9hT5LlE"
+									],
+									"title": "Image gadget",
+									"notePosition": 50,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [
+										{
+											"type": "relation",
+											"name": "internalLink",
+											"value": "o4itPKlFMvSZ",
+											"isInheritable": false,
+											"position": 1
+										}
+									],
+									"format": "html",
+									"dataFileName": "Image gadget.html"
+								}
+							]
+						},
+						{
+							"isClone": false,
+							"noteId": "R0Pz2TOPPdMW",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"O0ncaBDexhB8",
+								"R0Pz2TOPPdMW"
+							],
+							"title": "Internal Methods",
+							"notePosition": 60,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dirFileName": "Internal Methods",
+							"children": [
+								{
+									"isClone": false,
+									"noteId": "zSDVOxPHtoHU",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"O0ncaBDexhB8",
+										"R0Pz2TOPPdMW",
+										"zSDVOxPHtoHU"
+									],
+									"title": "gadObj:drawScrollbarHandle()",
+									"notePosition": 0,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "gadObjdrawScrollbarHandle().html"
+								}
+							]
+						},
+						{
+							"isClone": false,
+							"noteId": "LUrhrQvSD4sb",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"O0ncaBDexhB8",
+								"LUrhrQvSD4sb"
+							],
+							"title": "Overview",
+							"notePosition": 0,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [
+								{
+									"type": "relation",
+									"name": "internalLink",
+									"value": "o4itPKlFMvSZ",
+									"isInheritable": false,
+									"position": 1
+								},
+								{
+									"type": "relation",
+									"name": "internalLink",
+									"value": "J4u63HPGtiCQ",
+									"isInheritable": false,
+									"position": 2
+								}
+							],
+							"format": "html",
+							"dataFileName": "Overview.html"
+						}
+					]
+				},
+				{
+					"isClone": false,
+					"noteId": "2efenIB4TZR9",
+					"notePath": [
+						"DRyPY4DonWPN",
+						"2efenIB4TZR9"
+					],
+					"title": "Splash Screen",
+					"notePosition": 230,
+					"prefix": null,
+					"isExpanded": false,
+					"type": "text",
+					"mime": "text/html",
+					"attributes": [],
+					"format": "html",
+					"dataFileName": "Splash Screen.html",
+					"dirFileName": "Splash Screen",
+					"children": [
+						{
+							"isClone": false,
+							"noteId": "3pAak6WQEHyM",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"2efenIB4TZR9",
+								"3pAak6WQEHyM"
+							],
+							"title": "HGui.AnimSplashScreen()",
+							"notePosition": 10,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dataFileName": "HGui.AnimSplashScreen().html"
+						},
+						{
+							"isClone": false,
+							"noteId": "3V273ITuXTkX",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"2efenIB4TZR9",
+								"3V273ITuXTkX"
+							],
+							"title": "HGui.MsgSplashScreen()",
+							"notePosition": 20,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dataFileName": "HGui.MsgSplashScreen().html"
+						},
+						{
+							"isClone": false,
+							"noteId": "fWOD8qkRnaI5",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"2efenIB4TZR9",
+								"fWOD8qkRnaI5"
+							],
+							"title": "HGui.ShowSplashScreen()",
+							"notePosition": 30,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dataFileName": "HGui.ShowSplashScreen().html"
+						},
+						{
+							"isClone": false,
+							"noteId": "rhAhpAyMHDHx",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"2efenIB4TZR9",
+								"rhAhpAyMHDHx"
+							],
+							"title": "HGui.HideSplashScreen()",
+							"notePosition": 40,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dataFileName": "HGui.HideSplashScreen().html"
+						}
+					]
+				},
+				{
+					"isClone": false,
+					"noteId": "WKOpIpAPe0wM",
+					"notePath": [
+						"DRyPY4DonWPN",
+						"WKOpIpAPe0wM"
+					],
+					"title": "Area Class",
+					"notePosition": 240,
+					"prefix": null,
+					"isExpanded": false,
+					"type": "text",
+					"mime": "text/html",
+					"attributes": [],
+					"format": "html",
+					"dataFileName": "Area Class.html",
+					"dirFileName": "Area Class",
+					"children": [
+						{
+							"isClone": false,
+							"noteId": "PboVWPBashJj",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"WKOpIpAPe0wM",
+								"PboVWPBashJj"
+							],
+							"title": "Data Structure",
+							"notePosition": 10,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dataFileName": "Data Structure.html"
+						},
+						{
+							"isClone": false,
+							"noteId": "uNBDcoFmQn9V",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"WKOpIpAPe0wM",
+								"uNBDcoFmQn9V"
+							],
+							"title": "Methods",
+							"notePosition": 20,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dataFileName": "Methods.html",
+							"dirFileName": "Methods",
+							"children": [
+								{
+									"isClone": false,
+									"noteId": "BptC5WB6FAO2",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"WKOpIpAPe0wM",
+										"uNBDcoFmQn9V",
+										"BptC5WB6FAO2"
+									],
+									"title": "HGui.Area:New()",
+									"notePosition": 10,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.AreaNew().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "v9g7qR8ryslj",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"WKOpIpAPe0wM",
+										"uNBDcoFmQn9V",
+										"v9g7qR8ryslj"
+									],
+									"title": "areaObj:Set()",
+									"notePosition": 30,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "areaObjSet().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "JJNR3DoCfLNk",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"WKOpIpAPe0wM",
+										"uNBDcoFmQn9V",
+										"JJNR3DoCfLNk"
+									],
+									"title": "areaObj:Render()",
+									"notePosition": 20,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "areaObjRender().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "pkw84iBs9GgF",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"WKOpIpAPe0wM",
+										"uNBDcoFmQn9V",
+										"pkw84iBs9GgF"
+									],
+									"title": "areaObj:Free()",
+									"notePosition": 40,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "areaObjFree().html"
+								}
+							]
+						},
+						{
+							"isClone": false,
+							"noteId": "mkeDJQC3m1un",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"WKOpIpAPe0wM",
+								"mkeDJQC3m1un"
+							],
+							"title": "Functions",
+							"notePosition": 30,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dataFileName": "Functions.html",
+							"dirFileName": "Functions",
+							"children": [
+								{
+									"isClone": false,
+									"noteId": "edjQg64KmkG0",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"WKOpIpAPe0wM",
+										"mkeDJQC3m1un",
+										"edjQg64KmkG0"
+									],
+									"title": "HGui.Area_FindByName()",
+									"notePosition": 10,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.Area_FindByName().html"
+								}
+							]
+						}
+					]
+				},
+				{
+					"isClone": false,
+					"noteId": "8avMgAlRZWUK",
+					"notePath": [
+						"DRyPY4DonWPN",
+						"8avMgAlRZWUK"
+					],
+					"title": "CText Class",
+					"notePosition": 250,
+					"prefix": null,
+					"isExpanded": false,
+					"type": "text",
+					"mime": "text/html",
+					"attributes": [],
+					"format": "html",
+					"dataFileName": "CText Class.html",
+					"dirFileName": "CText Class",
+					"children": [
+						{
+							"isClone": false,
+							"noteId": "cveM3o7Tn7Rd",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"8avMgAlRZWUK",
+								"cveM3o7Tn7Rd"
+							],
+							"title": "Data Structure",
+							"notePosition": 10,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dataFileName": "Data Structure.html"
+						},
+						{
+							"isClone": false,
+							"noteId": "UitgdAW5wlgI",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"8avMgAlRZWUK",
+								"UitgdAW5wlgI"
+							],
+							"title": "Methods",
+							"notePosition": 20,
+							"prefix": null,
+							"isExpanded": false,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dirFileName": "Methods",
+							"children": [
+								{
+									"isClone": false,
+									"noteId": "bVYDethpXZxW",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"8avMgAlRZWUK",
+										"UitgdAW5wlgI",
+										"bVYDethpXZxW"
+									],
+									"title": "HGui.CText:New()",
+									"notePosition": 10,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.CTextNew().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "J491fL9jGYvd",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"8avMgAlRZWUK",
+										"UitgdAW5wlgI",
+										"J491fL9jGYvd"
+									],
+									"title": "ctextObj:Free()",
+									"notePosition": 20,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "ctextObjFree().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "g6Ui3RTToP5K",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"8avMgAlRZWUK",
+										"UitgdAW5wlgI",
+										"g6Ui3RTToP5K"
+									],
+									"title": "ctextObj:Set()",
+									"notePosition": 30,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "ctextObjSet().html"
+								},
+								{
+									"isClone": false,
+									"noteId": "OOqf9qs2yVUN",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"8avMgAlRZWUK",
+										"UitgdAW5wlgI",
+										"OOqf9qs2yVUN"
+									],
+									"title": "ctextObj:Render()",
+									"notePosition": 40,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "ctextObjRender().html"
+								}
+							]
+						},
+						{
+							"isClone": false,
+							"noteId": "rvwYntMZsJDl",
+							"notePath": [
+								"DRyPY4DonWPN",
+								"8avMgAlRZWUK",
+								"rvwYntMZsJDl"
+							],
+							"title": "Functions",
+							"notePosition": 30,
+							"prefix": null,
+							"isExpanded": true,
+							"type": "text",
+							"mime": "text/html",
+							"attributes": [],
+							"format": "html",
+							"dataFileName": "Functions.html",
+							"dirFileName": "Functions",
+							"children": [
+								{
+									"isClone": false,
+									"noteId": "bqqx53NAC1pe",
+									"notePath": [
+										"DRyPY4DonWPN",
+										"8avMgAlRZWUK",
+										"rvwYntMZsJDl",
+										"bqqx53NAC1pe"
+									],
+									"title": "HGui.CText.cTextFindByName()",
+									"notePosition": 10,
+									"prefix": null,
+									"isExpanded": false,
+									"type": "text",
+									"mime": "text/html",
+									"attributes": [],
+									"format": "html",
+									"dataFileName": "HGui.CText.cTextFindByName().html"
+								}
+							]
+						}
+					]
+				},
+				{
+					"isClone": false,
+					"noteId": "MLkq18hxCPOi",
+					"notePath": [
+						"DRyPY4DonWPN",
+						"MLkq18hxCPOi"
+					],
+					"title": "Quick Tutorial",
+					"notePosition": 110,
+					"prefix": null,
+					"isExpanded": false,
+					"type": "text",
+					"mime": "text/html",
+					"attributes": [],
+					"format": "html",
+					"dataFileName": "Quick Tutorial.html"
+				},
+				{
+					"isClone": false,
+					"noteId": "7F2IowDq9kzr",
+					"notePath": [
+						"DRyPY4DonWPN",
+						"7F2IowDq9kzr"
+					],
+					"title": "Tests & Examples",
+					"notePosition": 130,
+					"prefix": null,
+					"isExpanded": false,
+					"type": "text",
+					"mime": "text/html",
+					"attributes": [],
+					"format": "html",
+					"dataFileName": "Tests & Examples.html"
+				},
+				{
+					"isClone": false,
+					"noteId": "cptUpuljIjvO",
+					"notePath": [
+						"DRyPY4DonWPN",
+						"cptUpuljIjvO"
+					],
+					"title": "Special tags",
+					"notePosition": 100,
+					"prefix": null,
+					"isExpanded": false,
+					"type": "text",
+					"mime": "text/html",
+					"attributes": [],
+					"format": "html",
+					"dataFileName": "Special tags.html"
+				},
+				{
+					"isClone": false,
+					"noteId": "CU0X3JA6neaP",
+					"notePath": [
+						"DRyPY4DonWPN",
+						"CU0X3JA6neaP"
+					],
+					"title": "Experimental Features (IMPORTANT)",
+					"notePosition": 20,
+					"prefix": null,
+					"isExpanded": false,
+					"type": "text",
+					"mime": "text/html",
+					"attributes": [],
+					"format": "html",
+					"dataFileName": "Experimental Features (IMPORTA.html"
+				}
+			]
+		},
+		{
+			"noImport": true,
+			"dataFileName": "navigation.html"
+		},
+		{
+			"noImport": true,
+			"dataFileName": "index.html"
+		},
+		{
+			"noImport": true,
+			"dataFileName": "style.css"
+		}
+	]
+}

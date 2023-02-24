@@ -1,0 +1,201 @@
+/*******************************************************************************
+HGUI : Tutorial 901 - ListView Class                         v1.0 : 29.01.2016 *
+********************************************************************************
+Basic example with the ListView class.
+We are going to create a window with a ListView that will be populated with
+random entries, a button to quit and a button to randomize entries.
+These two buttons will be grouped in the bottom side, under the ListView, like
+this:
+
++----window----------+
+|+----listview------+|
+||                  ||
+||                  ||
+|+------------------+|
+|+---group----------+|
+||[button1][button2]||
+|+------------------+|
++--------------------+
+
+*******************************************************************************/
+
+; Let's include HGui library
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; We want to keep all our script stuff inside a table
+Local app = {}
+
+; First of all we need to define a function to setup the gui
+Function setupGUI()
+  ; Now we have to define a window where the gui will be built, this is a very basic
+  ; window without parameters or callbacks to keep the example easy to follow:
+  app.my_Window = HGui.Window:new(
+                      { title = "T901 : Tutorial about ListView, Basics",
+                        name  = "T901",
+                        position = { x = #CENTER, y = #CENTER },
+                        size = { w = 400, h = 400 }
+                        })
+
+  ; Let's create the gadgets
+  ; To avoid flickering during the gui creation we need to switch off the
+  ; auto rendering feature, this is optional but in slow systems or with very
+  ; complex gui can be annoying, also switching the rendering off during the
+  ; gui creation will speedup the initialization stage.
+  HGui.SetAutoRendering(False)
+
+  ; LISTVIEW (basic options)
+  ; Our listview will be populated with 3 columns, one for the surname, one for the
+  ; name and one for the age.
+  ; Since actually we don't have any items to show we will set the <items> field
+  ; empty, we will also define the starting sorting to the first columns (the count
+  ; starts from 0) with descending order.
+  ; We will swicth off the orizontal scroller and we will disable the multi-select
+  ; feature so the user can select only one item at a time.
+  app.my_ListView = HGui.Gadget:new(#HGUI_LISTVIEW_GADGET, 
+                    ;--- Column sizes in pixels ---
+                    { data = { columnSizes = { 200, 150, 50 }, 
+                    ;--- Column titles ---
+                      headers = { "Surname", "Name", "Age" },
+                    ;--- Items to show (actually empty) ---
+                    items = {},
+                    ;--- Starting sort order ---
+                    sortOrder = { columns = { 0 }, descending = { False } } },
+                    ;--- No horizontal scroller ---
+                    hScrollerOff = False,
+                    ;--- No multiselect ---
+                    Multiselect = False })
+
+  ; Now we need a group where to put the two buttons
+  ; BOX
+  app.my_Group = HGui.Gadget:new(#HGUI_BOX_GADGET)
+
+  ; Finally we need to build the two buttons, one to randomize the list
+  ; and one to quit the application.
+  ; RANDOMIZE BUTTON
+  app.my_RandomizeButton = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+                        ;--- The button's name (must be unique) ---
+                        { Name = "Randomize",
+                        ;--- The button's caption ---
+                        Caption = "Randomize List", 
+                        ;--- The event attached to the callback functions we need ---
+                        Actions = { OnPushed = f_Randomize } } )
+
+  ; QUIT BUTTON
+  app.my_QuitButton = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+                    ;--- The button's name (must be unique) ---
+                    { Name = "Quit",
+                    ;--- The button's caption ---
+                    Caption = "Quit", 
+                    ;--- The event attached to the callback functions we need ---
+                    Actions = { OnPushed = f_Quit } } )
+
+  ; As you can see we have attached functions not yet defined (we are going to
+  ; to define these function later), but it does not matter because Hollywood is
+  ; smart enough to understand this :)
+
+  ; Now that we have built all needed gadgets we have to arrange them according to
+  ; the gui layout we have defines earlier.
+
+  ; We have chosen to put the ListView and the button's group inside the
+  ; window's root gadget arranging them vertically. Let's do it using the <layoutSet>
+  ; method.
+   app.my_Window.rootGadget:layoutSet(
+      ;--- we need to tell which gadget must became child of the object
+      { Gadgets = { app.my_ListView, app.my_Group },
+      ;--- we also need to balance the weight of the childs in the
+      ;    available space always represented as 1 (100%).
+      ;    Using negative values means 'fixed' so that when the window is resized
+      ;    gadgets with negative weights will keep their original size.
+        Weights = { 0.90, -0.10 },
+      ;--- Now we need to define the layout type, in our case we want to
+      ;    arrange the two gadgets vertically
+        Type    = #HGUI_VERTICAL_LAYOUT,
+      ;--- We can specify a value in pixel between each gadget
+        Gap     = 1,
+      ;--- And we can also define borders around the father object, in
+      ;    this case it is the root gadget.
+        Borders = { Top = 0, Bottom = 0, Left = 0, Right = 0 } }, True)
+        
+  ; Now we have said to HGui: put the ListView and the Group gadgets inside
+  ; the window and arrange them vertically.
+
+  ; The next step is to do the same for the buttons, we need to put them inside
+  ; the Group gadget but this time we have to arrange them horizontally.
+   app.my_Group:layoutSet(
+      ;--- we need to tell which gadget must became child of the object
+      { Gadgets = { app.my_RandomizeButton, app.my_QuitButton },
+      ;--- Remember that the sum of all weights (absolute values) should
+      ;    be always 1.
+        Weights = { 0.70, 0.30 },
+      ;--- Now the layout type is horizontal
+        Type    = #HGUI_HORIZONTAL_LAYOUT,
+      ;--- Let's set a gap of 5 just to see how it works
+        Gap     = 5,
+      ;--- For the same reason we are going to define a little border
+      ;    just to see how it works
+        Borders = { Top = 3, Bottom = 3, Left = 3, Right = 3 } }, True)
+
+  ; At this stage the layout is complete, we only need to enable the
+  ; auto-rendering feature...
+  HGui.SetAutoRendering(True)
+
+  ; Finally we have to render the window with all our gadgets inside!
+  app.my_Window:Render()
+EndFunction
+
+; The next step is to define the two callback function we have attached
+; to the buttons (randomize and quit)
+Function f_Quit(msg)
+  ; This function is called every time the user releases the <Quit>
+  ; button.
+  Local a = SystemRequest("WARNING!", "Do you want to quit?", "Yes|Cancel")
+  If a = 1 Then End
+EndFunction
+
+Function f_Randomize(msg)
+  ; This function is called when the user releases the <Randomize>
+  ; button.
+  
+  ; If you remember our list view has 3 fields/columns
+  ; - surname
+  ; - name
+  ; - age
+  ; Every entry can be called a record represented by a table like
+  ; this : { [0]=surname, [1]=name, [2]=age }
+
+  ; Let's create a random list builder :)
+  Local surnames = { "Black", "Pitt", "Kent", "Willies", "Falk", "Jagger", "Eastwood", "Moore", "Jones", "Craig" }
+  Local names = { "Joe", "Sandy", "Mark", "Sarah", "Bruce", "Annah", "Mike", "Rose", "Gregory", "Samantha" }
+  Local ages = { 23, 43, 28, 40, 22, 47, 51, 21, 67, 39 }
+  
+  Local how_many_entries = Rnd(30)+5 ; At least 5, max = 29+5
+  
+  ; Now we are going to create the list
+  Local itemsList = {}
+  For i = 1 To how_many_entries
+    itemsList[i-1] = { surnames[Rnd(10)], names[Rnd(10)], ages[Rnd(10)] }
+  Next
+  
+  ; Ok, now it's time to set the list view gadgets with this data!
+  app.my_ListView:Set({ data = { Items = itemsList }}, True)
+  ; The last parameter set to True means we want to render immediatly
+  ; the gadget.
+  
+  ; DONE!
+EndFunction
+
+
+;======================================================================================
+
+; Now that all our functions and callbacks have been defined we can call the
+; initialization function and we are done.
+setupGUI()
+
+
+; Here is the main loop of the program
+Repeat
+   WaitEvent 
+Forever
+
+

@@ -1,0 +1,81 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>areaObj:Set()</h1>
+
+    <p><span class="text-big"><code>result = areaObj:Set(options, object, offset)</code></span>
+    </p>
+    <p>Set/modify the area object with the specified <code>options</code>.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>options </strong>: A table of the values you want to change, supported
+        fields are:
+        <ul>
+          <li><strong>recurse </strong>: <code>True</code> to recursively adjust all child
+            objects</li>
+          <li><strong>position </strong>: Area position with the following fields
+            <ul>
+              <li><strong>x</strong> : Horizontal coordinate</li>
+              <li><strong>y</strong> : Vertical coordinate</li>
+            </ul>
+          </li>
+          <li><strong>size </strong>: Area size
+            <ul>
+              <li><strong>w</strong> : Area width</li>
+              <li><strong>h</strong> : Area height</li>
+            </ul>
+          </li>
+          <li><strong>skin </strong>: Multiskin table</li>
+          <li><strong>active </strong>: TRUE if the area is an active (reacting) area</li>
+          <li><strong>window </strong>: The window this area belongs to, can be a Window
+            name or a Window object. If not specified the area will be linked to the
+            currently active window.</li>
+          <li><strong>events </strong>: A table with all callback functions:
+            <ul>
+              <li><strong>onmouseover </strong>: Callback attached to the OnMouseOver event</li>
+              <li><strong>onmouseout </strong>: Callback attached to the OnMouseOut event</li>
+              <li><strong>onmousedown </strong>: Callback attached to the OnMouseDown (left)
+                event</li>
+              <li><strong>onmouseup </strong>: Callback attached to the OnMouseUp (left)
+                event</li>
+              <li><strong>onrightmouseup </strong>: Callback attached to the OnRightMouseUp
+                event</li>
+            </ul>
+          </li>
+          <li><strong>object </strong>: Linked object</li>
+          <li><strong>offset </strong>: Position offset with the following fields:
+            <ul>
+              <li><strong>x</strong> : Horizontal offset</li>
+              <li><strong>y</strong> : Vertical offset</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li><strong>object</strong> : An HGui object attached to this area</li>
+      <li><strong>userdata</strong> : Any type of data you want to get back by the
+        callback functions</li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <ul>
+      <li><strong>result </strong>: <code>True</code> if there was no error otherwise <code>False</code>
+      </li>
+    </ul>
+    <p><u>NOTES</u>
+      <br>
+      <br><u>EXAMPLES</u>&nbsp;</p>
+    <p><u>SEE ALSO</u>
+    </p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

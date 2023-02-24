@@ -1,0 +1,40 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>HGui.windowExists()</h1>
+
+    <p><span class="text-big"><code>result = HGui.windowExists(window_name)</code></span>
+    </p>
+    <p>Returns <code>TRUE</code> if the window identified by <code>window_name</code> exists.</p>
+    <hr>
+    <p><u>IINPUT</u>
+    </p>
+    <ul>
+      <li><strong>win_name</strong> : Window name to check</li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <ul>
+      <li><strong>result </strong>: <code>True</code> if the specified window exists</li>
+    </ul>
+    <p><u>NOTES</u>
+    </p>
+    <p><u>EXAMPLES</u>&nbsp;</p><pre><code class="language-text-plain">; Check if the window named 'mainWindow' exists
+If HGui.windowExists("mainWindow")
+  DebugPrint("YES, Exists!")
+Else
+  DebugPrint("Window not found!")
+EndIf</code></pre>
+    <p><u>SEE ALSO</u>
+    </p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

@@ -1,0 +1,63 @@
+/*******************************************************************************
+HGUI : Tutorial 210 - Open and Close methods                 v1.2 : 09/02/2023 *
+********************************************************************************
+We have seen how you can create windows but you are also able also to close
+windows and open them again without destrying their contents. They can be
+removed from memory with the :Free() method. 
+This is usefull to build programs composed by several windows that can be 
+temporarily closed and reopened later.
+After closing a window you can reopen it instantly, you do not need to rebuild
+the window and its contents.
+
+Please note that in case you need to free memory you need to free the window
+using the :Free() method, we will see it later.
+
+In this example you will also see the :isClosed() method: you can use it to
+check if a window has been closed or not.
+
+This tutorial may seems a bit useless and simple but if you haven't used
+OOP and methods before it may help you to understand how it works.
+*******************************************************************************/
+
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+
+; This program will create two windows and will open and close them using an
+; interval function.
+win1 = HGui.Window:new(
+   { title    = "Window 1 (CTRL-C to end)",
+     position = { x = 200, y = 200 },
+     size     = { w = 400, h = 200 },
+     flags    = { closeable = False }
+     })
+
+win2 = HGui.Window:new(
+   { title    = "Window 2 (CTRL-C to end)",
+     position = { x = 300, y = 300 },
+     size     = { w = 400, h = 200 },
+     flags    = { closeable = False }
+     })
+
+Function CloseAndOpen()
+  ; Check if win1 is closed, if so open it otherwise close it, we will apply
+  ; the inverse behaviour to win2 window.
+  If win1:isClosed()
+    ; win1 is closed, open it and close win2
+    win1:open()
+    win2:close()
+    
+  Else
+    ; win1 is not close, close it and open win2
+    win2:open()
+    win1:close()
+    
+  EndIf
+
+EndFunction
+
+SetInterval(Nil, CloseAndOpen, 2000)
+
+Repeat
+   WaitEvent
+Forever

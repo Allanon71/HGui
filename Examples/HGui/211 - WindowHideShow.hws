@@ -1,0 +1,48 @@
+/*******************************************************************************
+HGUI : Tutorial 211 - Hide and Show  methods                 v1.2 : 09/02/2023 *
+********************************************************************************
+Essentially this is the same as Tutorial 210 but instead of opening and closing
+the windows we will hide and show them.
+We are going to meet the :isHidden() method to check if a windows is hidden or
+not.
+*******************************************************************************/
+
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; This program will create to windows and will hide and show them using an
+; interval function.
+win1 = HGui.Window:new(
+   { title    = "Window 1 (CTRL-C to end)",
+     position = { x = 200, y = 200 },
+     size     = { w = 400, h = 200 },
+     flags    = { closeable = False }
+     })
+
+win2 = HGui.Window:new(
+   { title    = "Window 2 (CTRL-C to end)",
+     position = { x = 300, y = 300 },
+     size     = { w = 400, h = 200 },
+     flags    = { closeable = False }
+     })
+
+Function HideAndShow()
+  ; Check if win1 is hidden, if so show it otherwise hide it, we will apply
+  ; the inverse behaviour to the win2.
+  If win1:isHidden()
+    win1:show()
+    win2:hide()
+      
+  Else
+    win2:show()
+    win1:hide()
+      
+  EndIf
+
+EndFunction
+
+SetInterval(Nil, HideAndShow, 2000)
+
+Repeat
+   WaitEvent
+Forever

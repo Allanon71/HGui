@@ -1,0 +1,52 @@
+/*******************************************************************************
+HGUI : Tutorial 204 - Window's Events 2 - part 2             v1.2 : 09/02/2023 *
+********************************************************************************
+This is basically the same we have seen in the Tutorial 203 but we will use
+another programming technique: we will make use of anonymous functions.
+This is a powerful feature but can be confusing :)
+********************************************************************************/
+
+;::: INCLUDE THE LIBRARIES DEFINITIONS :::::::::::::::::::::::::::::::::::::::::
+@INCLUDE "../../+Includes.hws"          ; Path relative to this application
+@INCLUDE #INC_HGUI                      ; Include the HGui library
+
+; UNCOMMENT THE FOLLOWING TWO LINES IF YOU WANT TO SEE WHAT EXACTLY HAPPEN.
+; DBG.Console.Enable(True)
+; DBG.Console.AddChannel(HGui.DebugChannel)
+
+/*******************************************************************************
+We don't need anymore to define the callback functions below like in the 
+previous tutorial because we will define them directly at creation time!
+********************************************************************************/
+
+; Window creation
+Local myWin0 = HGui.Window:new(
+                 { title = "My First Window!",
+                   name  = "win0",
+                   position = { x = 20, y = 20 },
+                   size     = { w = 400, h = 100 },
+                   Events   =
+                   ; Look how it's possible to create callback function directly
+                   ; at creation time while the event tracking is defined!
+                   ; This method is more durect and immediate but you cannot reuse these
+                   ; functions because they are anonymous!
+                   ; Let's use shorter functions this time.
+                     { OnMove = Function (msg, win)
+                                  DebugPrint("--> " .. GetTime(True) .. " : Window " .. win.name .. " has been moved!")
+                                EndFunction,
+
+                       OnSize = Function (msg, win)
+                                  DebugPrint("--> " .. GetTime(True) .. " : Window " .. win.name .. " has been resized!")
+                                EndFunction
+                       }
+                   })
+
+Repeat
+   WaitEvent()
+Forever
+
+/*******************************************************************************
+ -> Try to detect more events from the supported ones using anonymous functions.
+ -> Try to modify  the  callback functios  so  that they will act exactly as the
+    ones used in the tutorial T203.
+********************************************************************************/

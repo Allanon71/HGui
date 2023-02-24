@@ -1,0 +1,2658 @@
+/********************************************************************
+ * ANSI SUPPORT LIBRARY                                             *
+ * Author  : Fabio Falcucci (Allanon)                               *
+ * License : Donationware                                           *
+ * Version : 1.4                                                    *
+ * Release : 10/01/2022                                             *
+ * Dependancies : -                                                 *
+ * PayPal Support : hijoe@tin.it                                    *
+ * Support me on Patreon!         https://www.patreon.com/Allanon71 *
+ * Github repository                   https://github.com/Allanon71 *
+ * Buy me a coffee!                       https://ko-fi.com/allanon * 
+ * ------------------------------------------------------------------
+   Ansi library is an include file for Hollywood that will help you to 
+ manage ANSI escape codes so you can print colored text in the console 
+ of your host system.
+   I’ve developed this library to have an invaluable help while I’m 
+ debugging applications because this way I’m able to spot on the fly 
+ errors and/or warning messages that are hilighted from the rest of the
+ messages.
+   Of course you need that your host system console is able to understand
+ ANSI ascape codes, but almost any OS is able to do that… except 
+ Windows! For the Windows OS you need to install any thirdy party 
+ application to accomplish the task, on my development machine, running
+ Windows 10, I’m using ansicon program to make use of ANSI codes.
+ 
+ ANSI Functions
+   All ANSI related functions are mapped on the Ansi table. These 
+ functions are used to retrieve ANSI escape sequences to accomplish 
+ various tasks like moving the cursor, clearing/deleting characters and
+ so on.
+ 
+ TERM Functions
+   All terminal related functions are mapped on the Term table. These
+ functions are used to print string to the console or the get input 
+ from the user.
+ 
+ MACROS and STYLES
+   All recognized ANSI sequences are stored in the table Ansi.Code, this
+ table is indexed with the sequence name, for each sequence a macro
+ string has been defined to simplify the use of the escape codes, for
+ example:
+   Ansi.Code.FgBlack => Holds the escape sequence needed to set the
+ foreground color to black, you can use this code in your strings
+ like this:
+   Local myBlackText = Ansi.Code.FgBlack .. "Black world!"
+ But you can also use macro strings like this:
+   Local myBlackText = "~{FBLK}Black world!"
+ --------------------------------------------------------------------
+ 
+
+ CONTENTS
+ ========
+ :: ANSI ::
+ Ansi.GetClearCharacters()
+ Ansi.GetCursorDown()
+ Ansi.GetCursorLeft()
+ Ansi.GetCursorMove()
+ Ansi.GetCursorRight()
+ Ansi.GetCursorUp()
+ Ansi.GetDeleteCharacters()
+ Ansi.GetDeleteLines()
+ Ansi.GetInsertBlankLines()
+ Ansi.GetRndBGColor()
+ Ansi.GetRndFGColor()
+ Ansi.Set()
+ 
+ :: TERM OBJECT ::
+ Term.App:ClearInfo()
+ Term.App:ClearStatus()
+ Term.App:ClearWarning()
+ Term.App:GridView()
+ Term.App:MenuAdd()
+ Term.App:New()
+ Term.App:Progress()
+ Term.App:SetInfo()
+ Term.App:SetStatus()
+ Term.App:SetWarning()
+ Term.App:ShowInput()
+ Term.App:ShowMenu()
+ Term.App:ShowMessage()
+ Term.App:Start()
+ Term.App:alignNumber()
+ 
+ :: TERM FUNCTIONS ::
+ Term.CTLine()
+ Term.Clear()
+ Term.GetSize()
+ Term.Input()
+ Term.Line()
+ Term.Print()
+ Term.PrintAt()
+ Term.SetTermSize()
+ 
+ :: TERM DRAWING ::
+ Term.Draw.Box()
+ Term.Draw.FBox()
+ Term.Draw.HLine()
+ Term.Draw.VLine()
+ 
+ 
+ CHANGE LOG
+ ----------
+ ?.?
+    Fixed Term.GetSize() that was not initializing correctly the
+    terminal size under Linux systems.
+ 1.5
+    Updated the .Test() function and added the GridView() control.
+    Fixed a bug in Term.Print() that was causing an infinite loop.
+ 1.4
+    Term.App:_FixedWidth(txt, size, align)
+      Added support for center alignment
+
+ 1.3
+    Several improvements in terminal functions
+
+ 1.2
+  20/01/2018
+    Added : Ansi.Set(value, termSize) Terminal size is used by the
+            drawing functions and the wordwrap functions.
+    Added : Ansi.Draw() to draw lines.
+    Change : Removed Ansi.Draw() and replaced with specific functions
+             to draw lines, empty boxes and filled boxes.
+ 1.1
+  01/02/2018
+    Added a check to avoid error printing non-UTF8 characters.
+ 
+ ********************************************************************/
+/*
+ funzioni da creare
+  - Term.Draw.Box --> Draw Empty Box
+  - Term.Draw.FBox --> Draw Filled Box
+  - Term.LPrint(...)  --> Print with coordinates
+*/
+Ansi = {}
+Ansi.Version = "1.4"
+Ansi.Build   = "10/01/2022"
+Ansi.Escape  = "\27"
+Ansi.Code    =
+   { Reset            = Ansi.Escape ..  "[0m",              ;~{RSET}
+     BoldOn           = Ansi.Escape ..  "[1m",              ;~{BLD+}
+     DimOn            = Ansi.Escape ..  "[2m",              ;~{DIM+}
+     ItalicsOn        = Ansi.Escape ..  "[3m",              ;~{ITA+}
+     UnderlineOn      = Ansi.Escape ..  "[4m",              ;~{UND+}
+     BlinkOn          = Ansi.Escape ..  "[5m",              ;~{BLI+}
+     ; [6m = Rapid Blinking Cursor
+     InverseOn        = Ansi.Escape ..  "[7m",              ;~{INV+}
+     HiddenOn         = Ansi.Escape ..  "[8m",              ;~{HID+}
+     StrikethroughOn  = Ansi.Escape ..  "[9m",              ;~{STR+}
+     ; [10m = Default font
+     ; [<11-19>m = Alternative fonts
+     ; [20m = Gothic font
+     ; [21m = Double underline
+     BoldOff          = Ansi.Escape .. "[22m",              ;~{BLD-}
+     ItalicsOff       = Ansi.Escape .. "[23m",              ;~{ITA-}
+     UnderlineOff     = Ansi.Escape .. "[24m",              ;~{UND-}
+     BlinkOff         = Ansi.Escape .. "[25m",              ;~{BLI-}
+     ; [26m = Proportional spacing
+     InverseOff       = Ansi.Escape .. "[27m",              ;~{INV-}
+     HiddenOff        = Ansi.Escape .. "[28m",              ;~{HID-}
+     StrikethroughOff = Ansi.Escape .. "[29m",              ;~{STR-}
+     FgBlack          = Ansi.Escape .. "[30m",              ;~{FBLK}
+     FgRed            = Ansi.Escape .. "[31m",              ;~{FRED}
+     FgGreen          = Ansi.Escape .. "[32m",              ;~{FGRN}
+     FgYellow         = Ansi.Escape .. "[33m",              ;~{FYEL}
+     FgBlue           = Ansi.Escape .. "[34m",              ;~{FBLU}
+     FgMagenta        = Ansi.Escape .. "[35m",              ;~{FMAG}
+     FgCyan           = Ansi.Escape .. "[36m",              ;~{FCYA}
+     FgWhite          = Ansi.Escape .. "[37m",              ;~{FWHI}
+     ; [38m =	Set foreground color	Next arguments are 5;n or 2;r;g;b
+     FgDefault        = Ansi.Escape .. "[39m",              ;~{FDEF}
+     BgBlack          = Ansi.Escape .. "[40m",              ;~{BBLK}
+     BgRed            = Ansi.Escape .. "[41m",              ;~{BRED}
+     BgGreen          = Ansi.Escape .. "[42m",              ;~{BGRN}
+     BgYellow         = Ansi.Escape .. "[43m",              ;~{BYEL}
+     BgBlue           = Ansi.Escape .. "[44m",              ;~{BBLU}
+     BgMagenta        = Ansi.Escape .. "[45m",              ;~{BMAG}
+     BgCyan           = Ansi.Escape .. "[46m",              ;~{BCYA}
+     BgWhite          = Ansi.Escape .. "[47m",              ;~{BWHI}
+     ; [48m = Set background color	Next arguments are 5;n or 2;r;g;b]
+     BgDefault        = Ansi.Escape .. "[49m",              ;~{BDEF}
+     ; [50m = Disable proportional spacing
+     MoveCursor       = Ansi.Escape .. "[{line};{column}H", ; GetCursorMove(l, c)
+     MoveCursorUp     = Ansi.Escape .. "[{lines}A",         ; GetCursorUp(l)
+     MoveCursorUp1    = Ansi.Escape .. "[1A",               ;~{M1UP}
+     MoveCursorDown   = Ansi.Escape .. "[{lines}B",         ; GetCursorDown(l)
+     MoveCursorDown1  = Ansi.Escape .. "[1B",               ;~{M1DO}
+     MoveCursorRight  = Ansi.Escape .. "[{columns}C",       ; GetCursorRight(c)
+     MoveCursorRight1 = Ansi.Escape .. "[1C",               ;~{M1RI}
+     MoveCursorLeft   = Ansi.Escape .. "[{columns}D",       ; GetCursorLeft(c)
+     MoveCursorLeft1  = Ansi.Escape .. "[1D",               ;~{M1LE}
+     SaveCursor       = Ansi.Escape .. "[s",                ;~{SAVE}
+     RestoreCursor    = Ansi.Escape .. "[u",                ;~{REST}
+     Home             = Ansi.Escape .. "[H",                ;~{HOME}
+     ClearBelow       = Ansi.Escape .. "[0J",               ;~{CLRB}
+     ClearAbove       = Ansi.Escape .. "[1J",               ;~{CLRA}
+     ClearHome        = Ansi.Escape .. "[2J",               ;~{CLRH}
+     ClearLineRight   = Ansi.Escape .. "[K",                ;~{CLRR}
+     ClearLineLeft    = Ansi.Escape .. "[1K",               ;~{CLRL}
+     ClearLine        = Ansi.Escape .. "[2K",               ;~{CLIN}
+     ClearCharacters  = Ansi.Escape .. "[{chars}X",         ; GetClearCharacters(c)
+     Clear1Character  = Ansi.Escape .. "[1X",               ;~{C1CH}
+     InsertBlankLines = Ansi.Escape .. "[{lines}L",         ; GetInsertBlankLines(l)
+     Insert1BlankLine = Ansi.Escape .. "[1L",               ;~{I1BL}
+     DeleteLines      = Ansi.Escape .. "[{lines}M",         ; GetDeleteLines(l)
+     Delete1Line      = Ansi.Escape .. "[1M",               ;~{D1LI}
+     DeleteCharacters = Ansi.Escape .. "[{chars}P",         ; GetDeleteCharacters(c)
+     Delete1Character = Ansi.Escape .. "[1P",               ;~{D1CH}
+     InsertCharacters = Ansi.Escape .. "[{chars}@",         ; GetInsertCharacters(c)
+     Insert1Character = Ansi.Escape .. "[1@",               ;~{I1CH}
+     ShowCursor       = Ansi.Escape .. "[?25h",             ;~{SHWC}
+     HideCursor       = Ansi.Escape .. "[?25l",             ;~{HIDC}
+     
+     SetTerm          = Ansi.Escape .. "[={mode}h",
+     
+     HLine            = Chr(8213),
+     HHLine           = Chr(8215),
+     
+     Gfx =
+      { ; Light Lines = LL
+        ; H = Horizontal, V = Vertical
+        ; L = Left, R = Right
+        ; U = Up, D = Down
+        LLH           = Chr(9472),  ; ─	BOX DRAWINGS LIGHT HORIZONTAL  
+        LLV           = Chr(9474),  ; │	BOX DRAWINGS LIGHT VERTICAL
+        LLDR          = Chr(9484),  ; ┌	BOX DRAWINGS LIGHT DOWN AND RIGHT
+        LLDL          = Chr(9488),  ; ┐	BOX DRAWINGS LIGHT DOWN AND LEFT
+        LLUR          = Chr(9492),  ; └	BOX DRAWINGS LIGHT UP AND RIGHT
+        LLUL          = Chr(9496),  ; ┘	BOX DRAWINGS LIGHT UP AND LEFT
+        LLVL          = Chr(9508),  ; ┤ BOX DRAWINGS LIGHT VERTICAL LEFT
+        LLVR          = Chr(9500),  ; ├ BOX DRAWINGS LGIHT VERTICAL RIGHT
+        LLHU          = Chr(9524),  ; ┴ BOX DRAWINGS LIGHT HORIZONTAL UP
+        LLHD          = Chr(9516),  ; ┬ BOX DRAWINGS LIGHT HORIZONTAL DOWN
+        LLVH          = Chr(9532),  ; ┼ BOX DRAWINGS LIGHT VERTICAL HORIZONTAL
+        
+        ; Rounded Light Lines = RLL
+        RLLDR         = Chr(9581),  ; ╭	BOX DRAWINGS LIGHT ARC DOWN RIGHT
+        RLLDL         = Chr(9582),  ; ╮	BOX DRAWINGS LIGHT ARC DOWN LEFT
+        RLLUL         = Chr(9583),  ; ╯	BOX DRAWINGS LIGHT ARC UP LEFT
+        RLLUR         = Chr(9584),  ; ╰	BOX DRAWINGS LIGHT ARC UP RIGHT
+        
+        ; Block = B
+        ; UP = Upper, LO = Lower
+        ; H = Half, Q = Quarter, E = Eighth, F = Full
+        ; R = Right, L = Left
+        BUPH          = Chr(9600),  ; ▀	BOX DRAWINGS UPPER HALF
+        BLO1E         = Chr(9601),  ; ▁	BOX DRAWINGS LOWER 1 EIGHTH
+        BLO1Q         = Chr(9602),  ; ▂	BOX DRAWINGS LOWER 1 QUARTER
+        BLO3E         = Chr(9603),  ; ▃	BOX DRAWINGS LOWER 3 EIGHTHS
+        BLOH          = Chr(9604),  ; ▄	BOX DRAWINGS LOWER HALF
+        BLO5E         = Chr(9605),  ; ▅	BOX DRAWINGS LOWER 5 EIGHTHS
+        BLO3Q         = Chr(9606),  ; ▆	BOX DRAWINGS LOWER 3 QUARTERS
+        BLO7E         = Chr(9607),  ; ▇	BOX DRAWINGS LOWER 7 EIGHTHS
+        FB            = Chr(9608),  ; █	BOX DRAWINGS FULL BLOCK
+        LSB           = Chr(9617),  ; ░ LIGHT SHADE
+        MSB           = Chr(9618),  ; ▒ MEDIUM SHADE
+        HSB           = Chr(9619),  ; ▓ HEAVY SHADE
+        L7E           = Chr(9609),  ; ▉ BOX DRAWINGS LEFT 7 EIGHTHS
+        L3Q           = Chr(9610),  ; ▊ BOX DRAWINGS LEFT 3 QUANRTERS
+        L5E           = Chr(9611),  ; ▋ BOX DRAWINGS LEFT 5 EIGHTHS
+        LH            = Chr(9612),  ; ▌	BOX DRAWINGS LEFT HALF
+        L3E           = Chr(9613),  ; ▍ BOX DRAWINGS LEFT 3 EIGHTHS
+        L1Q           = Chr(9614),  ; ▎ BOX DRAWINGS LEFT 1 QUARTER
+        L1E           = Chr(9615),  ; ▏ BOX DRAWINGS LEFT 1 EIGHTH
+        RH            = Chr(9616),  ; ▐ BOX DRAWINGS RIGHT HALF
+        UP1E          = Chr(9620),  ; ▔ BOX DRAWINGS UPPER 1 EIGHTH
+        R1E           = Chr(9621),  ; ▕ BOX DRAWINGS RIGHT 1 EIGHTH
+        },
+
+
+     
+
+     ;--- NORMAL SET ---                                    ;~{NORM}
+     ;--- NOTICE SET ---                                    ;~{NOTI}
+     ;--- WARNING SET ---                                   ;~{WARN}
+     ;--- ERROR SET ---                                     ;~{ERRO}
+     ;--- ADVICE SET ---                                    ;~{ADVI}
+     ;--- QUOTE SET ---                                     ;~{QUOT}
+     ;--- PROMPT SET ---                                    ;~{PROM}
+     }
+
+Ansi.FgColor =
+  { Ansi.Code.FgBlack,
+    Ansi.Code.FgRed,
+    Ansi.Code.FgGreen,
+    Ansi.Code.FgYellow,
+    Ansi.Code.FgBlue,
+    Ansi.Code.FgMagenta,
+    Ansi.Code.FgCyan,
+    Ansi.Code.FgWhite }
+
+Ansi.BgColor =
+  { Ansi.Code.BgBlack,
+    Ansi.Code.BgRed,
+    Ansi.Code.BgGreen,
+    Ansi.Code.BgYellow,
+    Ansi.Code.BgBlue,
+    Ansi.Code.BgMagenta,
+    Ansi.Code.BgCyan,
+    Ansi.Code.BgWhite }
+    
+
+Term = {}
+Term.AnsiMode     = False
+Term.NormalColor  = { Bg = Ansi.Code.BgBlack, Fg = Ansi.Code.FgWhite,   Bold = False, Italic = False, Underline = False }
+Term.NoticeColor  = { Bg = Ansi.Code.BgBlue, Fg = Ansi.Code.FgWhite,  Bold = True, Italic = False, Underline = False }
+Term.WarningColor = { Bg = Ansi.Code.BgBlack, Fg = Ansi.Code.FgYellow,  Bold = True,  Italic = False, Underline = False }
+Term.ErrorColor   = { Bg = Ansi.Code.BgRed,   Fg = Ansi.Code.FgYellow,  Bold = True,  Italic = False, Underline = False }
+Term.AdviceColor  = { Bg = Ansi.Code.BgBlack, Fg = Ansi.Code.FgGreen,   Bold = True,  Italic = False, Underline = False }
+Term.QuoteColor   = { Bg = Ansi.Code.BgBlack, Fg = Ansi.Code.FgRed,     Bold = True,  Italic = True,  Underline = False }
+Term.PromptColor  = { Bg = Ansi.Code.BgRed, Fg = Ansi.Code.FgWhite, Bold = True,  Italic = True,  Underline = False }
+Term.Size         = { Rows = 25, Columns = 80 }
+
+Term.Draw = {} ; Drawing Functions
+
+Function Term.SetTermSize(r, c, color)
+  
+  Local mode = 0
+  If c = 40 And r = 25 And Not(color)
+    mode = 0
+    
+  ElseIf c = 40 And r = 25 And color
+    mode = 1
+    
+  ElseIf c = 80 And r = 25 And Not(color)
+    mode = 2
+  
+  ElseIf c = 80 And r = 25 And color
+    mode = 3
+  
+  EndIf
+  
+  Term.Size.Rows = r
+  Term.Size.Columns = c
+
+  Local t = ReplaceStr(Ansi.Code.SetTerm, "{mode}", mode)
+  
+EndFunction
+
+Function Term.GetSize()
+  ; If we are in a linux environment we can try to read the terminal size
+  Local v = GetVersion()
+
+  If v.platform = "Linux"
+    ; Retrieve the terminal size using tput
+    Local output = GetTempFileName()            ; Storage for the output
+    Local script = GetTempFileName() .. ".sh"   ; We will store a simple script here
+    Local fid = OpenFile(Nil, script, #MODE_WRITE)
+    WriteLine(fid, "tput lines >" .. output)
+    WriteLine(fid, "tput cols >>" .. output)
+    CloseFile(fid)
+    ; Execute the script to generate the output
+    Execute("sh " .. script)
+    ; And now read the result
+    If Exists(output)
+      Local fid = OpenFile(Nil, output, #MODE_READ)
+      Local lines = ReadLine(fid)
+      Local cols  = ReadLine(fid)
+      CloseFile(fid)
+      ; And saves them
+      Term.Size.Rows = ToNumber(lines)
+      Term.Size.Columns = ToNumber(cols)
+      Return(Term.Size.Rows, Term.Size.Columns)
+    EndIf
+  EndIf
+  
+  Return(Term.Size.Rows, Term.Size.Columns)
+EndFunction
+
+Function Ansi.GetRndFgColor()
+  Return(Ansi.FgColor[Rnd(8)])
+EndFunction
+
+Function Ansi.GetRndBgColor()
+  Return(Ansi.BgColor[Rnd(8)])
+EndFunction
+
+Function Ansi.Set(value, termSize)
+/******************************************************************************
+Ansi.Set(value, termSize)
+
+Switch ansi mode on or off and adjust the terminal size in characters.
+---------------------------------------------------------------------
+INPUT
+  value => True|False where True enables ansi mode
+  termSize => Optional table you can pass to set the default terminal size
+              in characters.
+EXAMPLE
+  The following command switch on the ansi mode and set the terminal size to
+  the default size of 30 rows and 60 columns:
+  | Ansi.Set(True, { 30, 60 })
+******************************************************************************/
+  Term.AnsiMode = value
+EndFunction
+
+Function Ansi.GetDeleteLines(lines) ; v1.0
+/******************************************************************************
+code = Ansi.GetDeleteLines(lines)
+
+Return the escape sequence to delete <lines> rows.
+---------------------------------------------------------------------
+INPUT
+  lines => How many lines we have to delete
+OUTPUT
+  result => String with the requested ANSI escape sequence
+******************************************************************************/  
+  Return(ReplaceStr(Ansi.Code.DeleteLines, "lines", lines))
+EndFunction
+
+Function Ansi.GetInsertBlankLines(lines) ; v1.0
+/******************************************************************************
+code = Ansi.GetInsertBlankLines(lines)
+
+Return the escape sequence to insert <lines> blank rows.
+---------------------------------------------------------------------
+INPUT
+  lines => How many blank lines we have to insert
+OUTPUT
+  result => String with the requested ANSI escape sequence
+******************************************************************************/  
+  Return(ReplaceStr(Ansi.Code.InsertBlankLines, "lines", lines))
+EndFunction
+
+Function Ansi.GetClearCharacters(chars) ; v1.0
+/******************************************************************************
+code = Ansi.GetClearCharacters(chars)
+
+Returns a string with the ANSI escape sequence needed to clear 'chars' characters.
+---------------------------------------------------------------------
+INPUT
+  chars => How many charaters we have to clear
+OUTPUT
+  result => String with the requested ANSI escape sequence
+******************************************************************************/  
+  Return(ReplaceStr(Ansi.Code.ClearCharacters, "chars", chars))
+EndFunction
+
+Function Ansi.GetInsertCharacters(chars) ; v1.0
+/******************************************************************************
+code = Ansi.GetInsertCharacters(chars)
+
+Return the escape sequence to insert <chars> characters.
+---------------------------------------------------------------------
+INPUT
+  chars => How many charaters we have to insert
+OUTPUT
+  result => String with the requested ANSI escape sequence
+******************************************************************************/  
+  Return(ReplaceStr(Ansi.Code.InsertCharacters, "chars", chars))
+EndFunction
+
+Function Ansi.GetDeleteCharacters(chars) ; v1.0
+/******************************************************************************
+code = Ansi.GetDeleteCharacters(chars)
+
+Return the escape sequence to delete <chars> characters.
+---------------------------------------------------------------------
+INPUT
+  chars => How many charaters we have to delete
+OUTPUT
+  result => String with the requested ANSI escape sequence
+******************************************************************************/  
+  Return(ReplaceStr(Ansi.Code.DeleteCharacters, "chars", chars))
+EndFunction
+
+Function Ansi.GetCursorMove(row, column) ; v1.0
+/******************************************************************************
+code = Ansi.GetCursorMove(row, column)
+
+Return the escape sequence to move the cursor to (row, column).
+---------------------------------------------------------------------
+INPUT
+  row => Row position
+  column => Column position
+OUTPUT
+  result => String with the requested ANSI escape sequence
+******************************************************************************/
+  Local r = ReplaceStr(Ansi.Code.MoveCursor, "{line}", row)
+  r = ReplaceStr(r, "{column}", column)
+  Return(r)
+EndFunction
+
+Function Ansi.GetCursorUp(lines) ; v1.0
+/******************************************************************************
+code = Ansi.GetCursorUp(lines)
+
+Return the escape sequence to move the cursor up <lines> lines.
+---------------------------------------------------------------------
+INPUT
+  lines => How many lines we want to move the cursor up
+OUTPUT
+  result => String with the requested ANSI escape sequence
+******************************************************************************/
+  Return(ReplaceStr(Ansi.Code.MoveCursorUp, "{lines}", lines))
+EndFunction
+
+Function Ansi.GetCursorDown(lines) ; v1.0
+/******************************************************************************
+code = Ansi.GetCursorDown(lines)
+
+Return the escape sequence to move the cursor down <lines> lines.
+---------------------------------------------------------------------
+INPUT
+  lines => How many lines we want to move the cursor down
+OUTPUT
+  result => String with the requested ANSI escape sequence
+******************************************************************************/
+  Return(ReplaceStr(Ansi.Code.MoveCursorDown, "{lines}", lines))
+EndFunction
+
+Function Ansi.GetCursorRight(columns) ; v1.0
+/******************************************************************************
+code = Ansi.GetCursorRight(columns)
+
+Return the escape sequence to move the cursor right <columns> chars.
+---------------------------------------------------------------------
+INPUT
+  columns => How many columns we want to move the cursor to the right
+OUTPUT
+  result => String with the requested ANSI escape sequence
+******************************************************************************/
+  Return(ReplaceStr(Ansi.Code.MoveCursorRight, "{columns}", columns))
+EndFunction
+
+Function Ansi.GetCursorLeft(columns) ; v1.0
+/******************************************************************************
+code = Ansi.GetCursorLeft(columns)
+
+Return the escape sequence to move the cursor left <columns> chars.
+---------------------------------------------------------------------
+INPUT
+  columns => How many columns we want to move the cursor to the left
+OUTPUT
+  result => String with the requested ANSI escape sequence
+******************************************************************************/
+  Return(ReplaceStr(Ansi.Code.MoveCursorLeft, "{columns}", columns))
+EndFunction
+
+Function Term.getInput(t, wordwrap, linefeed, maxLen) ; v1.0
+/******************************************************************************
+result = Term.getInput(t, wordwrap, linefeed, maxLen)
+
+Listen to stdin for a keypress
+---------------------------------------------------------------------
+INPUT
+  t => Message for the user
+  wordwrap => TRUE to enable the wordwrap
+  linefeed => TRUE to add a line feed at the end of he message
+  maxLen => Max number of characters to read (default=1)
+OUTPUT
+  result => User's answer
+******************************************************************************/
+  If Term.AnsiMode
+    Local b = IIf(Term.PromptColor.Bold,      Ansi.Code.BoldOn,      Ansi.Code.BoldOff)
+    Local i = IIf(Term.PromptColor.Italic,    Ansi.Code.ItalicsOn,   Ansi.Code.ItalicsOff)
+    Local u = IIf(Term.PromptColor.Underline, Ansi.Code.UnderlineOn, Ansi.Code.UnderlineOff)
+    prompt = prompt .. Term.PromptColor.Bg .. Term.PromptColor.Fg .. b .. i .. u
+  EndIf
+
+  If IsNil(maxLen) then maxLen = 1
+  
+  Local txt = Term.Print(t, wordwrap, 0, linefeed, True)
+  txt[0] = prompt .. txt[0]
+  Local count = ListItems(txt)
+  If count > 1
+    For Local k = 0 To ListItems(txt)-2
+      DebugPrint(txt[k])
+    Next
+  EndIf
+
+  ; INPUT
+  Local r, c = "", ""
+  SetIOMode(#IO_UNBUFFERED)
+  Local fid = OpenFile(Nil, #STDIN, #MODE_READ)
+  While True
+    ExitOnError(False)
+    Local c = ReadChr(fid)
+    Local le = GetLastError()   
+    ExitOnError(True)
+    If le <> 0 Then DebugPrint("ERROR: ", le, GetErrorName(le))
+    If Not(IsNil(c))
+      DebugPrint("-> ", c)
+    EndIf
+  Wend
+   
+  
+  If Term.AnsiMode
+    Local b = IIf(Term.PromptColor.Bold,      Ansi.Code.BoldOn,      Ansi.Code.BoldOff)
+    Local i = IIf(Term.PromptColor.Italic,    Ansi.Code.ItalicsOn,   Ansi.Code.ItalicsOff)
+    Local u = IIf(Term.PromptColor.Underline, Ansi.Code.UnderlineOn, Ansi.Code.UnderlineOff)
+    prompt = prompt .. Term.PromptColor.Bg .. Term.PromptColor.Fg .. b .. i .. u
+  EndIf
+
+  Local txt = Term.Print(t, wordwrap, 0, linefeed, True)
+  txt[0] = prompt .. txt[0]
+  Local count = ListItems(txt)
+  If count > 1
+    For Local k = 0 To ListItems(txt)-2
+      DebugPrint(txt[k])
+    Next
+  EndIf
+  
+EndFunction
+
+Function Term.Input(t, wordwrap, linefeed) ; v1.0
+/******************************************************************************
+result = Term.Input(t, wordwrap, linefeed)
+
+Prompt the user with a message.
+---------------------------------------------------------------------
+INPUT
+  t => Message for the user
+  wordwrap => TRUE to enable the wordwrap
+  linefeed => TRUE to add a line feed at the end of the message
+OUTPUT
+  result => User's answer
+******************************************************************************/
+  Local prompt = ""
+  If Term.AnsiMode
+    Local b = IIf(Term.PromptColor.Bold,      Ansi.Code.BoldOn,      Ansi.Code.BoldOff)
+    Local i = IIf(Term.PromptColor.Italic,    Ansi.Code.ItalicsOn,   Ansi.Code.ItalicsOff)
+    Local u = IIf(Term.PromptColor.Underline, Ansi.Code.UnderlineOn, Ansi.Code.UnderlineOff)
+    prompt = prompt .. Term.PromptColor.Bg .. Term.PromptColor.Fg .. b .. i .. u
+  EndIf
+
+  Local txt = Term.Print(t, wordwrap, 0, linefeed, True)
+  txt[0] = prompt .. txt[0]
+  Local count = ListItems(txt)
+  If count > 1
+    For Local k = 0 To ListItems(txt)-2
+      DebugPrint(txt[k])
+    Next
+  EndIf
+  Local r = DebugPrompt(txt[count-1])
+
+  If Term.AnsiMode
+    Local b = IIf(Term.NormalColor.Bold,      Ansi.Code.BoldOn,      Ansi.Code.BoldOff)
+    Local i = IIf(Term.NormalColor.Italic,    Ansi.Code.ItalicsOn,   Ansi.Code.ItalicsOff)
+    Local u = IIf(Term.NormalColor.Underline, Ansi.Code.UnderlineOn, Ansi.Code.UnderlineOff)
+    Term.Print(Term.NormalColor.Bg .. Term.NormalColor.Fg .. b .. i .. u, False, False)
+  EndIf
+
+  Return(r)
+EndFunction
+
+Function Term.PrintAt(r, c, txt)
+  Local t = Ansi.GetCursorMove(r, c) .. txt
+  Term.Print(t, False, False, False)
+EndFunction
+
+Function Term.Print(t, wordwrap, newlineoffset, linefeed, getdata) ; v1.0
+/******************************************************************************
+Term.Print(t, wordwrap, newlineoffset, linefeed, getdata)
+
+Print a string to the terminal.
+---------------------------------------------------------------------
+INPUT
+  t => Message to print
+  wordwrap => TRUE to enable wordwrap (default=True)
+  newlineoffset => Offset to the right when a newline occurs (default=0)
+  linefeed => TRUE to add a final linefeed (default=True)
+  getdata => INTERNAL : Used by the input routine
+******************************************************************************/
+  If IsNil(t)        Then Return()
+  If IsNil(wordwrap) Then wrodwrap = True
+  If IsNil(linefeed) Then linefeed = True
+  If IsNil(getdata)  Then getdata  = False
+  If IsNil(newlineoffset) Then newlineoffset = 0
+
+  Local lines = {}
+
+  If wordwrap
+    Local count = StrLen(t)
+    Local r = ""
+    Local k = 0
+    For Local i = 0 To count-1
+      Local c = MidStr(t, i, 1)
+      If c <> "~"
+        If c = " " And k = 0 And ListItems(lines) > 0
+          ; salta il primo spazio
+        Else
+          If c = Chr(10) Or c = Chr(13)
+            InsertItem(lines, r)
+            r = ""
+            c = ""
+            k = 0
+            If newlineoffset > 0
+              r = RepeatStr(" ", newlineoffset)
+              k = newlineoffset
+            EndIf
+          Else
+            r = r .. c
+            k = k + 1
+          EndIf
+        EndIf
+        If k = Term.Size.Columns-1 Or i = count-1
+          If k = Term.Size.Columns-1
+            ; Verifica la troncatura della parola
+            If MidStr(t, i+1, 1) <> " " And MidStr(t, i+1, 1) <> "~"
+              Local r1 = r
+              ; Torna indietro fino a trovare uno spazio
+              Loop = True
+              Local kk = StrLen(r)
+              Local ki = i
+              While Loop
+                Local s = MidStr(r, kk+1, 1)
+                If s = " " Or s = "}" Or s = "." Or s = "," Or s = ":" Or s = ";" Or s = ")" Or s = "/" Or s = "{" Or s = ")" Or s = "\\"
+                  ; Devo troncare qua
+                  r = LeftStr(r, kk+2)
+                  i = i - StrLen(r1) + kk + 2
+                  Loop = False
+                Else
+                  kk = kk-1
+                  If kk = 0
+                    Loop = False
+                  EndIf
+                EndIf
+              Wend
+            EndIf
+          EndIf
+
+          InsertItem(lines, r)
+          r = ""
+          k = 0
+          If newlineoffset > 0
+            r = RepeatStr(" ", newlineoffset)
+            k = newlineoffset
+          EndIf
+        EndIf
+      Else
+        If Term.AnsiMode Then r = r .. MidStr(t, i, 7)
+        i = i + 6
+      EndIf
+    Next
+    If ListItems(lines) = 0 Then InsertItem(lines, r)
+  Else
+    lines[0] = t
+  EndIf
+
+  Local Encoded = CopyTable(lines)
+  Local Naked   = CopyTable(lines)
+  
+  For k = 0 To ListItems(lines)-1
+    If Not(ValidateStr(Encoded[k]))
+      Encoded[k] = ConvertStr(Encoded[k], #ENCODING_ISO8859_1, #ENCODING_UTF8)
+      Naked[k]   = ConvertStr(Naked[k], #ENCODING_ISO8859_1, #ENCODING_UTF8)
+    EndIf
+  
+    ; SHORT CODES -> ~{code}
+    ; ~{RSET} -> Reset Terminal
+    Encoded[k] = ReplaceStr(Encoded[k], "~{RSET}", Ansi.Code.Reset)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{RSET}", "")
+
+    ; ~{BLD+} -> Bold/Brightness On
+    Encoded[k] = ReplaceStr(Encoded[k], "~{BLD+}", Ansi.Code.BoldOn)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{BLD+}", "")
+
+    ; ~{DIM+} -> Dim/Darkness On
+    Encoded[k] = ReplaceStr(Encoded[k], "~{DIM+}", Ansi.Code.DimOn)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{DIM+}", "")
+
+    ; ~{ITA+} -> Italics On
+    Encoded[k] = ReplaceStr(Encoded[k], "~{ITA+}", Ansi.Code.ItalicsOn)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{ITA+}", "")
+
+    ; ~{UND+} -> Underline On
+    Encoded[k] = ReplaceStr(Encoded[k], "~{UND+}", Ansi.Code.UnderlineOn)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{UND+}", "")
+
+    ; ~{BLI+} -> Blink On
+    Encoded[k] = ReplaceStr(Encoded[k], "~{BLI+}", Ansi.Code.BlinkOn)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{BLI+}", "")
+
+    ; ~{INV+} -> Inverse On
+    Encoded[k] = ReplaceStr(Encoded[k], "~{INV+}", Ansi.Code.InverseOn)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{INV+}", "")
+
+    ; ~{HID+} -> Hidden On
+    Encoded[k] = ReplaceStr(Encoded[k], "~{HID+}", Ansi.Code.HiddenOn)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{HID+}", "")
+
+    ; ~{STR+} -> Strikethrough On
+    Encoded[k] = ReplaceStr(Encoded[k], "~{STR+}", Ansi.Code.StrikethroughOn)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{STR+}", "")
+
+    ; ~{BLD-} -> Bold/Brightness Off
+    Encoded[k] = ReplaceStr(Encoded[k], "~{BLD-}", Ansi.Code.BoldOff)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{BLD-}", "")
+
+    ; ~{ITA-} -> Italics Off
+    Encoded[k] = ReplaceStr(Encoded[k], "~{ITA-}", Ansi.Code.ItalicsOff)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{ITA-}", "")
+
+    ; ~{UND-} -> Underline Off
+    Encoded[k] = ReplaceStr(Encoded[k], "~{UND-}", Ansi.Code.UnderlineOff)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{UND-}", "")
+
+    ; ~{BLI-} -> Blink Off
+    Encoded[k] = ReplaceStr(Encoded[k], "~{BLI-}", Ansi.Code.BlinkOff)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{BLI-}", "")
+
+    ; ~{HID-} -> Hidden Off
+    Encoded[k] = ReplaceStr(Encoded[k], "~{HID-}", Ansi.Code.HiddenOff)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{HID-}", "")
+
+    ; ~{INV-} -> Inverse Off
+    Encoded[k] = ReplaceStr(Encoded[k], "~{INV-}", Ansi.Code.InverseOff)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{INV-}", "")
+
+    ; ~{STR-} -> Strikethrough Off
+    Encoded[k] = ReplaceStr(Encoded[k], "~{STR-}", Ansi.Code.StrikethroughOff)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{STR-}", "")
+
+    ; ~{FBLK} -> Foreground Black
+    Encoded[k] = ReplaceStr(Encoded[k], "~{FBLK}", Ansi.Code.FgBlack)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{FBLK}", "")
+
+    ; ~{FRED} -> Foreground Red
+    Encoded[k] = ReplaceStr(Encoded[k], "~{FRED}", Ansi.Code.FgRed)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{FRED}", "")
+
+    ; ~{FGRN} -> Foreground Green
+    Encoded[k] = ReplaceStr(Encoded[k], "~{FGRN}", Ansi.Code.FgGreen)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{FGRN}", "")
+
+    ; ~{FYEL} -> Foreground Yellow
+    Encoded[k] = ReplaceStr(Encoded[k], "~{FYEL}", Ansi.Code.FgYellow)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{FYEL}", "")
+
+    ; ~{FBLU} -> Foreground Blue
+    Encoded[k] = ReplaceStr(Encoded[k], "~{FBLU}", Ansi.Code.FgBlue)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{FBLU}", "")
+
+    ; ~{FMAG} -> Foreground Magenta
+    Encoded[k] = ReplaceStr(Encoded[k], "~{FMAG}", Ansi.Code.FgMagenta)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{FMAG}", "")
+
+    ; ~{FCYA} -> Foreground Cyan
+    Encoded[k] = ReplaceStr(Encoded[k], "~{FCYA}", Ansi.Code.FgCyan)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{FCYA}", "")
+
+    ; ~{FWHI} -> Foreground White
+    Encoded[k] = ReplaceStr(Encoded[k], "~{FWHI}", Ansi.Code.FgWhite)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{FWHI}", "")
+
+    ; ~{FDEF} -> Foreground Default
+    Encoded[k] = ReplaceStr(Encoded[k], "~{FDEF}", Ansi.Code.FgDefault)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{FDEF}", "")
+
+    ; ~{BBLK} -> Background Black
+    Encoded[k] = ReplaceStr(Encoded[k], "~{BBLK}", Ansi.Code.BgBlack)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{BBLK}", "")
+
+    ; ~{BRED} -> Background Red
+    Encoded[k] = ReplaceStr(Encoded[k], "~{BRED}", Ansi.Code.BgRed)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{BRED}", "")
+
+    ; ~{BGRN} -> Background Green
+    Encoded[k] = ReplaceStr(Encoded[k], "~{BGRN}", Ansi.Code.BgGreen)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{BGRN}", "")
+
+    ; ~{BYEL} -> Background Yellow
+    Encoded[k] = ReplaceStr(Encoded[k], "~{BYEL}", Ansi.Code.BgYellow)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{BYEL}", "")
+
+    ; ~{BBLU} -> Background Blue
+    Encoded[k] = ReplaceStr(Encoded[k], "~{BBLU}", Ansi.Code.BgBlue)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{BBLU}", "")
+
+    ; ~{BMAG} -> Background Magenta
+    Encoded[k] = ReplaceStr(Encoded[k], "~{BMAG}", Ansi.Code.BgMagenta)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{BMAG}", "")
+
+    ; ~{BCYA} -> Background Cyan
+    Encoded[k] = ReplaceStr(Encoded[k], "~{BCYA}", Ansi.Code.BgCyan)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{BCYA}", "")
+
+    ; ~{BWHI} -> Background White
+    Encoded[k] = ReplaceStr(Encoded[k], "~{BWHI}", Ansi.Code.BgWhite)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{BWHI}", "")
+
+    ; ~{BDEF} -> Background Default
+    Encoded[k] = ReplaceStr(Encoded[k], "~{BDEF}", Ansi.Code.BgDefault)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{BDEF}", "")
+
+    ; ~{HOME} -> Home
+    Encoded[k] = ReplaceStr(Encoded[k], "~{HOME}", Ansi.Code.Home)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{HOME}", "")
+
+    ; ~{CLRH} -> Clear + Home
+    Encoded[k] = ReplaceStr(Encoded[k], "~{CLRH}", Ansi.Code.ClearHome)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{CLRH}", "")
+
+    ; ~{CLRR} -> Clear Line Right
+    Encoded[k] = ReplaceStr(Encoded[k], "~{CLRR}", Ansi.Code.ClearLineRight)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{CLRR}", "")
+
+    ; ~{CLRL} -> Clear Line Left
+    Encoded[k] = ReplaceStr(Encoded[k], "~{CLRL}", Ansi.Code.ClearLineLeft)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{CLRL}", "")
+
+    ; ~{CLRB} -> Clear Below
+    Encoded[k] = ReplaceStr(Encoded[k], "~{CLRB}", Ansi.Code.ClearBelow)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{CLRB}", "")
+
+    ; ~{CLRA} -> Clear Above
+    Encoded[k] = ReplaceStr(Encoded[k], "~{CLRA}", Ansi.Code.ClearAbove)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{CLRA}", "")
+
+    ; ~{CLIN} -> Clear Line
+    Encoded[k] = ReplaceStr(Encoded[k], "~{CLIN}", Ansi.Code.ClearLine)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{CLIN}", "")
+
+    ; ~{C1CH} -> Clear 1 charatcer
+    Encoded[k] = ReplaceStr(Encoded[k], "~{C1CH}", Ansi.Code.Clear1Character)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{C1CH}", "")
+
+    ; ~{I1BL} -> Insert 1 blank line
+    Encoded[k] = ReplaceStr(Encoded[k], "~{I1BL}", Ansi.Code.Insert1BlankLine)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{I1BL}", "")
+
+    ; ~{D1LI} -> Delete 1 line
+    Encoded[k] = ReplaceStr(Encoded[k], "~{D1LI}", Ansi.Code.Delete1Line)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{D1LI}", "")
+
+    ; ~{D1CH} -> Delete 1 character
+    Encoded[k] = ReplaceStr(Encoded[k], "~{D1CH}", Ansi.Code.Delete1Character)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{D1CH}", "")
+
+    ; ~{I1CH} -> Insert 1 character
+    Encoded[k] = ReplaceStr(Encoded[k], "~{I1CH}", Ansi.Code.Insert1Character)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{I1CH}", "")
+
+    ; ~{SHWC} -> Show cursor
+    Encoded[k] = ReplaceStr(Encoded[k], "~{SHWC}", Ansi.Code.ShowCursor)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{SHWC}", "")
+
+    ; ~{HIDC} -> Hide cursor
+    Encoded[k] = ReplaceStr(Encoded[k], "~{HIDC}", Ansi.Code.HideCursor)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{HIDC}", "")
+
+    ; ~{M1UP} -> Move cursor up 1 line
+    Encoded[k] = ReplaceStr(Encoded[k], "~{M1UP}", Ansi.Code.MoveCursorUp1)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{M1UP}", "")
+
+    ; ~{M1DO} -> Move cursor down 1 line
+    Encoded[k] = ReplaceStr(Encoded[k], "~{M1DO}", Ansi.Code.MoveCursorDown1)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{M1DO}", "")
+
+    ; ~{M1LE} -> Move cursor left 1 character
+    Encoded[k] = ReplaceStr(Encoded[k], "~{M1LE}", Ansi.Code.MoveCursorLeft1)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{M1LE}", "")
+
+    ; ~{M1RI} -> Move cursor light 1 character
+    Encoded[k] = ReplaceStr(Encoded[k], "~{M1RI}", Ansi.Code.MoveCursorRight1)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{M1RI}", "")
+
+    ; ~{SAVE} -> Save cursor position
+    Encoded[k] = ReplaceStr(Encoded[k], "~{SAVE}", Ansi.Code.SaveCursor)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{SAVE}", "")
+
+    ; ~{REST} -> Restore saved cursor position
+    Encoded[k] = ReplaceStr(Encoded[k], "~{REST}", Ansi.Code.RestoreCursor)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{REST}", "")
+
+    ; ~{NORM} -> Normal set
+    Local b = IIF(Term.NormalColor.Bold,      Ansi.Code.BoldOn,      Ansi.Code.BoldOff)
+    Local i = IIF(Term.NormalColor.Italic,    Ansi.Code.ItalicsOn,   Ansi.Code.ItalicsOff)
+    Local u = IIF(Term.NormalColor.Underline, Ansi.Code.UnderlineOn, Ansi.Code.UnderlineOff)
+    Encoded[k] = ReplaceStr(Encoded[k], "~{NORM}", Term.NormalColor.Bg .. Term.NormalColor.Fg .. b .. i .. u)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{NORM}", "")
+
+    ; ~{NOTI} -> Normal set
+    Local b = IIF(Term.NoticeColor.Bold,      Ansi.Code.BoldOn,      Ansi.Code.BoldOff)
+    Local i = IIF(Term.NoticeColor.Italic,    Ansi.Code.ItalicsOn,   Ansi.Code.ItalicsOff)
+    Local u = IIF(Term.NoticeColor.Underline, Ansi.Code.UnderlineOn, Ansi.Code.UnderlineOff)
+    Encoded[k] = ReplaceStr(Encoded[k], "~{NOTI}", Term.NoticeColor.Bg .. Term.NoticeColor.Fg .. b .. i .. u)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{NOTI}", "")
+
+    ; ~{WARN} -> Normal set
+    Local b = IIF(Term.WarningColor.Bold,      Ansi.Code.BoldOn,      Ansi.Code.BoldOff)
+    Local i = IIF(Term.WarningColor.Italic,    Ansi.Code.ItalicsOn,   Ansi.Code.ItalicsOff)
+    Local u = IIF(Term.WarningColor.Underline, Ansi.Code.UnderlineOn, Ansi.Code.UnderlineOff)
+    Encoded[k] = ReplaceStr(Encoded[k], "~{WARN}", Term.WarningColor.Bg .. Term.WarningColor.Fg .. b .. i .. u)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{WARN}", "")
+
+    ; ~{ERRO} -> Normal set
+    Local b = IIF(Term.ErrorColor.Bold,      Ansi.Code.BoldOn,      Ansi.Code.BoldOff)
+    Local i = IIF(Term.ErrorColor.Italic,    Ansi.Code.ItalicsOn,   Ansi.Code.ItalicsOff)
+    Local u = IIF(Term.ErrorColor.Underline, Ansi.Code.UnderlineOn, Ansi.Code.UnderlineOff)
+    Encoded[k] = ReplaceStr(Encoded[k], "~{ERRO}", Term.ErrorColor.Bg .. Term.ErrorColor.Fg .. b .. i .. u)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{ERRO}", "")
+
+    ; ~{ADVI} -> Normal set
+    Local b = IIF(Term.AdviceColor.Bold,      Ansi.Code.BoldOn,      Ansi.Code.BoldOff)
+    Local i = IIF(Term.AdviceColor.Italic,    Ansi.Code.ItalicsOn,   Ansi.Code.ItalicsOff)
+    Local u = IIF(Term.AdviceColor.Underline, Ansi.Code.UnderlineOn, Ansi.Code.UnderlineOff)
+    Encoded[k] = ReplaceStr(Encoded[k], "~{ADVI}", Term.AdviceColor.Bg .. Term.AdviceColor.Fg .. b .. i .. u)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{ADVI}", "")
+
+    ; ~{QUOT} -> Normal set
+    Local b = IIF(Term.QuoteColor.Bold,      Ansi.Code.BoldOn,      Ansi.Code.BoldOff)
+    Local i = IIF(Term.QuoteColor.Italic,    Ansi.Code.ItalicsOn,   Ansi.Code.ItalicsOff)
+    Local u = IIF(Term.QuoteColor.Underline, Ansi.Code.UnderlineOn, Ansi.Code.UnderlineOff)
+    Encoded[k] = ReplaceStr(Encoded[k], "~{QUOT}", Term.QuoteColor.Bg .. Term.QuoteColor.Fg .. b .. i .. u)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{QUOT}", "")
+
+    ; ~{PROM} -> Normal set
+    Local b = IIF(Term.PromptColor.Bold,      Ansi.Code.BoldOn,      Ansi.Code.BoldOff)
+    Local i = IIF(Term.PromptColor.Italic,    Ansi.Code.ItalicsOn,   Ansi.Code.ItalicsOff)
+    Local u = IIF(Term.PromptColor.Underline, Ansi.Code.UnderlineOn, Ansi.Code.UnderlineOff)
+    Encoded[k] = ReplaceStr(Encoded[k], "~{PROM}", Term.PromptColor.Bg .. Term.PromptColor.Fg .. b .. i .. u)
+    Naked[k]   = ReplaceStr(Naked[k],   "~{PROM}", "")
+
+  Next
+
+  If Term.AnsiMode
+    If GetData
+      Return(Encoded)
+      
+    Else
+      For Local i = 0 To ListItems(lines)-1
+        DebugPrint(Encoded[i])
+        If i = ListItems(lines)-1 And Not(Linefeed)
+          DebugPrint(Ansi.GetCursorUp(2))
+        EndIf
+      Next
+    EndIf
+  Else
+    If GetData
+      Return(Naked)
+    Else
+      For Local i = 0 To ListItems(lines)-1
+        DebugPrint(Naked[i])
+      Next
+    EndIf
+  EndIf
+
+EndFunction
+
+Function Term.Draw.FBox(options)
+  ; Draw a fille box
+  ;
+  ; Options
+  ;   row
+  ;   column
+  ;   width
+  ;   height
+  ;   color
+  ; ----------------------------------
+  If Not(HaveItem(options, "color")) Then options.Color = ""
+  
+  For Local i = 1 To options.height
+    Local y = options.row+i-1
+    Term.Draw.HLine({ row = y, column = options.column, length = options.width, color = options.color, type = "full" })
+  Next
+  
+EndFunction
+
+Function Term.Draw.Box(options)
+  ; Draw an empty box
+  ;
+  ; Options
+  ;   row    = vertical pos
+  ;   column = horizontal pos
+  ;   width  = width
+  ;   height = height
+  ;   color  = color
+  ;   type   = line type
+  ;      light      light lines
+  ;   angles
+  ;      squared
+  ;      rounded
+  ; ------------------------------
+  If Not(HaveItem(options, "color")) Then options.Color = ""
+  If Not(HaveItem(options, "type"))  Then options.Type = "light"
+  If Not(HaveItem(options, "angles"))  Then options.Angles = "squared"
+  
+  Local tl, tr, bl, br = "", "", "", ""
+  Switch options.Angles
+    Case "squared"
+      tl = Ansi.Code.Gfx.LLDR
+      tr = Ansi.Code.Gfx.LLDL
+      bl = Ansi.Code.Gfx.LLUR
+      br = Ansi.Code.Gfx.LLUL
+      
+    Case "rounded"
+      tl = Ansi.Code.Gfx.RLLDR
+      tr = Ansi.Code.Gfx.RLLDL
+      bl = Ansi.Code.Gfx.RLLUR
+      br = Ansi.Code.Gfx.RLLUL
+      
+    Default
+      tl = Ansi.Code.Gfx.LLDR
+      tr = Ansi.Code.Gfx.LLDL
+      bl = Ansi.Code.Gfx.LLUR
+      br = Ansi.Code.Gfx.LLUL
+
+  EndSwitch
+  
+  ; Draw the angles
+  options.width = options.width - 1
+  options.height = options.height - 1
+  If options.width < 1 Then options.width = 1
+  If options.height < 1 THen options.height = 1
+  
+  Local txt  = options.Color
+  txt = txt .. Ansi.GetCursorMove(options.row, options.column)
+  txt = txt .. tl .. Ansi.GetCursorMove(options.row, options.column+options.width)
+  txt = txt .. tr .. Ansi.GetCursorMove(options.row+options.height, options.column)
+  txt = txt .. bl .. Ansi.GetCursorMove(options.row+options.height, options.column+options.width)
+  txt = txt .. br
+  
+  Term.Print(txt, False, False, False)
+  Term.Draw.HLine({ row = options.row, column = options.column+1, length = options.width-1, color = options.color, type = options.type})
+  Term.Draw.HLine({ row = options.row+options.height, column = options.column+1, length = options.width-1, color = options.color, type = options.type})
+  Term.Draw.VLine({ row = options.row+1, column = options.column, length = options.height-1, color = options.color, type = options.type})
+  Term.Draw.VLine({ row = options.row+1, column = options.column+options.width, length = options.height-1, color = options.color, type = options.type})
+  
+EndFunction
+
+Function Term.Draw.HLine(options)
+  ; Draw an horizontal line
+  ;
+  ; options
+  ;   row    = vertical position
+  ;   column = horizontal start position
+  ;   length = line lenght in characters
+  ;   color  = line color
+  ;   type   = line type
+  ;      light      Ansi.Code.Gfx.LLH
+  ;      full       Ansi.Code.Gfx.FB
+  ; ------------------------------------
+  If Not(HaveItem(options, "color")) Then options.Color = ""
+  If Not(HaveItem(options, "type"))  Then options.Type = "light"
+
+  Local hLine = ""
+  Switch options.Type
+    Case "light"
+      hLine = Ansi.Code.Gfx.LLH
+  
+    Case "full"
+      hLine = Ansi.Code.Gfx.FB
+      
+    Default
+      hLine = Ansi.Code.Gfx.LLH
+      
+  EndSwitch
+
+  Local txt = Ansi.GetCursorMove(options.row, options.column) .. options.Color
+
+  For Local i = 1 To options.length
+    txt = txt .. hLine
+  Next
+  
+  Term.Print(txt, False, False, False)
+  
+EndFunction
+
+Function Term.Draw.VLine(options)
+  ; Draw an vertical line
+  ;
+  ; options
+  ;   column = horizontal position
+  ;   row    = horizontal start position
+  ;   length = line lenght in characters
+  ;   color  = line color
+  ;   type   = line type
+  ;      light      Ansi.Code.Gfx.LLV
+  ;      full       Ansi.Code.Gfx.FB  
+  ; ------------------------------------
+  If Not(HaveItem(options, "color")) Then options.Color = ""
+  If Not(HaveItem(options, "type"))  Then options.Type = "light"
+
+  Local hLine = ""
+  Switch options.Type
+    Case "light"
+      hLine = Ansi.Code.Gfx.LLV
+  
+    Case "full"
+      hLine = Ansi.Code.Gfx.FB
+  
+    Default
+      hLine = Ansi.Code.Gfx.LLV
+      
+  EndSwitch
+
+  Local txt = Ansi.GetCursorMove(options.row, options.column) .. options.Color
+
+  For Local i = 1 To options.length
+    txt = txt .. hLine .. Ansi.GetCursorDown(1) .. Ansi.GetCursorLeft(1)
+  Next
+  
+  Term.Print(txt, False, False, False)
+  
+EndFunction
+
+Function Term.Line(character, style) ; v1.0
+/******************************************************************************
+Term.Line(character, style)
+
+Draw a line with the <character> line and the given <style>.
+---------------------------------------------------------------------
+INPUT
+  character => Character used to draw the line
+  style => Character style
+******************************************************************************/
+  If IsNil(style) Then style = "~{NORM}"
+  Local l = RepeatStr(character, Term.Size.Columns)
+  Term.Print(style .. l .. "~{NORM}")
+EndFunction
+
+Function Term.CTLine(character, txt, style) ; v1.0
+/******************************************************************************
+Term.CTLine(character, txt, style)
+
+Draw a line with the given <character> and center on it the given <txt> text
+with the specified <style>.
+---------------------------------------------------------------------
+INPUT
+  character => Character used to draw the line
+  txt => Text to center
+  style => Character style
+******************************************************************************/
+  If IsNil(style) Then style = "~{NORM}"
+  Local len = StrLen(txt)
+  Local pos = Int((Term.Size.Columns-len)/2) + 1
+  Local s = RepeatStr(character, pos) .. txt .. RepeatStr(character, pos)
+  Local s = LeftStr(s, Term.Size.Columns)
+  Term.Print(style .. s .. "~{NORM}")
+EndFunction
+
+Function Term.Clear()
+  Term.Print(Ansi.Code.BgBlack .. Ansi.Code.ClearHome, False, False, False)
+EndFunction
+
+;---------------------------------
+; TERM APP OBJECT
+; Terminal Application
+;---------------------------------
+Term.App =
+  { Name = "",            ; Application Name
+    Version = "",         ; App version
+    Build = "",           ; App Build
+    Copyright = "",       ; Copyright Owner
+    
+    TermSize = { 25, 40 },; Terminal size (rows, columns)
+    
+    Menu = { },           ; Table of all available menus
+    MenuHistory = { },    ; Table to track the menu levels
+    
+    Layout =              ; Table to define the application layout
+      { Header = 
+        { Value = "{AppName} v{AppVersion} ({AppBuild}) - {Copyright}",
+          Color = Ansi.Code.BoldOn .. Ansi.Code.FgYellow .. Ansi.Code.BgBlue,
+          Row = 1
+          },
+        Info =    ; Used only by the GridView
+        { Value = "",
+          Color = Ansi.Code.BoldOn .. Ansi.Code.FgWhite .. Ansi.Code.BgGreen,
+          Row = -1
+          },
+        Status =
+        { Value = "",
+          Color = Ansi.Code.BoldOn .. Ansi.Code.FgCyan .. Ansi.Code.BgBlue,
+          Row   = -1
+          },
+        Warning =
+        { Value = "",
+          Color = Ansi.Code.BoldOn .. Ansi.Code.FgYellow .. Ansi.Code.BgRed,
+          Row = -1 },
+        MenuState =       ; Row to show the menu navigation
+        { Value = "",
+          Color = Ansi.Code.BoldOn .. Ansi.Code.FgWhite .. Ansi.Code.BgCyan,
+          Row = 2,
+          ArrowChar = Chr(187), ;" > ",
+          ArrowColor = Ansi.Code.FgYellow .. Ansi.Code.BgBlack
+          },
+        Prompt =          ; Prompt menu definition
+        { Row = 22,
+          Column = 1,
+          Prefix = " ",
+          Postfix = ": ",
+          Color = Ansi.Code.BoldOff .. Ansi.Code.FgBlack .. Ansi.Code.BgWhite,
+          Value = "Command",
+          UserInputColor = Ansi.Code.BoldOn .. Ansi.Code.FgYellow .. Ansi.Code.BgBlack
+          },
+        Message =
+        { firstRow = 3,
+          vLenght = 18,
+          Color = Ansi.Code.BoldOff .. Ansi.Code.FgWhite .. Ansi.Code.BgBlue,
+          BgColor = Ansi.Code.BoldOff .. Ansi.Code.FgBlue .. Ansi.Code.BgBlue,
+          TextColor = Ansi.Code.BoldOn .. Ansi.Code.FgWhite .. Ansi.Code.BgBlue
+          },
+        MenuItems =       ; Defines how to render menu items
+        { firstRow = 4,
+          vLength  = 15,
+          Command =
+          { Length = 5,
+            Color = Ansi.Code.BoldOn .. Ansi.Code.FgWhite .. Ansi.Code.BgBlue,
+            Column1 = 2,
+            Column2 = 41 
+            },
+          Desc =
+          { Length = 30,
+            Color = Ansi.Code.BoldOn .. Ansi.Code.FgWhite .. Ansi.Code.BgBlack,
+            Column1 = 8,
+            Column2 = 47,
+            tag1 =
+              { symbol = ":G:", code = Ansi.Code.FgGreen }
+            },
+          Header =
+          { Color = Ansi.Code.BoldOn .. Ansi.Code.FgYellow .. Ansi.Code.BgMagenta
+            },
+          Empty =
+          { DrawLine = True,
+            Color = Ansi.Code.BoldOff .. Ansi.Code.FgWhite .. Ansi.Code.BgBlack
+            },
+          VLines =
+          { DrawLine = True,
+            Color = Ansi.Code.BoldOff .. Ansi.Code.FgWhite .. Ansi.Code.BgBlack
+            }
+          },
+        TextMsg =
+          { Hilight = Ansi.Code.BoldOn .. Ansi.Code.FgYellow .. Ansi.Code.BgBlue,
+            Normal  = Ansi.Code.BoldOn .. Ansi.Code.FgWhite .. Ansi.Code.BgBlue
+            },
+        GridView =
+          { Color =
+            { HeaderBg   = Ansi.Code.BgGreen,
+              HeaderFg   = Ansi.Code.BoldOn .. Ansi.Code.FgYellow,
+              HeaderLine = Ansi.Code.BoldOn .. Ansi.Code.FgCyan .. Ansi.Code.BgBlack,
+              DataArea   = Ansi.Code.FgBlack,
+              Hilighted  = Ansi.Code.BoldOn .. Ansi.Code.FgYellow .. Ansi.Code.BgBlue,
+              Normal     = Ansi.Code.BoldOff .. Ansi.Code.FgWhite .. Ansi.Code.BgBlack,
+              PromptPre  = Ansi.Code.BoldOn .. Ansi.Code.FgYellow .. Ansi.Code.BgMagenta,
+              PromptPost = Ansi.Code.BoldOn .. Ansi.Code.FgGreen .. Ansi.Code.BgBlack,
+              },
+            VLines = True,
+            Row = 22,
+            }
+        }
+  
+    }
+
+Function Term.App:New()
+  Local obj = CopyTable(self)
+  
+  Local r, c = Term.GetSize()
+  obj.TermSize[0] = r
+  obj.TermSize[1] = c
+  
+  obj.Layout.Status.Row  = obj.TermSize[0]-1
+  obj.Layout.Warning.Row = obj.TermSize[0]-2
+  obj.Layout.Info.Row    = obj.TermSize[0]
+  
+  Return(obj)
+EndFunction
+
+Function Term.App:_FullWidth(txt, align)
+  ; Align default = Left (1)
+  ;                 Right (-1)
+  ; Add spaces to have a full width string
+  If IsNil(align) Then align = 1 ; LEFT
+  
+  Local l = StrLen(txt)
+  Local spaces = self.TermSize[1] - l
+  
+  If align = 1
+    If spaces > 0
+      txt = txt .. RepeatStr(" ", spaces)
+    EndIf
+    
+  ElseIf align = -1
+    If spaces > 0
+      txt = RepeatStr(" ", spaces-1) .. txt
+    EndIf
+    
+  EndIf
+  
+  Return(txt)
+
+EndFunction
+
+Function Term.App:_DrawHeader()
+  ; Build the string
+  Local t = self.Layout.Header.Value
+  t = ReplaceStr(t, "{AppName}", self.Name)
+  t = ReplaceStr(t, "{AppVersion}", self.Version)
+  t = ReplaceStr(t, "{AppBuild}", self.Build)
+  t = ReplaceStr(t, "{Copyright}", "©" .. self.Copyright)
+  t = self:_FullWidth(t)
+  
+  t = Ansi.GetCursorMove(self.Layout.Header.Row, 1) .. self.Layout.Header.Color .. t
+  
+  Term.Print(t)
+
+EndFunction
+
+Function Term.App:SetStatus(txt)
+  self.Layout.Status.Value = txt
+  
+  self:_DrawStatus()
+  
+EndFunction
+
+Function Term.App:ClearStatus()
+  self.Layout.Status.Value = ""
+  
+  self:_DrawStatus()
+  
+EndFunction
+
+Function Term.App:SetInfo(txt)
+  self.Layout.Info.Value = txt
+  
+  self:_DrawInfo()
+  
+EndFunction
+
+Function Term.App:ClearInfo()
+  self.Layout.Info.Value = ""
+  
+  self:_DrawInfo()
+  
+EndFunction
+
+Function Term.App:SetWarning(txt)
+  self.Layout.Warning.Value = txt
+  
+  self:_DrawWarning()
+  
+EndFunction
+
+Function Term.App:ClearWarning()
+  self.Layout.Warning.Value = ""
+  
+  self:_DrawWarning()
+  
+EndFunction
+
+Function Term.App:_DrawStatus(txt)
+  ; If txt is specified use this string instead of the
+  ; stored one
+  
+  ; Build the string
+  Local t = self.Layout.Status.Value
+  
+  If Not(IsNil(txt))
+    t = txt
+  EndIf
+  
+  t = self:_FullWidth(t)
+  
+  t = Ansi.GetCursorMove(self.Layout.Status.Row, 1) .. self.Layout.Status.Color .. t
+  
+  Term.Print(t)
+EndFunction
+
+Function Term.App:_DrawInfo(txt)
+  ; If txt is specified draw txt instead of the stored
+  ; value
+  
+  ; Build the string
+  Local t = self.Layout.Info.Value
+  
+  If Not(IsNil(txt))
+    t = txt
+  EndIf
+  
+  t = self:_FullWidth(t)
+  
+  t = Ansi.GetCursorMove(self.Layout.Info.Row, 1) .. self.Layout.Info.Color .. t
+  
+  Term.Print(t, False, 0, False)
+EndFunction
+
+Function Term.App:_DrawWarning(txt)
+  ; If txt is specified draw it instead of the stored one
+  
+  ; Build the string
+  Local t = self.Layout.Warning.Value
+  
+  If Not(IsNil(txt))
+    t = txt
+  EndIf
+  
+  t = self:_FullWidth(t)
+  
+  t = Ansi.GetCursorMove(self.Layout.Warning.Row, 1) .. self.Layout.Warning.Color .. t
+  
+  Term.Print(t)
+EndFunction
+
+Function Term.App:_DrawMenuState(txt)
+  ; If txt is specified draw that text instead of the 
+  ; stored one.
+  
+  ; Build the string
+  Local t, last = "", ListItems(self.MenuHistory)-1
+  For i = 0 To last
+    t = t .. self.MenuHistory[i]
+    If i <> last Then t = t .. self.Layout.MenuState.ArrowChar
+  Next
+  
+  If Not(IsNil(txt))
+    t = txt
+  EndIf
+  
+  t = self:_FullWidth(t)
+  t = ReplaceStr(t, self.Layout.MenuState.ArrowChar, self.Layout.MenuState.ArrowColor .. self.Layout.MenuState.ArrowChar .. self.Layout.MenuState.Color)
+  t = Ansi.GetCursorMove(self.Layout.MenuState.Row, 1) .. self.Layout.MenuState.Color .. t
+  
+  Term.Print(t)
+EndFunction
+
+Function Term.App:MenuAdd(name, items)
+  ; Defines a menu
+  ;
+  ; name            menu name
+  ; item structure
+  ;   command       command string to type
+  ;   description   command description to show
+  ;   callback      callback function to execute or submenu name
+  ;
+  ; if command = "" => description is an header
+  self.Menu[name] = CopyTable(items)
+  
+EndFunction
+
+Function Term.App:_FixedWidth(txt, size, align)
+
+  ; align 1, 0, -1 -> left, center, right
+  If IsNil(align) Then align = 1
+  
+  Local l = StrLen(txt)
+  
+  If l > size
+    If align = 1
+      txt = LeftStr(txt, size-1) .. "»"
+    
+    ElseIf align = -1
+      txt = "«" .. LeftStr(txt, size-1)
+      
+    ElseIf align = 0
+      Local exc = Int((l-size)/2)
+      txt = "«" .. MidStr(txt, exc, size-2) .. "»"
+      
+    EndIf
+    
+  ElseIf l < size
+    If align = 1
+      txt = txt .. RepeatStr(" ", size-l)
+      
+    ElseIf align = -1
+      txt = RepeatStr(" ", size-l-1) .. txt
+      
+    ElseIf align = 0
+      Local half = (size-l)/2
+      txt = RepeatStr(" ", half) .. txt .. RepeatStr(" ", half)
+      
+    EndIf
+    
+  EndIf
+  
+  Return(txt)
+  
+EndFunction
+
+Function Term.App:alignNumber(value, decimals, size)
+  ; Align the value to the right, sets the specified
+  ; decimals and add size the string to the
+  ; given value.
+  Local v = tapp:_FixedWidth(FormatStr("%." .. decimals .. "f", value), size, -1)
+  
+  Return(v)
+  
+EndFunction
+
+Function Term.App:_DrawMenuItems(menuEntry)
+  Local entries = self.Menu[menuEntry]
+  Local count = ListItems(entries)-1
+  
+  Local r, ccmd, cdesc = self.Layout.MenuItems.firstRow, self.Layout.MenuItems.Command.Column1, self.Layout.MenuItems.Desc.Column1
+  For Local i = 0 To count
+    If r + i > self.Layout.MenuItems.vLength + self.Layout.MenuItems.firstRow - 1
+      r = r - self.Layout.MenuItems.vLength
+      ccmd = self.Layout.MenuItems.Command.Column2
+      cdesc = self.Layout.MenuItems.Desc.Column2
+    EndIf
+    
+    Local cmd = ""
+    If entries[i].command <> ""
+      cmd  = Ansi.GetCursorMove(r + i, ccmd) ..
+             self.Layout.MenuItems.Command.Color .. " " ..
+             self:_FixedWidth(entries[i].command, self.Layout.MenuItems.Command.Length)
+             
+    EndIf
+    
+    If cmd <> ""
+      desc  = Ansi.GetCursorMove(r + i, cdesc) ..
+              self.Layout.MenuItems.Desc.Color .. " " ..
+              self:_FixedWidth(entries[i].description, self.Layout.MenuItems.Desc.Length)
+
+      Local t = cmd .. desc
+      t = ReplaceStr(t, Term.App.Layout.MenuItems.Desc.Tag1.Symbol, Term.App.Layout.MenuItems.Desc.Tag1.Code)
+      Term.Print(t)
+      
+    Else
+      ; HEADER
+      If entries[i].description <> ""
+        Local t = Ansi.GetCursorMove(r + i, ccmd) ..
+                  self.Layout.MenuItems.Header.Color .. " " ..
+                  RepeatStr(" ", self.Layout.MenuItems.Command.Length + 1) ..
+                  self:_FixedWidth(entries[i].description, self.Layout.MenuItems.Desc.Length - 1)
+        
+        ; Check tags
+        t = ReplaceStr(t, Term.App.Layout.MenuItems.Desc.Tag1.Symbol, Term.App.Layout.MenuItems.Desc.Tag1.Code)
+        Term.Print(t)
+
+      ; EMPTY
+      Else
+        If self.Layout.MenuItems.Empty.DrawLine
+          Term.Draw.HLine(
+            { row = r + i,
+              column = ccmd,
+              length = self.Layout.MenuItems.Desc.Length + self.Layout.MenuItems.Command.Length + 1,
+              color = self.Layout.MenuItems.Empty.Color,
+              type = "light"
+              })
+        EndIf
+        
+      EndIf
+      
+    EndIf
+    
+  Next
+  
+  If self.Layout.MenuItems.VLines.DrawLine
+    Term.Draw.VLine(
+      { column = self.Layout.MenuItems.Desc.Column1-1,
+        row = self.Layout.MenuItems.firstRow,
+        length = self.Layout.MenuItems.vLength,
+        color = self.Layout.MenuItems.VLines.Color,
+        type = "light"
+        })
+    Term.Draw.VLine(
+      { column = self.Layout.MenuItems.Desc.Column2-1,
+        row = self.Layout.MenuItems.firstRow,
+        length = self.Layout.MenuItems.vLength,
+        color = self.Layout.MenuItems.VLines.Color,
+        type = "light"
+        })
+  
+  EndIf
+  
+EndFunction
+
+Function Term.App:ShowMessage(txt, waitkey, wordwrap)
+  If IsNil(waitkey)  Then waitkey = True
+  If IsNil(wordwrap) Then wordwrap = True
+
+  Term.Draw.FBox(
+    { row = self.Layout.Message.firstRow+1,
+      column = 2,
+      width = self.TermSize[1]-3,
+      height = self.Layout.Message.vLenght-2,
+      color = self.Layout.Message.BgColor
+      })
+  Local t = Ansi.GetCursorMove(self.Layout.Message.firstRow+1, 4) ..
+            self.Layout.Message.TextColor
+  
+  ;Term.Print(t .. "- TEST -", False, 4, False)
+  ;Wait(2000, #MILLISECONDS)
+  
+  Local backup = CopyTable(Term.Size)
+  Term.Size.Columns = Term.Size.Columns - 5
+  Term.Print(t, False, 0, False)
+  Term.Print(RepeatStr(" ", 3) .. txt, wordwrap, 3, False)
+  Term.Size = backup
+  
+  Term.Draw.Box(
+    { row = self.Layout.Message.firstRow,
+      column = 1,
+      width = self.TermSize[1]-1,
+      height = self.Layout.Message.vLenght,
+      color = self.Layout.Message.Color
+      })
+  
+  If waitkey
+    Term.Input(
+      Ansi.GetCursorMove(self.Layout.Message.firstRow+self.Layout.Message.vLenght-2, 3) ..
+      self:_FixedWidth("HIT ENTER TO CONTINUE", Term.Size.Columns-5),
+      False,
+      False)
+  EndIf
+  
+EndFunction
+
+Function Term.App:GridView(data, columns, headers, positions, callback, info, formats)
+  ; Show data in a grid.
+  ;
+  ; data          A table of all columns, each column with its data records
+  ; columns       Column names (>=left align)
+  ; headers       Column headers
+  ; positions     Column positions
+  ;                 You can specify a last position which determines
+  ;                 the end position of the last column
+  ; callback      Callback when a row is selected
+  ; info          Custom info text
+  ; formats       Optional table to represent columns (format)
+  ; ---------------------------------------------
+  If IsNil(info) Then info = ""
+  If IsNil(formats) Then formats = {}
+
+  Local sizes = {}
+  Local items = ListItems(positions)
+  For Local i = 0 To items-2
+    sizes[i] = positions[i+1]-positions[i]
+  Next
+  
+  sizes[items-1] = self.TermSize[1] - positions[items-1] + 1
+  
+  For i = 0 To items-1
+    If Not(HaveItem(formats, i))
+      formats[i] = "%s" ; String
+    EndIf
+    
+  Next
+  
+  Local cursor  = 0       ; Hilighted row
+  Local xoffset = 0       ; Horizontal offset
+  Local y       = 3       ; Starting y
+  Local firstLine = 0     ; First visible line
+  Local lastVisible = -1  ; Last visible line
+  
+  Local cname = columns[0]
+  If LeftStr(cname, 1) = ">"
+    cname = RightStr(cname, StrLen(cname)-1)
+  EndIf
+  Local lastIndex = ListItems(data[cname])-1     ; Last data index
+  
+  Local y_header = y      ; Header vertical position
+  Local y_data   = y_header+2 ; Data vertical position
+  Local columnsCnt = ListItems(columns)-1
+  Local searchStr  = "" ; Last search string
+  Local searchIdx  = 0  ; Last found index
+  Local loopActive = True
+
+  ; INTERFACE
+  self:_DrawHeader()
+  self:_DrawMenuState()
+
+  ; UPDATE STATUS AND WARNING LINES
+  self._LastWarning = self.Layout.Warning.Value
+  self._LastStatus = self.Layout.Status.Value
+  self._LastInfo = self.Layout.Info.Value
+  
+  Local c1 = Ansi.Code.BoldOn .. Ansi.Code.FgYellow .. Ansi.Code.BgGreen
+  self:SetWarning("---")
+  self:SetStatus(" DOWN:s/S   UP:w/W  LEFT:d/D  RIGHT:a/A  SELECT:Space  Find:f/F  EXIT:Q")
+  self:SetInfo(info)
+  
+  ; PRINT HEADER FUNCTION
+  printHeader =
+    Function()
+      Local y = y_header
+      Term.Print(Ansi.GetCursorMove(y, 1) .. 
+                 self.Layout.GridView.Color.HeaderBg ..
+                 self:_FullWidth(" "))
+      For Local i = 0 To columnsCnt
+        Local value = self:_FixedWidth(headers[i], sizes[i])
+        Local p = xoffset+positions[i]
+        If p < 1
+          value = UnrightStr(value, Abs(p)+1)
+          p = 1
+        EndIf
+        
+        Local pos = Ansi.GetCursorMove(y, p)
+        Term.Print(pos .. 
+                   self.Layout.GridView.Color.HeaderFg ..
+                   value, False, 0, False)
+      Next
+      Term.Draw.HLine(
+        { row = y+1,
+          column = 1,
+          length = self.TermSize[1],
+          color = self.Layout.GridView.Color.HeaderLine,
+          type = "light" } )
+    EndFunction
+  
+  ;printHeader()
+  
+
+  ; PRINT DATA FUNCTION
+  printData =
+    Function()
+      ; Refresh Headers
+      printHeader()
+      
+      ; Refresh Warning Line (Status)
+      Local lst = firstLine+self.Layout.MenuItems.vLength-1
+      If lst > lastIndex Then lst = lastIndex
+      self:SetWarning("Items:" .. lastIndex .. "     Current:" .. firstLine+cursor .. "     Visible:" .. firstLine .. "-" .. lst)
+      
+      ; Clear Area
+      Local y = y_data
+      Term.Draw.FBox(
+        { row = y,
+          column = 1,
+          width = self.TermSize[1],
+          height = self.Layout.MenuItems.vLength,
+          color = self.Layout.GridView.Color.DataArea
+          })
+      
+      ; Draw data
+      For r = firstLine To lastIndex
+        For Local i = 0 To columnsCnt
+          Local value, col, align = "NIL", "", 1
+          Local column = columns[i]
+          If LeftStr(column, 1) = ">"
+            align = -1
+            column = RightStr(column, StrLen(column)-1)
+          EndIf
+          
+          If HaveItem(data[column], r)
+            ; Format the value
+            formatted = FormatStr(formats[i], data[column][r])
+            value = self:_FixedWidth(formatted, sizes[i], align)
+            ;If xoffset < 0
+            ;  value = UnrightStr(value, -xoffset)
+            ;EndIf
+          
+            If r = cursor + firstLine
+              col = self.Layout.GridView.Color.Hilighted
+            Else
+              col = self.Layout.GridView.Color.Normal
+            EndIf
+          EndIf
+          
+          Local p = positions[i]+xoffset
+          If p < 1
+            value = UnrightStr(value, Abs(p)+1)
+            p = 1
+          EndIf
+          If StrLen(value)+p > self.TermSize[1]
+            ; Overflow to the right
+            Local l = StrLen(value) + p - self.TermSize[1]
+            value = LeftStr(value, StrLen(value)-l) .. "→"
+          EndIf
+          Local pos = Ansi.GetCursorMove(y, p)
+          If value <> "" And p < self.TermSize[1]
+            Term.Print(pos .. col .. value, False, 0, False)
+          EndIf
+        Next
+
+        lastVisible = r
+        y = y + 1
+        If y > self.Layout.MenuItems.vLength + y_data - 1
+          Break()
+        EndIf
+      Next
+    
+      ; VLines
+      If self.Layout.GridView.VLines
+        For Local c = 0 To columnsCnt-1
+          If positions[c]+sizes[c]-1+xoffset > 0
+            If positions[c]+sizes[c]-1+xoffset > 0 And
+               positions[c]+sizes[c]-1+xoffset < self.TermSize[1]
+              Term.Draw.VLine(
+                { column = positions[c]+sizes[c]-1+xoffset,
+                  row    = y_data,
+                  length = self.Layout.MenuItems.vLength,
+                  color  = self.Layout.GridView.Color.Normal,
+                  type   = "light"
+                  })
+            EndIf
+          EndIf
+        Next
+        
+      EndIf
+    
+      ; Bottom Line
+      Term.Draw.HLine(
+        { row = y_data + self.Layout.MenuItems.vLength,
+          column = 1,
+          length = self.TermSize[1],
+          color = self.Layout.GridView.Color.HeaderLine,
+          type = "light" } )
+      
+      ; Bottom Data
+      self:_DrawWarning()
+      self:_DrawStatus()
+      self:_DrawInfo()
+      
+      ; Info Text
+      /*
+      If info <> ""
+        Local p = Ansi.GetCursorMove(self.Layout.Info.Row, 1) .. self.Layout.Info.Color
+        Term.Print(p .. info, False, 0, False)
+      EndIf */
+      
+    EndFunction
+    
+  printData()
+    
+  ; ACTIVE ITEM
+  Local setActive =
+    Function(direction, render)
+      If IsNil(render) Then render = True
+      
+      ; direction = +1 forward, -1 backward, 0 don't clear previous position
+      Local y_active = y_data + cursor
+    
+      ; Set current
+      cursor = cursor + direction
+      
+      If cursor < 0
+        ; SCROLL UP
+        firstLine = firstLine-1
+        cursor = 0
+        If firstLine < 0 Then firstLine = 0
+
+      ElseIf cursor+firstLine > lastVisible
+        ; SCROLL DOWN
+        firstLine = firstLine + 1
+        cursor = cursor-1
+        If cursor+firstLine > lastIndex Then firstLine = firstLine-1
+        
+      EndIf
+      
+      If render Then printData()
+      
+      y_active = y_data + cursor
+      
+      ;app.DrawMenu_Info("Record " .. cursor+firstLine .. " of " .. lastIndex)
+      ;app.DrawMenu_Info3("KEYS : [color=$FFFF00]Up Dw Lf Rg[/color] to move + [color=$FFFF00]LShift[/color] to move faster, [color=$FFFF00]ENTER[/color] to select, [color=$FFFF00]ESC[/color] to exit view")
+      
+    EndFunction
+        
+  setActive(0)
+  
+  ; FIND STRING
+  Local findString =
+    Function()
+      searchStr = self:ShowInput(
+      "Type the string you want to search for, wildcards are accepted.",
+      "Search for")
+      
+      If searchStr <> ""
+        self:ShowMessage("Searching for '" .. searchStr .. "' ...", False)
+        
+        Local foundIndex = -1
+        For i, v In Pairs(columns)
+          ; For every available columns 
+          Local clmn = v
+          If LeftStr(clmn, 1) = ">"
+            clmn = RightStr(clmn, StrLen(clmn)-1)
+          EndIf
+          For k = 0 To lastIndex
+            If FindStr(data[clmn][k], searchStr, False) <> -1
+              foundIndex = k
+              searchIdx = k
+              Break(2)
+            EndIf
+          Next
+        Next
+        
+        If foundIndex <> -1
+          ; Move the cursor to what we have found
+          If foundIndex > firstLine+cursor
+            While foundIndex <> firstLine+cursor
+              SetActive(1, False)
+            Wend
+            
+          ElseIf foundIndex < firstLine+cursor
+            While foundIndex <> firstLine+cursor
+              SetActive(-1, False)
+            Wend
+          
+          EndIf
+          printData()
+          
+        Else
+          self:ShowMessage("Nothing found!")
+          
+        EndIf
+        
+      EndIf
+      
+    EndFunction
+    
+  ; FIND NEXT
+  Local findNext =
+    Function()
+      If searchStr <> ""
+        self:ShowMessage("Searching for '" .. searchStr .. "' ...", False)
+        
+        Local foundIndex = -1
+        For i, v In Pairs(columns)
+          ; For every available columns 
+          Local clmn = v
+          If LeftStr(clmn, 1) = ">"
+            clmn = RightStr(clmn, StrLen(clmn)-1)
+          EndIf
+          For k = searchIdx+1 To lastIndex
+            If FindStr(data[clmn][k], searchStr, False) <> -1
+              foundIndex = k
+              searchIdx = k
+              Break(2)
+            EndIf
+          Next
+        Next
+        
+        If foundIndex <> -1
+          ; Move the cursor to what we have found
+          If foundIndex > firstLine+cursor
+            While foundIndex <> firstLine+cursor
+              SetActive(1, False)
+            Wend
+            
+          ElseIf foundIndex < firstLine+cursor
+            While foundIndex <> firstLine+cursor
+              SetActive(-1, False)
+            Wend
+          
+          EndIf
+          printData()
+          
+        Else
+          self:ShowMessage("Nothing found!")
+          
+        EndIf
+        
+      EndIf
+      
+    EndFunction
+    
+  Local inputHandlerSwitch = True
+      
+  While loopActive
+    Local yinput = y_data + self.Layout.MenuItems.vLength + 2
+    Local t = self.Layout.GridView.Color.PromptPre .. "COMMAND :" .. self.Layout.GridView.Color.PromptPost .. RepeatStr(" ", 11) .. Ansi.GetCursorLeft(10)
+    Local k = Term.Input(Ansi.GetCursorMove(self.Layout.GridView.Row, 1) .. t)
+    
+    If inputHandlerSwitch
+      Switch k
+        Case "f"  ; Find
+          findString()
+          
+        Case "F"  ; Find Next
+          findNext()
+          
+        Case "s" ; Move down 1 row
+          setActive(1)
+
+        Case "S" ; Move down 1 page
+          For Local i = 1 To self.Layout.MenuItems.vLength
+            setActive(1, False)
+          Next
+          printData()
+
+        Case "w" ; Move up 1 row
+          setActive(-1)
+
+        Case "W" ; Move up 1 page
+          For Local i = 1 To self.Layout.MenuItems.vLength
+            setActive(-1, False)
+          Next
+          printData()
+
+        Case "d" ; Move right 1 char
+          xoffset = xoffset - 1
+          printData()
+          
+        Case "D" ; Move right 16 chars
+          xoffset = xoffset - 16
+          printData()
+         
+        Case "a" ; Move left 1 char
+          xoffset = xoffset + 1
+          printData()
+          
+        Case "A" ; Move left 16 chars
+          xoffset = xoffset + 16
+          printData()
+         
+        Case "Q" ; Exit Viewer
+          loopActive = False
+          self:SetWarning(self._LastWarning)
+          self:SetStatus(self._LastStatus)
+          self:SetInfo(self._LastInfo)
+          self._LastWarning = Nil
+          self._LastStatus = Nil
+          self._LastInfo = Nil
+          
+        Case " " ; Select Item
+          inputHandlerSwitch = False
+          callback(data, cursor+firstLine)
+          inputHandlerSwitch = True
+          
+          printData()
+          setActive()
+          
+      EndSwitch
+
+    EndIf
+    
+    ;printData()
+    
+  Wend
+
+EndFunction
+
+Function Term.App:ShowInput(txt, req)
+  Term.Draw.FBox(
+    { row = self.Layout.Message.firstRow+1,
+      column = 2,
+      width = self.TermSize[1]-3,
+      height = self.Layout.Message.vLenght-2,
+      color = self.Layout.Message.BgColor
+      })
+  Local t = Ansi.GetCursorMove(self.Layout.Message.firstRow+1, 4) ..
+            self.Layout.Message.TextColor
+  
+  ;Term.Print(t .. "-", False, 4, False)
+
+  Local backup = CopyTable(Term.Size)
+  Term.Size.Columns = Term.Size.Columns - 5
+  Term.Print(t, False, 0, False)
+  Term.Print(RepeatStr(" ", 3) .. txt, True, 3, False)
+  Term.Size = backup
+  
+  Term.Draw.Box(
+    { row = self.Layout.Message.firstRow,
+      column = 1,
+      width = self.TermSize[1]-1,
+      height = self.Layout.Message.vLenght,
+      color = self.Layout.Message.Color
+      })
+  
+  Local answer = Term.Input(
+    Ansi.GetCursorMove(self.Layout.Message.firstRow+self.Layout.Message.vLenght-2, 3) ..
+    Req .. ":" .. self.Layout.Message.TextColor .. " ",
+    False,
+    False)
+
+  Return(answer)
+  
+EndFunction
+
+Function Term.App:ShowMenu(menuEntry)
+  InsertItem(self.MenuHistory, menuEntry)
+
+  Local loop = True
+  
+  While loop
+    Term.Clear()
+    self:_DrawHeader()
+    self:_DrawMenuState()
+    self:_DrawMenuItems(menuEntry)
+    self:_DrawStatus()
+    self:_DrawWarning()
+    self:_DrawInfo()
+    
+    Local t = Ansi.GetCursorMove(self.Layout.Prompt.Row, self.Layout.Prompt.Column) ..
+              self.Layout.Prompt.Color .. 
+              self.Layout.Prompt.Prefix ..
+              self.Layout.Prompt.Value ..
+              self.Layout.Prompt.Postfix ..
+              self.Layout.Prompt.UserInputColor ..
+              Ansi.GetCursorRight(1)
+    Local cmd = Term.Input(t, False, False)
+    If cmd = "" Then cmd = "ENTER"
+    
+    If cmd = "back"
+      loop = False
+      If ListItems(self.MenuHistory) > 1
+        RemoveItem(self.MenuHistory)
+      EndIf
+      
+    Else
+      Local found, callback, arg = False, Function() EndFunction, Nil
+      
+      For i, v In Pairs(self.Menu[menuEntry])
+        If cmd = v.command
+          found = True
+          callback = v.callback
+          If HaveItem(v, "arg1")
+            arg = v.arg1
+          EndIf
+          Break()
+        EndIf
+      Next
+      
+      If found
+        If GetType(callback) = #FUNCTION
+          callback(arg)
+        Else
+          self:ShowMenu(callback)
+        EndIf
+        
+      Else
+        ; COMMAND NOT RECOGNIZED
+        self:ShowMessage("COMMAND '" .. cmd .. "' NOT FOUND.")
+      EndIf
+    
+    EndIf
+    
+  Wend
+  
+EndFunction
+
+Function Term.App:Progress(txt, vcurr, vmax)
+  ; Uses MenuState data
+  
+  Local length = self.TermSize[1]-StrLen(txt)-2
+  Local vstp   = length/vmax
+  Local vcr    = Int(vcurr*vstp)
+  Local vmx    = Int(vmax*vstp)
+  Local d      = vmx-vcr
+  If d < 1 Then Return
+  ;DebugPrint(txt,vstp,vcr,vmx, vcurr, vmax)
+  Local t = txt .. " " .. RepeatStr(Ansi.Code.Gfx.HSB, vcr) .. RepeatStr(Ansi.Code.Gfx.LSB, d)
+  ;DebugPrint(t)
+  self:SetStatus(t)
+  
+EndFunction
+
+Function Term.App:Start(menuEntry)
+  self.MenuHistory = {}
+  
+  self:ShowMenu(menuEntry)
+EndFunction
+
+Function Term.TEST() ; v1.0
+/******************************************************************************
+Term.TEST()
+
+Perform a test to check ANSI capabilities of the host console.
+******************************************************************************/
+  ;CloseDisplay(1)
+  Term.SetTermSize(25, 80, True)            ; Setup the terminal size and switch
+                                            ; on escape sequences.
+  Term.GetSize()                            ; Query the system for the terminal
+                                            ; size, it only works on Linux systems
+  ; Print the header
+  Term.Print("ANSI Library Test Program", True, Nil, True)   
+  Term.Print("-------------------------", True, Nil, True)
+  Term.Print("Terminal Size : " .. Term.Size.Rows .. "x" .. Term.Size.Columns, True, Nil, True)
+  Term.Print("", True, Nil, True)
+  
+  ; :::::::::::::::::::
+  ; :: WORDWRAP TEST ::
+  ; :::::::::::::::::::
+  ; Setup a long string to test the wordwrap feature
+  t1 = [[This is just a test string for the ANSILib library, the following test will check if the text is printed as expected with Ansi support ON and OFF then the wordwrap will be turned off and the test will be repeated.
+This is a linefeed embedded into the string.]]
+  
+  ; We are using DebugPrint() that does not have wordwrap support
+  Term.Print("STANDARD DebugPrint() command", True, Nil, True)
+  DebugPrint(t1)
+  Term.Print(RepeatStr("-", 80), True, Nil, True)
+
+  ; Let's test wordwrap
+  Term.Print("TESTING WORDWRAP", True, Nil, True)
+  Term.Print(t1, True, Nil, True)
+  Term.Print(RepeatStr("-", 80), True, Nil, True)
+
+  Term.Print("", True, Nil, True)
+  Term.Input("Hit Enter to continue:", True, True)
+  
+  ;::::::::::::::::
+  ;:: LINES TEST ::
+  ;::::::::::::::::
+  ; Horizontal Lines
+  Term.Clear()
+  Term.AnsiMode = True  ; By default colors are switched off
+                        ; You can also use Ansi.Set() function for this
+  Term.Print("~{FGRN}~{BLD+}TESTING LINES", True, Nil, True)  ; Using the style tags
+  Term.Print("~{FCYA}Random Horizontal Lines...", True, Nil, True)
+  For Local r = 4 To 21 
+    Local c, l = Rnd(20)+1, Rnd(50)+1
+    Term.Draw.HLine({ row    = r, 
+                      column = c, 
+                      length = l, 
+                      Color  = Ansi.GetRndFgColor(), 
+                      Type   = "light" })
+  Next
+  Term.Input(Ansi.GetCursorMove(23, 1) .. "Hit Enter to continue...", True, True)
+
+  ; Vertical Lines
+  Term.Clear()
+  Term.Print("~{FGRN}~{BLD+}TESTING LINES", True, Nil, True)
+  Term.Print("~{FCYA}Random Vertical Lines...", True, Nil, True)
+  For Local c = 20 To 70 
+    Local r, l = Rnd(5)+4, Rnd(15)+1
+    Term.Draw.VLine({ row    = r, 
+                      column = c, 
+                      length = l, 
+                      Color  = Ansi.GetRndFgColor(), 
+                      Type   = "light" })
+  Next
+  Term.Input(Ansi.GetCursorMove(23, 1) .. "Hit Enter to continue...", True, True)
+  
+  ;::::::::::::::::
+  ;:: BOXES TEST ::
+  ;::::::::::::::::
+  ; Filled Boxes
+  Term.Clear()
+  Term.Print("~{FGRN}~{BLD+}TESTING BOXES", True, Nil, True)
+  Term.Print("~{FCYA}Random Filled Boxes (100ms delay)...", True, Nil, True)
+  For Local i = 1 To 15
+    Local r, c, w, h = Rnd(5)+4, Rnd(40)+1, Rnd(30)+2, Rnd(13)+2
+    Term.Draw.FBox({ row    = r, 
+                     column = c, 
+                     width  = w, 
+                     height = h, 
+                     Color  = Ansi.GetRndFgColor() })
+    Wait(100, #MILLISECONDS)
+  Next
+  Term.Input(Ansi.GetCursorMove(23, 1) .. "Hit Enter to continue...", True, True)
+  
+  ; Empty Boxes
+  Term.Clear()
+  Term.Print("~{FGRN}~{BLD+}TESTING BOXES", True, Nil, True)
+  Term.Print("~{FCYA}Random Empty Boxes (100ms delay)...", True, Nil, True)
+  For Local i = 1 To 15
+    Local r, c, w, h = Rnd(5)+4, Rnd(40)+1, Rnd(30)+2, Rnd(13)+2
+    Term.Draw.Box({ row    = r, 
+                    column = c, 
+                    width  = w, 
+                    height = h, 
+                    color  = Ansi.GetRndFgColor(), 
+                    type   = "light", 
+                    angles = IIf(RndF()>0.5, "squared", "rounded") })
+    Wait(100, #MILLISECONDS)
+  Next
+  Term.Input(Ansi.GetCursorMove(23, 1) .. "Hit Enter to continue...", True, True)
+  
+  ;::::::::::::::::::
+  ;:: PRINTAT TEST ::
+  ;::::::::::::::::::
+  Term.Clear()
+  Term.Print("~{FGRN}~{BLD+}TESTING Term.PrintAt() with 100ms delay...", True, Nil, True)
+  
+  For Local i = 1 To 15
+    Local r, c = Rnd(16)+4, Rnd(70)+1
+    Term.PrintAt(r, c, Ansi.GetRndFgColor() .. "Print At (" .. r .. "," .. c .. ")")
+    Wait(100, #MILLISECONDS)
+    
+  Next
+  Term.Input(Ansi.GetCursorMove(23, 1) .. "Hit Enter to continue...", True, True)
+  
+  ;::::::::::::::::
+  ;:: INPUT TEST ::
+  ;::::::::::::::::
+  Term.Clear()  
+  Term.Print("~{FGRN}~{BLD+}TESTING 'Term.Input()'...")
+  Local  name = Term.Input(Ansi.GetCursorMove(10, 2) .. "~{FCYA}Type your name and hit ENTER:~{FRED}")
+  Local sname = Term.Input(Ansi.GetCursorMove(12, 2) .. "~{FCYA}Type your surname and hit ENTER:~{FGRN}")
+  Term.PrintAt(14, 2, "name: " .. name .. ", surname: " .. sname)
+  Term.Input(Ansi.GetCursorMove(23, 1) .. "Hit Enter to continue...", True, True)
+  
+   /* ACTUALLY NOT WORKING AS INTENDED 
+   Term.Print("-----------------------------")
+   Term.Print("TESTING 'Term.getInput()'...")
+   Local xx = Term.getInput("Type something:", True, True, 10)
+   */
+  
+  ;::::::::::::::::
+  ;:: COLOR TEST ::
+  ;::::::::::::::::
+  Local t3 = [[01:RESET command ->~{RSET}<- done.
+02:BOLD ON/OFF      : ~{BLD+}BOLD style~{BLD-}       BOLD OFF
+03:DIM ON/OFF       : ~{DIM+}DIM style~{RSET}        DIM OFF
+04:ITALIC ON/OFF    : ~{ITA+}ITALIC style~{ITA-}     ITALIC OFF
+05:UNDERLINE ON/OFF : ~{UND+}UNDERLINE style~{UND-}  UNDERLINE OFF
+06:BLINK ON/OFF     : ~{BLI+}BLINK style~{BLI-}      BLINK OFF
+07:INVERSE ON/OFF   : ~{INV+}INVERSE style~{INV-}    INVERSE OFF
+08:HIDDEN ON/OFF    : ~{HID+}HIDDEN style~{HID-}     HIDDEN OFF
+09:STRIKETR ON/OFF  : ~{STR+}STRIKETR style~{STR-}   STRIKETR OFF
+10:FG BLACK         : ~{FBLK}FG BLACK style~{FDEF}   FG BLACK OFF
+11:FG RED           : ~{FRED}FG RED style~{FDEF}     FG RED OFF
+12:FG GREEN         : ~{FGRN}FG GREEN style~{FDEF}   FG GREEN OFF
+13:FG BLUE          : ~{FBLU}FG BLUE style~{FDEF}    FG BLUE OFF
+14:FG MAGENTA       : ~{FMAG}FG MAGENTA style~{FDEF} FG MAGENTA OFF
+15:FG CYA           : ~{FCYA}FG CYAN style~{FDEF}    FG CYAN OFF
+16:FG WHITE         : ~{FWHI}FG WHITE style~{FDEF}   FG WHITE OFF
+17:FG DEFAULT       : ~{FDEF}FG DEFAULT style~{FDEF} FG DEFAULT OFF
+18:BG BLACK         : ~{BBLK}BG BLACK style~{BDEF}   BG BLACK OFF
+19:BG RED           : ~{BRED}BG RED style~{BDEF}     BG RED OFF
+20:BG GREEN         : ~{BGRN}BG GREEN style~{BDEF}   BG GREEN OFF
+21:BG BLUE          : ~{BBLU}BG BLUE style~{BDEF}    BG BLUE OFF
+22:BG MAGENTA       : ~{BMAG}BG MAGENTA style~{BDEF} BG MAGENTA OFF
+23:BG CYAN          : ~{BCYA}BG CYAN style~{BDEF}    BG CYAN OFF
+24:BG WHITE         : ~{BWHI}BG WHITE style~{BDEF}   BG WHITE OFF
+25:BG DEFAULT       : ~{BDEF}BG DEFAULT style~{BDEF} BG DEFAULT OFF
+26:NORMAL SET       : ~{NORM}NORMAL style~{NORM}     BACK TO NORMAL
+26:NOTICE SET       : ~{NOTI}NOTICE style~{NORM}     BACK TO NORMAL
+27:WARN SET         : ~{WARN}WARN style~{NORM}       BACK TO NORMAL
+28:ERROR SET        : ~{ERRO}ERROR style~{NORM}      BACK TO NORMAL
+29:ADVICE SET       : ~{ADVI}ADVICE style~{NORM}     BACK TO NORMAL
+30:QUOTE SET        : ~{QUOT}QUOTE style~{NORM}      BACK TO NORMAL
+]]
+  Term.Clear()
+  Term.Print("~{FGRN}~{BLD+}TESTING Codes...", True, Nil, True)
+  Term.Print(t3, False)   
+  Term.Print("      ~{FRED}RED~{FGRN}GREEN~{FDEF}", False)
+  Term.Print("BOLD->~{BLD+}~{FRED}RED~{FGRN}GREEN~{FDEF}~{BLD-}", False)
+  Term.Input("Hit Enter to continue...", True, True)
+
+  
+  ;:::::::::::::::::::::
+  ;:: CURSOR MOVEMENT ::
+  ;:::::::::::::::::::::
+  Term.Clear()
+  Term.Print("~{FGRN}~{BLD+}TESTING Cursor's movements...", True, Nil, True)
+  
+  Term.Print("~{CLRH}Home", False, False, False)
+  Term.Print("1234567890123456789012345678901234567890")
+  Term.Print("2")
+  Term.Print("3")
+  Term.Print("4")
+  Term.Print("5")
+  Term.Print("6")
+  Term.Print("7")
+  Term.Print("8")
+  Term.Print("9")
+  Term.Print("0")
+  Term.Print("1")
+  Term.Print("2")
+  Term.Print("3")
+  Term.Print("4")
+  Term.Print("5")
+  Term.Print("6")
+  Term.Print("7")
+  Term.Print("8")
+  Term.Print("9")
+  Term.Print("0")
+  Term.Print("~{HOME}", False, False)
+  Term.Print(Ansi.GetCursorDown(8) .. Ansi.GetCursorRight(4) .. "~{FRED}01:~{FWHI} from Home go right 4 columns and down 8 lines", False, False, False)
+  Term.Print(Ansi.GetCursorUp(4)        .. "~{FRED}02:~{FWHI} then move up 4 lines", False, False, False)
+  Term.Print(Ansi.GetCursorRight(20)    .. "~{FRED}03:~{FWHI} move right 20 Columns", False, False, False)
+  Term.Print(Ansi.GetCursorDown(2)      .. "~{FRED}04:~{FWHI} and go down 2 lines", False, False, False)
+  Term.Print(Ansi.GetCursorMove(14, 10) .. "~{FRED}05:~{FWHI} Move at (14, 10)", False, False, False)
+  Term.Print(Ansi.GetCursorDown(5)      .. "~{FRED}06:~{FWHI} go down 5 rows ~{ADVI}HIT <ENTER> TO QUIT", False, False, False)
+  Term.Input(Ansi.GetCursorDown(2)      .. "Hit Enter to continue...", True, True)
+   
+  ;::::::::::::::::::::
+  ;:: Term.App Class ::
+  ;:: +ProgressBar   ::
+  ;:: +MenuSystem    ::
+  ;:: +GridView      ::
+  ;::::::::::::::::::::
+  Term.Clear()
+  
+  ; GRID VIEW SAMPLE DATA
+  Local data = 
+    { name = 
+      { "Fabio",
+        "Mario",
+        "Pino",
+        "Jhon",
+        "Fabio",
+        "Mario",
+        "Pino",
+        "Jhon",
+        "Fabio",
+        "Mario",
+        "Pino",
+        "Jhon",
+        "Fabio",
+        "Mario",
+        "Pino",
+        "Jhon",
+        "Fabio",
+        "Mario",
+        "Pino",
+        "Jhon",
+        "Fabio",
+        "Mario",
+        "Pino",
+        "Jhon",
+        "Fabio",
+        "Mario",
+        "Pino",
+        "Jhon",
+        "Fabio",
+        "Mario",
+        "Pino",
+        "Jhon",        
+        "Raimond" },
+        
+      surname = 
+      { "Falcucci",
+        "Rossi",
+        "Bianchi",
+        "Ross",
+        "Falcucci",
+        "Rossi",
+        "Bianchi",
+        "Ross",
+        "Falcucci",
+        "Rossi",
+        "Bianchi",
+        "Ross",
+        "Falcucci",
+        "Rossi",
+        "Bianchi",
+        "Ross",
+        "Falcucci",
+        "Rossi",
+        "Bianchi",
+        "Ross",
+        "Falcucci",
+        "Rossi",
+        "Bianchi",
+        "Ross",
+        "Falcucci",
+        "Rossi",
+        "Bianchi",
+        "Ross",
+        "Falcucci",
+        "Rossi",
+        "Bianchi",
+        "Ross",
+        "White" },
+        
+      age =
+      { 48.87,
+        41,
+        30,
+        58,
+        48,
+        41,
+        30,
+        58,
+        48,
+        41,
+        30,
+        58,
+        48,
+        41,
+        30,
+        58,
+        48,
+        41,
+        30,
+        58,
+        48,
+        41,
+        30,
+        58,
+        48,
+        41,
+        30,
+        58,
+        48,
+        41,
+        30,
+        58,        
+        61 },
+      }
+      
+  Local columns = 
+    { "name",
+      "surname",
+      ">age" }
+      
+  Local headers =
+    { "NAME",
+      "SURNAME",
+      "AGE" }
+      
+  Local positions =
+    {  1,
+      20,
+      40 }
+      
+  Local numbers =
+    { [2] = "%.4f" }
+   
+  Local tapp = Term.App:New()           ; Instantiate a new class
+   tapp.Name = "TestApp"                ; and setup some variables of your app
+   tapp.Version = "1.0"
+   tapp.Build = "10/01/2022"
+   tapp.Copyright = "Fabio Falcucci"
+   
+   ; Let's use the menu system defining a new menu
+   ; Every menu entry must have the following fields: command, description and callback
+   ; have a look at the docs for further details.
+   tapp:MenuAdd("Main",
+    { { command = "01",  description = "Nothing here 1", callback = Function() EndFunction },
+      { command = "msg", description = "Select me to show a message", callback = 
+                                                                Function() 
+                                                                  tapp:ShowMessage("Hello!This is a message box!\n\nIsn't it nice?")
+                                                                EndFunction },
+      { command = "02", description = "Nothing here 2", callback = Function() EndFunction },
+      { command = "", description = "HEADER (Empty cmd field)", callback = Function() EndFunction },
+      { command = "prg", description = "Test progress bar", callback = Function() 
+                                                                         For Local i = 1 To 100
+                                                                           tapp:Progress("Testing the Progress method:" .. i .. "%", i, 100)
+                                                                           Wait(100, #MILLISECONDS)
+                                                                         Next
+                                                                         tapp:SetStatus("Completed!")
+                                                                         Wait(3000, #MILLISECONDS)      
+                                                                       EndFunction },
+      { command = "grid", description = "Test the grid view", callback = Function() 
+                                                                          tapp:GridView(data, columns, headers, positions, 
+                                                                                  Function(d, index) 
+                                                                                    tapp:ShowMessage(
+                                                                                      "ITEM SELECTED\n\n" ..
+                                                                                      d.Name[index] .. " " .. d.Surname[index] .. ", Age: " .. d.Age[index])
+                                                                                  EndFunction,
+                                                                                  "Hello! this is an info text...",
+                                                                                  numbers)
+                                                                         EndFunction },
+      { command = "05", description = "Nothing here 5", callback = Function() EndFunction },
+      { command = "06", description = "Nothing here 6", callback = Function() EndFunction },
+      { command = "07", description = "Nothing here 7", callback = Function() EndFunction },
+      { command = "08", description = "Nothing here 8", callback = Function() EndFunction },
+      { command = "sub", description = "Go to Submenu 1", callback = "Sub1" },
+      { command = "A1", description = "Menu commands", callback = Function() EndFunction },
+      { command = "A2", description = "can be anything", callback = Function() EndFunction },
+      { command = "A3", description = "there are no", callback = Function() EndFunction },
+      { command = "B1", description = "restrictions", callback = Function() EndFunction },
+      { command = "B2", description = "Nothing", callback = Function() EndFunction },
+      { command = "", description = "", callback = Function() EndFunction },
+      { command = "C1", description = "Nothing", callback = Function() EndFunction },
+      { command = "C2", description = "Type 'back' to quit", callback = Function() EndFunction },
+      { command = "C3", description = "followed by ENTER", callback = Function() EndFunction }
+      })
+   
+   ; This menu is called when the user selected the menu item <sub> of the main menu.
+   tapp:MenuAdd("Sub1",
+    { { command = "this", description = "type 'back'", callback = Function() EndFunction },
+      { command = "is", description = "to return", callback = Function() EndFunction },
+      { command = "a", description = "to the previous", callback = Function() EndFunction },
+      { command = "sub", description = "menu", callback = Function() EndFunction },
+      { command = "", description = "SEPARATOR", callback = Function() EndFunction },
+      { command = "menu", description = "", callback = Function() EndFunction },
+      })
+   
+   ; By default, typing <back> the user can go back to one menu level or quit the app if he has
+   ; reached the main menu.
+   
+   tapp:SetWarning("This is a sample warning.")       ; Set the warning bar  
+   tapp:SetStatus("Ready.")                           ; Set the status bar
+   tapp:Start("Main")
+   
+   
+   DebugPrompt("\n\n\nTEST ENDED - Hit ENTER")
+EndFunction
+
+; UNCOMMENT THE FOLLOWING FUNCTION TO PERFORM A TEST
+; Term.TEST()
+
+

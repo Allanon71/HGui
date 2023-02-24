@@ -1,0 +1,57 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>Switch gadget</h1>
+
+    <p>For common methods have a look <a href="../Common%20Methods.html">here</a>,</p>
+    <p>&nbsp;</p>
+    <p><span class="text-big"><strong>SWITCH GADGET METHODS</strong></span>
+    </p>
+    <ul>
+      <li><span class="text-big"><code>result = gadObj:getValue()</code></span>
+        <br>Returns the switch value (<code>0</code> = up or <code>1</code> = down)
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:setValue(value)</code></span>
+        <br>Sets the switch value (<code>0</code> = up or <code>1</code> = down)
+        <br>- <strong>value </strong>: <code>0</code> = up or <code>1</code> = down
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>result = gadObj:isDown()</code></span>
+        <br>Returns <code>True</code> if the switch is pressed
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>result = gadObj:isUp()</code></span>
+        <br>Returns <code>True</code> if the switch is not pressed
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>result = gadObj:setCaptions(texts)</code></span>
+        <br>Set the switch captions using a table with 2 fields as follow:
+        <br><code>{ normal = &lt;text&gt;, pushed = &lt;text&gt; }</code>
+        <br>Text can be a string or a table of strings for multiline texts.
+        <br>- <strong>texts </strong>: A table used to change the switch text for each
+        state:
+        <br>&nbsp; normal : sets the text for normal, hilightedand disabled texts
+        <br>&nbsp; pushed : sets the text for pushed, normal-pushed, hilighted-pushed
+        and disabled-pushed states</li>
+    </ul>
+    <p>&nbsp;</p>
+    <p><span class="text-big"><strong>Additional arguments accepted by :New() method</strong></span>
+    </p>
+    <ul>
+      <li><strong>Value</strong> : <code>1</code> = Switch ON (Down), <code>0</code> =
+        Switch OFF (Up)</li>
+    </ul>
+    <p>&nbsp;</p>
+    <p><span class="text-big"><strong>Additional actions accepted by :New() method</strong></span>
+    </p>
+    <ul>
+      <li><strong>OnPushed</strong> : Triggered when switch has been pushed and its
+        state changed&nbsp;</li>
+    </ul>
+  </body>
+
+</html>

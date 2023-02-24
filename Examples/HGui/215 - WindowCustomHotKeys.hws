@@ -1,0 +1,82 @@
+/******************************************************************************
+HGUI : Tutorial 215 - Window's Custom Hotkeys               v1.2 : 09/02/2023 *
+                      and :select() method                                    *
+*******************************************************************************
+With custom hot keys you can assign to each window of your application a custom
+hotkey that will be detected when the window is active, this way any window can
+have its own set of hoy keys.
+When defining a custom hot key you have to specify the qualifier key (if any),
+the key, the associated event (OnKeyDown or OnKeyUp) and the callback function,
+which is the function that will be called when the key event is detected.
+******************************************************************************/
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+;DBG.Console.Enable(True)
+;DBG.Console.AddChannel(HGui.DebugChannel)
+
+/*----------------------------------------------------------------------------
+Below we are going to set 4 callback functions, 2 for each window. 
+When a custom hotkey is pressed the associated callback function will be
+executed.
+Callback functions are called with two tables as arguments, the first one is
+the source window object, where the event has been triggered, while the
+second table is the message detected by the keyboard event handler.
+To print the message in the called window we need to invoke the :select()
+method that will set the window as the current output device.
+---------------------------------------------------------------------------*/
+
+Function fKeyA(w, m)
+  ; This function will be called when you press 'a' key
+  w:select()
+  NPrint("You have pressed the <a> key!")
+EndFunction
+
+Function fKeyF1(w, m)
+  ; This function will be called when you press left ALT + 'F1' key
+  w:select()
+  NPrint("You have pressed the <Left ALT> + <F1> combo!")
+EndFunction
+
+Function fKeyB(w, m)
+  ; This function will be called when you press 'B' key
+  w:select()
+  NPrint("You have pressed the <B> key!")
+EndFunction
+
+Function fKeyF9(w, m)
+  ; This function will be called when you press left ALT + 'F9' key
+  w:select()
+  NPrint("You have pressed the <Left ALT> + <F9> combo!")
+EndFunction
+
+; Windows creation
+Local myWin1 = HGui.Window:new(
+                { title = "Listening for : <a> and <RALT+F1>",
+                  name  = "win1",
+                  position   = { x = 100, y = 100 },
+                  size       = { w = 400, h = 400 },
+                  background = "Resources/background.jpg",
+                  
+                  ; Let's see how custom hot keys can be defined, there is no limit
+                  ; to how many keys you can define:
+                  CustomHotKeys = { 
+                    { Qualifier = "", Key = "a", AltCode = "", Event = "OnKeyDown", Callback = fKeyA },
+                    { Qualifier = "ralt", Key = "F1", AltCode = "", Event = "OnKeyDown", Callback = fKeyF1 }}
+                  })
+
+Local myWin2 = HGui.Window:new(
+                { title = "Listening for : <B> and <RALT+F9>",
+                  name  = "win2",
+                  position   = { x = 400, y = 200 },
+                  size       = { w = 400, h = 400 },
+                  background = "Resources/background.jpg",
+                  CustomHotKeys = { 
+                    { Qualifier = "", Key = "B", AltCode = "", Event = "OnKeyDown", Callback = fKeyB },
+                    { Qualifier = "ralt", Key = "F9", AltCode = "", Event = "OnKeyDown", Callback = fKeyF9 }}
+                  })
+
+
+Repeat
+   WaitEvent()
+Forever

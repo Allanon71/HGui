@@ -1,0 +1,105 @@
+/******************************************************************************
+HGUI : Tutorial 217 - Window's Menu                         v1.2 : 09/02/2023 *
+*******************************************************************************
+HGui allows you to build top window's menus using its very own system, this
+is interesting because you can build very complex menus using almost all the
+gadget classes available, like for example knobs!
+
+Let's start explaining how window's menu works.
+I am going to show you a brief introduction because the argument is a bit complex
+and probabily you will fully understand it when GUI elements will be introduced.
+
+So, as we just said, a menu can hold any type of gadget because menus they are
+essentially 'special' windows, menus can be defined and modified at runtime
+freely during the execution of your code.
+
+Let's see a working example, it's pretty simple but not very easy to understand at
+first sight.
+******************************************************************************/
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+;DBG.Console.Enable(True)
+;DBG.Console.AddChannel(HGui.DebugChannel)
+
+; Let's start creating a window where we will attach the menu.
+win = HGui.Window:new({ Title = "Menu items with (*) works..." })
+
+; This function will handle all Menu callbacks, callback functions
+; will be called with the caller gadget structure as argument:
+Function MenuHandler(gad)
+  ; For now we just dump the name of the gadget that has raised the event
+  DebugPrint("RECEIVED A MENU EVENT FROM GADGET :")
+  DebugPrint("  Name : " .. gad.Name)
+  DebugPrint("-----")
+EndFunction
+
+; Now we will use the :menuSet() method to define the window's menu
+; Please notice the nested structure of menu and submenus and don't be scared,
+; it's just a tree, consider that there are no limits to the menu complexity.
+
+; Let's go:
+win:menuSet(
+  ; The first level are always BUTTONS!
+  { { type    = #HGUI_BUTTON_GADGET,     ; The HGui gadget class
+      params  = { Caption = "File" },    ; The button's caption, and optionally other button's parameters!
+      submenu =                          ; This button leads to a submenu that we can define here
+        { ; First submenu item (index 0)
+          { type     = #HGUI_BUTTON_GADGET,    ; This is a button
+            params   = { Name = "menuNEW",     ; We are setting the name to better recognize the gadget that will raise the callback
+                         Caption = "*New"   }, ; The button's caption
+            callback = MenuHandler },
+          ; Second submenu item (index 1)
+          { type = #HGUI_BUTTON_GADGET, params = { Name = "menuOPEN",  Caption = "*Open"  }, callback = MenuHandler },
+          
+          ; and so on...
+          { type = #HGUI_BUTTON_GADGET, params = { Name = "menuSAVE",  Caption = "*Save"  }, callback = MenuHandler },
+          { type = #HGUI_BUTTON_GADGET, params = { Name = "menuCLOSE", Caption = "*Close" }, callback = MenuHandler },
+          { type = #HGUI_VDIVIDER_GADGET, params = {} },
+          { type = #HGUI_BUTTON_GADGET, params = { Caption = "*Export as" }, ; This one lead to another submenu!
+            submenu = 
+              { { type = #HGUI_BUTTON_GADGET,   params = { Name = "menuExportPNG", Caption = "*PNG" }, callback = MenuHandler },
+                { type = #HGUI_BUTTON_GADGET,   params = { Name = "menuExportJPG", Caption = "*JPG" }, callback = MenuHandler },
+                { type = #HGUI_BUTTON_GADGET,   params = { Name = "menuExportBMP", Caption = "*BMP" }, callback = MenuHandler },
+                { type = #HGUI_VDIVIDER_GADGET, params = {} },
+                { type = #HGUI_SWITCH_GADGET,   params = { Caption = "Auto Export",  Value = 0 } }, ; We are setting this switch to 0 (raised)
+                { type = #HGUI_SWITCH_GADGET,   params = { Caption = "Make Backups", Value = 1 } }, ; and this one to 1 (pushed)
+                { type = #HGUI_VDIVIDER_GADGET, params = {} },
+                { type = #HGUI_LABEL_GADGET,    params = { Caption = "Compression Level" } },
+                { type = #HGUI_SLIDER_GADGET,   params = { name = "Slider",      ; Here is a slider and its parameters!
+                                                           range = { 1, 100 }, 
+                                                           value = 70,
+                                                           cursorsize = 0.1,
+                                                           orientation = #HGUI_HORIZONTAL_LAYOUT } }
+              } 
+            },
+          { type = #HGUI_BUTTON_GADGET, params = { Caption = "Import as" },
+            submenu = 
+              { { type = #HGUI_BUTTON_GADGET, params = { Caption = "Vector Image..." } },
+                { type = #HGUI_BUTTON_GADGET, params = { Caption = "Bitmap Image..." } },
+                { type = #HGUI_BUTTON_GADGET, params = { Caption = "IFF Image..." } }
+              } 
+          },
+          { type = #HGUI_VDIVIDER_GADGET, params = {} },
+          { type = #HGUI_BUTTON_GADGET, params = { Caption = "Quit" } },
+        } 
+    },
+    { type = #HGUI_BUTTON_GADGET, params = { Caption = "Edit" } },
+    { type = #HGUI_BUTTON_GADGET, params = { Caption = "Tools" } },
+    { type = #HGUI_BUTTON_GADGET, params = { Caption = "Help" } }
+  })
+
+; -----------------------------------------------------------------------------
+; NOTE:
+; Please note that the very same operation can be accomplished attaching
+; the menu table at creation time, assigning the menu table to the
+; window's tag 'menu'.
+;
+; You may have noticed that when you push or unpush the switches the value is
+; not stored and it resets to the original value when you reopen the menu:
+; that's ok, we will see how to let these values be persistent.
+; -----------------------------------------------------------------------------
+
+Repeat
+  WaitEvent()
+Forever

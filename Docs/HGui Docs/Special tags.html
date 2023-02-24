@@ -1,0 +1,27 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>Special tags</h1>
+
+    <p>There are soime special tags you can embed at the beginning of the text
+      to temporarily change how the text is rendered, the speciafied changes
+      are applied only to the line where they has been specified.</p>
+    <p>At this time the following tags can be used safely with LABEL and BUTTON
+      gadgets:</p><pre><code class="language-text-plain">{:align-l:}      		Align the line to the left
+{:align-r:}      		Align the line to the right
+{:font++:}          	Increase the font size for the line
+{:font--:}          	Decrease the font size for the line
+{:font=nnn:}        	Set the font line size with the given nnn value, nnn must be 3 characters long
+{:bgcolor=aarrggbbz:}   Render the background of the full line with the given hex color, z is the background box round level (0-9)
+{:bbcolor=aarrggbbz:}   Same as above but the background is rendered only under the text.</code></pre>
+
+  </body>
+
+</html>

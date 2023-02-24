@@ -1,0 +1,91 @@
+/*
+********************
+* HGui Test Script *
+* Fabio Falcucci   *
+*    Feb-2023      *
+********************
+  This script is used as a test and to show how it's possible to use the
+helper function 
+  HGui.Theme.SetGlobalTheme()
+to globally change the theme for a specific gadget class, in this case for
+KNOB gadgets.
+-------------------
+
+HGui.Theme.SetGlobalTheme(GadgetType, Theme)
+  Set the specified theme to the given gadget class
+*/
+
+; INCLUDE THE LIBRARIES DEFINITIONS
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; Creates a new HGui window
+Local myWin = HGui.Window:new(
+                { title = "HGui.Theme.SetGlobalTheme()",
+                  name  = "myWindow",
+                  position   = { x = #CENTER, y = #CENTER }
+                  })
+                   
+; Disable auto-rendering to avoid flickering
+HGui.SetAutoRendering(False)
+
+; Let's create 3 skins that we will use with our GROUP gadget
+Local current, skins = 0, {}
+skins = { [0] = { nSkin  = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 5, $EE00EE, $880088, $CC00CC),
+                  Style =
+                  { BorderSize1  = 2, BorderSize2 = 2,
+                    Border1Light = $444444, Border1Dark  = $ffffff,
+                    Border1FillA = $dd00ff, Border1FillB = $440077,
+                    Border2Light = $666666, Border2Dark  = $ffffff,
+                    Border2FillA = $008800, Border2FillB = $00FF00,
+                    Radius1      = 0.1,     Radius2      = 1.0, RadiusWidth = 8,
+                    Type         = 1 } },
+          [1] = { nSkin  = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Sunken, GFX.BevelFx_Raised, 4, $EEEE00, $888800, $CCCC00),
+                  Style =
+                  { BorderSize1  = 2, BorderSize2 = 1,
+                    Border1Light = $ffffff, Border1Dark  = $444444,
+                    Border1FillA = $ddeeff, Border1FillB = $778899,
+                    Border2Light = $ffffff, Border2Dark  = $666666,
+                    Border2FillA = $000000, Border2FillB = $FF0000,
+                    Radius1      = 0.4,     Radius2      = 0.85, RadiusWidth = 4,
+                    Type         = 2 } },
+          [2] = { nSkin  = HGui.Theme.Generate_SkinGradient($EEEEEE, $333333),
+                  Style =
+                  { BorderSize1  = 1, BorderSize2 = 1,
+                    Border1Light = $ffffff, Border1Dark  = $444444,
+                    Border1FillA = $ddeeff, Border1FillB = $778899,
+                    Border2Light = $ffffff, Border2Dark  = $666666,
+                    Border2FillA = $000000, Border2FillB = $FF0000,
+                    Radius1      = 0.1,     Radius2      = 0.9, RadiusWidth = 20,
+                    Type         = 2 } }
+          }
+
+; We are going to create a KNOB for our test and a button we will use
+; to rotate the skins we have defined above.
+Local myKnob   = HGui.Gadget:new(#HGUI_KNOB_GADGET)
+Local myButton = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { caption = { "Click me", "to change the KNOB skin"},
+    actions = {
+      onpushed =
+        Function(gadObj)
+          ; Change the knob skin everytime the button is pushed
+          HGui.Theme.SetGlobalTheme(#HGUI_KNOB_GADGET, skins[current])
+          current = current+1
+          If current > 2 Then current = 0
+        EndFunction }
+      })
+
+
+; Let's arrange the gadgets into the window
+mywin.rootgadget:layoutSet({ gadgets = { myKnob, myButton },
+                             weights = { 0.70, 0.30 },
+                             gap     = 1
+                             }, True )
+                             
+; Finally enable the auto-rendering and refresh the window
+HGui.SetAutoRendering(True)
+myWin:Render()
+                 
+Repeat
+   WaitEvent()
+Forever

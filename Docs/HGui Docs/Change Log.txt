@@ -1,0 +1,146 @@
+ /*****************************************************************************
+  * HISTORY                                                                   *
+  *****************************************************************************
+  
+  21/02/2023 : Last two weeks
+    - Documentation and examples
+    - Showcase revision
+    - Implemented a very basic and experimental handler to reduce flickering which uses BeginRefresh/EndRefresh commands, please look at the 'Experimental Features' chapter for the details.
+  
+  05/02/2023
+    - DOC wrinting completed, it was painful :)
+    - Started to review all the examples and tests that will be distributed with HGui
+  
+  many untracked fixes and documentation
+  
+  17/03/2022
+    ADD : Added HGui.Debug.Enable(channels) to enable the 'main' channel and/or
+          the 'windows' channel debug on console.
+  16/03/2022
+    FIX : Added BeginRefresh()/EndRefresh() to reduce flickeringat the end of the
+          gadget:set() method when a refresh is required.
+    MISC: Removed the embedded test about canvas gadget and moved to an external
+          file.
+
+  24/03/2021
+    NEW : Started to work seriously on the documentation
+  
+  23/03/2021
+    FIX : ListView, when HScrollerOFF=True the autosize of the columns didn't
+          took into account the column's gap causing rendering glitches of the
+          listview fields.
+          
+  12/02/2021
+    FIX : TextBox now rearrange the text when the window's size changes.
+    
+  10/10/2020
+    FIX : Fixed a nasty bug on ListView columns alignment.
+    
+  21/09/2020
+    ADD : ListView now supports the column alignments, you can pass inside data
+          the 'alignments' table where, for each column, you have to specify
+          the alignment, default is LEFT.
+    FIX : Changed how ListVIews are rendered.
+    
+  07/08/2020
+    FIX : Fixed a bug in InputBox window caused by the loop used for the
+          blocking requesters.
+    FIX : Fixed how customizations are passed to the InputBox
+    FIX : Fixed TP module adding the OnChange method
+    
+  05/08/2020
+    ADD : InputBox now accept a 'Caption' field to enter an optional description
+          and 'isPassword' to mask the typed text.
+          
+  03/08/2020
+    ADD : Progress window and progress gadget range can be changed
+          with 'valuemax' and 'valuemin' tags
+    FIX : Fixed several problems with ProgressBar especially when range
+          wasn't starting from 0
+    ADD : Added 'perc' tag to ProgressWindow & ProgressBar cursor
+          text.
+    ADD : 'cursortext' tag to the ProgressWindow to set what to
+          show in the cursor box.
+          
+  15/06/2020
+    ADD : SoftKeypad
+    ADD : SoftKeyboard
+    ADD : Waiter Window
+    
+  30/05/2020
+    ADD : HGui.Gadget:adaptFontSize()
+          Works only on buttons, adapt the font size to the gadget size
+          
+  09/04/2020
+    FIX : Background pictures were not freely correctly
+    FIX : Transitions in image gadgets crashed when a new window with a bgpic
+          was created.
+          
+  27/02/2019
+    NEW : Window's flag 'modal' can now be correctly used.
+    
+  26/10/2018
+    NEW : Image Class now support 'FadeIn' argument, set it to True
+          to let the image appear using a crossfade fx.
+          
+  23/02/2017
+    FIX : When a text in a TextObject was changed HGui was generating an
+          <OnInputEnd> event to signal that the text was changed, thought this
+          way was easily generating recursive callbacks causing stack overflow
+          so it has been disabled.
+  
+  12/12/2017
+    FIX : There was missing parameters when the callback 'OnChange' for TreeView
+          items was called.
+    NEW : Added flag 'selectGroups' (default to True), if it is set to false the
+          group items cannot be selected.
+          
+  07/11/2017
+    FIX : ListView's :set() method. When using the special tag 'selected' to pass
+          a single item to be selected (a numeric value), there was no check
+          to see if the ListView was allowing 'multi-selection'. This was
+          causing multiple selections on 'single-selection' ListViews using this
+          specific tag.
+          
+  08/11/2017
+    NEW : ListView -> Added method :Insert() to add a single record, this is
+          an additional way to add items (see special tag 'insert' of the :set()
+          method for further details).
+    NEW : ListView -> Added event 'OnInsert' raised when an item has been added
+          to the ListView.
+    DOC : Improved the HGui.Window:InputBoxNew(params) documentation.
+    NEW : Added new method HGui.Gadget:freeChildren(refresh) to free all children
+          attached to a gadget. This is usefull when you have to create gadget
+          groups at runtime.
+          
+  10/11/2017
+    NEW : Added :link() and :unlink() methods to automate common operations with
+          linked gadgets. For example with this method you can link [+] and [-]
+          buttons to a text gadget and increase/decrease the current value without
+          additional code. One gadget can have multiple targets and multiple
+          actions. The skinMaker program will show this new feature (actually in
+          development).
+    FIX : Fixed a rendering rare bug in the Text class that was preventing the
+          contents rendering.
+    NOTE : Discovered a bug in multiline text gadgets. If you insert a blank line,
+           go to the last line and hit the Home button to reach the first character
+           the program will crash. This problem is not yet fixed.
+
+  04/11/2017
+    FIX : Now all dropdown menus are hidden from the taskbar (Thank you Andreas)
+    NEW : As a result of the above change now another window's flag has been
+          added : HideFromTaskBar (default=False).
+    FIX : When a floating tip of a menu item was showed the menu was closed.
+    FIX : Now when a floating tip is showed it is hidden from the task bar.
+    NEW : Added new tags recognition in the :InputBoxNew() window's method.
+    NEW : Old changes moved to an external file named 'HGui_ChangeLog.txt'
+    FIX : Removed a bug in the Group object creation, sometimes object children
+          was rendered in the wrong windows.
+    FIX : When using proportional column sizes in ListView an TreeView, resizing
+          a column could cause graphical glitches. It has been fixed, however
+          the resize switches the columns from a proportional hadnling to absolute
+          handling, so it needs more love. Anyway in the current form it
+          is working just fine.
+
+OLDER CHANGES WEREN'T TRACKED
+

@@ -1,0 +1,614 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>Data Structures</h1>
+
+    <p>Here are all the currently defined theme structures, this values can be
+      adjusted and tuned to best match the desired theme.</p>
+    <p>All parameters listed here will be indicated with their own default values.</p>
+    <p>&nbsp;</p>
+    <p><strong>WINDOWS BACKGROUND COLOR</strong>
+    </p><pre><code class="language-text-plain">HGui.Theme.WindowBG = $050511</code></pre>
+    <p>&nbsp;</p>
+    <p><strong>FLOATING TIPS</strong>
+    </p><pre><code class="language-text-plain">HGui.Theme.Tip = {}
+HGui.Theme.Tip.BGColor = $FFFFFF
+HGui.Theme.Tip.nSkin   = HGui.Theme.Generate_SkinColor($00DDDDDD)
+HGui.Theme.Tip.nText   = HGui.Theme.Generate_Text(14, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)</code></pre>
+    <p>&nbsp;</p>
+    <p><strong>WINDOWS ROOT GADGET</strong>
+    </p><pre><code class="language-text-plain">HGui.Theme.Root = {}
+HGui.Theme.Root.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $88FFFFFF, $88666666, #NONE)</code></pre>
+    <p>&nbsp;</p>
+    <p><strong>WINDOWS MENU</strong>
+    </p><pre><code class="language-text-plain">WINDOW TOP MENU BAR
+-------------------
+HGui.Theme.Menu = {}
+HGui.Theme.Menu.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Flat, 1, $DDDDDD, $DDDDDD, $DDDDDD)
+HGui.Theme.Menu.Height          = 20             ; Top bar size
+HGui.Theme.Menu.FontOffset      = -4             ; Adjust font size into the top bar
+HGui.Theme.Menu.Borders         = 
+ { Top = 0, Bottom = 0, Left = 0, Right = 0 }    ; Top bar container offsets
+HGui.Theme.Menu.TopBoxSpacing   = 0              ; Space between top box and gadget area
+HGui.Theme.Menu.TopItemsSpacing = 0              ; Space bewtween top items
+HGui.Theme.Menu.ItemsBorder     =                ; Top items borders
+ { Top = 1, Bottom = 1, Left = 1, Right = 1 }
+HGui.Theme.Menu.ItemsLook      = {}              ; TOP ITEMS LOOK
+HGui.Theme.Menu.ItemsLook.nSkin = HGui.Theme.Generate_SkinColor($00DDDDDD)
+HGui.Theme.Menu.ItemsLook.hSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $EEF0F0)
+HGui.Theme.Menu.ItemsLook.pSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEEEEE, $888888, $AAAAAA)
+HGui.Theme.Menu.ItemsLook.dSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $BBBBBB)
+HGui.Theme.Menu.ItemsLook.npSkin= HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEEEEE, $888888, $AAAAAA)
+HGui.Theme.Menu.ItemsLook.hpSkin= HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEEEEE, $888888, $EEEEEE)
+HGui.Theme.Menu.ItemsLook.dpSkin= HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEEEEE, $888888, $BBBBBB)
+; Nota : la dimensione del font non viene considerata perché conta &lt;HGui.Theme.Menu.Height&gt;
+HGui.Theme.Menu.ItemsLook.nText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Menu.ItemsLook.hText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+HGui.Theme.Menu.ItemsLook.pText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+HGui.Theme.Menu.ItemsLook.dText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $AAAAAA, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Menu.ItemsLook.npText= HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+HGui.Theme.Menu.ItemsLook.hpText= HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+HGui.Theme.Menu.ItemsLook.dpText= HGui.Theme.Generate_Text(16, #ANTIALIAS, $AAAAAA, #HGUI_ALIGN_CENTER, False, True)
+
+MENU WINDOW &amp; ITEMS
+-------------------
+HGui.Theme.SubMenu = {}
+HGui.Theme.SubMenu.BGColor      = $CCCCCC
+HGui.Theme.SubMenu.RootSkin     = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $FFFFFF, $444444, $DDDDDD)
+HGui.Theme.SubMenu.Height       = 18             ; SubItem size
+HGui.Theme.SubMenu.FontOffset   = -2             ; SubItem font adjustment
+HGui.Theme.SubMenu.Borders      =                ; SubItems group borders
+ { Top = 2, Bottom = 2, Left = 2, Right =  2 }
+HGui.Theme.SubMenu.Gap          = 4              ; Space between items
+HGui.Theme.SubMenu.HorizontalOverlap = 8
+HGui.Theme.SubMenu.MenuHOverlap  = 8
+HGui.Theme.SubMenu.MenuVOverlap  = 2
+HGui.Theme.SubMenu.ItemsLook = {}
+HGui.Theme.SubMenu.ItemsLook.nSkin = HGui.Theme.Generate_SkinColor($00DDDDDD)
+HGui.Theme.SubMenu.ItemsLook.hSkin = HGui.Theme.Generate_SkinColor($00EEF0F0)
+HGui.Theme.SubMenu.ItemsLook.pSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEEEEE, $888888, $999999)
+HGui.Theme.SubMenu.ItemsLook.dSkin = HGui.Theme.Generate_SkinColor($00DDDDDD)
+HGui.Theme.SubMenu.ItemsLook.npSkin= HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEEEEE, $888888, $999999)
+HGui.Theme.SubMenu.ItemsLook.hpSkin= HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEEEEE, $888888, $BBA099)
+HGui.Theme.SubMenu.ItemsLook.dpSkin= HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEEEEE, $888888, $BBBBBB)
+HGui.Theme.SubMenu.ItemsLook.nText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_LEFT, False, False, { top = 0, bottom = 0, left = 5, right = 0 })
+HGui.Theme.SubMenu.ItemsLook.hText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_LEFT, False, True, { top = 0, bottom = 0, left = 5, right = 0 })
+HGui.Theme.SubMenu.ItemsLook.pText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $FFFFFF, #HGUI_ALIGN_LEFT, False, True, { top = 0, bottom = 0, left = 5, right = 0 })
+HGui.Theme.SubMenu.ItemsLook.dText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $777777, #HGUI_ALIGN_LEFT, False, False, { top = 0, bottom = 0, left = 5, right = 0 })
+HGui.Theme.SubMenu.ItemsLook.npText= HGui.Theme.Generate_Text(16, #ANTIALIAS, $FFEE66, #HGUI_ALIGN_LEFT, False, False, { top = 0, bottom = 0, left = 5, right = 0 })
+HGui.Theme.SubMenu.ItemsLook.hpText= HGui.Theme.Generate_Text(16, #ANTIALIAS, $FFFF88, #HGUI_ALIGN_LEFT, False, False, { top = 0, bottom = 0, left = 5, right = 0 })
+HGui.Theme.SubMenu.ItemsLook.dpText= HGui.Theme.Generate_Text(16, #ANTIALIAS, $666666, #HGUI_ALIGN_LEFT, False, False, { top = 0, bottom = 0, left = 5, right = 0 })</code></pre>
+    <p>&nbsp;</p>
+    <p><strong>EMPTY BOX GADGET</strong>
+    </p><pre><code class="language-text-plain">HGui.Theme.Empty = {}
+HGui.Theme.Empty.nSkin = HGui.Theme.Generate_SkinColor($FF000000)</code></pre>
+    <p>&nbsp;</p>
+    <p><strong>SYSTEM REQUESTER</strong>
+    </p><pre><code class="language-text-plain">Local hsw, hsh = GFX.GetHostSize()
+HGui.Theme.SysRequest = {}
+HGui.Theme.SysRequest.WindowSize = { w = Int(hsw/3), h = Int(hsh/4) }
+HGui.Theme.SysRequest.nSkin = HGui.Theme.Generate_SkinColor($CCCCCC)
+HGui.Theme.SysRequest.nText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, False, { left = 20, right = 20 })
+HGui.Theme.SysRequest.imageBorder = $CCCCCC
+HGui.Theme.SysRequest.imageMode = 1
+HGui.Theme.SysRequest.imageAlign = #CENTER
+HGui.Theme.SysRequest.imageBorders = { Left = 4, Right = 4, Top = 4, Bottom = 4 }
+HGui.Theme.SysRequest.iconSize = 64
+HGui.Theme.SysRequest.Buttons = {}
+HGui.Theme.SysRequest.Buttons.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEFF, $8888AA, $BBBBEE)
+HGui.Theme.SysRequest.Buttons.hSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEFF, $8888AA, $DDDDFF)
+HGui.Theme.SysRequest.Buttons.pSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEEEFF, $8888AA, $999999BB)
+HGui.Theme.SysRequest.Buttons.dSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEFF, $8888AA, $AAAAAACC)
+HGui.Theme.SysRequest.Buttons.nText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.SysRequest.Buttons.hText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+HGui.Theme.SysRequest.Buttons.pText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+HGui.Theme.SysRequest.Buttons.dText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $666666, #HGUI_ALIGN_CENTER, False, False)</code></pre>
+    <p>&nbsp;</p>
+    <p><strong>BOX GADGET</strong>
+    </p><pre><code class="language-text-plain">HGui.Theme.Box = {}
+HGui.Theme.Box.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $333333, $99CCCCCC)</code></pre>
+    <p>&nbsp;</p>
+    <p><strong>HDIVIDER GADGET</strong>
+    </p><pre><code class="language-text-plain">HGui.Theme.HDivider = {}
+HGui.Theme.HDivider.Colors = {}
+HGui.Theme.HDivider.Colors.Color1 = $666666
+HGui.Theme.HDivider.Colors.Color2 = $DDDDDD
+HGui.Theme.HDivider.Size = 1
+HGui.Theme.HDivider.Padding = 0
+HGui.Theme.HDivider.nSkin = HGui.Theme.Generate_SkinColor($FF000000)</code></pre>
+    <p>&nbsp;</p>
+    <p><strong>VDIVIDER GADGET</strong>
+    </p><pre><code class="language-text-plain">HGui.Theme.VDivider = {}
+HGui.Theme.VDivider.Colors = {}
+HGui.Theme.VDivider.Colors.Color1 = $666666
+HGui.Theme.VDivider.Colors.Color2 = $DDDDDD
+HGui.Theme.VDivider.Size = 1
+HGui.Theme.VDivider.Padding = 0
+HGui.Theme.VDivider.nSkin = HGui.Theme.Generate_SkinColor($FF000000)</code></pre>
+    <p>&nbsp;</p>
+    <p><strong>LABEL GADGET</strong>
+    </p><pre><code class="language-text-plain">HGui.Theme.sLabel = {} 
+HGui.Theme.sLabel.nSkin = HGui.Theme.Generate_SkinColor($CCCCCC)
+HGui.Theme.sLabel.nText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, False)</code></pre>
+    <p>&nbsp;</p>
+    <p><strong>GROUP GADGET</strong>
+    </p><pre><code class="language-text-plain">HGui.Theme.Group = {}
+HGui.Theme.Group.obSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $DDDDDD)
+HGui.Theme.Group.ibSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Sunken, GFX.BevelFx_Recessed, 1, $EEEEEE, $888888, $DDDDDD)
+HGui.Theme.Group.nText  = HGui.Theme.Generate_Text(14, #ANTIALIAS, $444444, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Group.nSkin  = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 2, $EEEEEE, $888888, $CCCCCC, { Top = 1, Bottom = 1, Left = 1, Right = 1 })
+HGui.Theme.Group.iBorders = {}
+HGui.Theme.Group.iBorders.Top = 2
+HGui.Theme.Group.iBorders.Bottom = 2
+HGui.Theme.Group.iBorders.Left = 2
+HGui.Theme.Group.iBorders.Right = 2
+HGui.Theme.Group.oBorders = {}
+HGui.Theme.Group.oBorders.Top = 1
+HGui.Theme.Group.oBorders.Bottom = 1
+HGui.Theme.Group.oBorders.Left = 1
+HGui.Theme.Group.oBorders.Right = 1
+HGui.Theme.Group.gap = 0
+HGui.Theme.Group.AnonymousGroupHeader = 0</code></pre>
+    <p>&nbsp;</p>
+    <p><strong>KNOB GADGET</strong>
+    </p><pre><code class="language-text-plain">HGui.Theme.Knob = {}
+HGui.Theme.Knob.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $DDDDDD)
+HGui.Theme.Knob.Style =
+  { BorderSize1  = 2, BorderSize2 = 1,
+    Border1Light = $ffffff, Border1Dark  = $444444,
+    Border1FillA = $ddeeff, Border1FillB = $778899,
+    Border2Light = $ffffff, Border2Dark  = $666666,
+    Border2FillA = $000000, Border2FillB = $FF0000,
+    Radius1      = 0.4,     Radius2      = 0.8, RadiusWidth = 8,
+    Type         = 1 }</code></pre>
+    <p>&nbsp;</p>
+    <p><strong>BUTTON GADGET</strong>
+    </p><pre><code class="language-text-plain">HGui.Theme.Button = {}
+HGui.Theme.Button.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $DDDDDD)
+HGui.Theme.Button.hSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $EEEEEE)
+HGui.Theme.Button.pSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEEEEE, $888888, $AAAAAA)
+HGui.Theme.Button.dSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $BBBBBB)
+HGui.Theme.Button.nText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Button.hText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+HGui.Theme.Button.pText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+HGui.Theme.Button.dText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $666666, #HGUI_ALIGN_CENTER, False, False)</code></pre>
+    <p>&nbsp;</p>
+    <p><strong>DROPDOWN GADGET</strong>
+    </p><pre><code class="language-text-plain">HGui.Theme.DropDown = {}
+HGui.Theme.DropDown.nSkin = HGui.Theme.Generate_SkinDoubleGradient($666666, $FFFFFF)
+HGui.Theme.DropDown.hSkin = HGui.Theme.Generate_SkinDoubleGradient($888888, $FFFFFF)
+HGui.Theme.DropDown.pSkin = HGui.Theme.Generate_SkinDoubleGradient($444444, $DDDDDD)
+HGui.Theme.DropDown.dSkin = HGui.Theme.Generate_SkinDoubleGradient($666666, $888888)
+HGui.Theme.DropDown.nText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.DropDown.hText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+HGui.Theme.DropDown.pText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+HGui.Theme.DropDown.dText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $777777, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.DropDown.WindowBGColor = $000000
+HGui.Theme.DropDown.WindowBorders = 1
+
+CONTENTS AREA
+HGui.Theme.DropDown.LVFont         = { Name = #SANS, Style = #ANTIALIAS, Color = $000000, SizeOffset = 0 }
+HGui.Theme.DropDown.LVBGColors     = { odd = $DDEEDD, even = $EEEEEE }
+HGui.Theme.DropDown.EntryHeight    = 16
+HGui.Theme.DropDown.AlternateLines = False</code></pre>
+    <p>&nbsp;</p>
+    <p><strong>LISTVIEW GADGET</strong>
+    </p><pre><code class="language-text-plain">HGui.Theme.ListView = {}
+
+HGui.Theme.ListView.OuterBox  = {}
+
+HGui.Theme.ListView.Body      = {}
+
+HGui.Theme.ListView.TopBox    = {}
+
+HGui.Theme.ListView.Scrollbar = {}
+
+
+
+HGui.Theme.ListView.OuterBox.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $DDDDDD)
+
+HGui.Theme.ListView.Body.nSkin     = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $DDDDDD)
+
+HGui.Theme.ListView.TopBox.nSkin   = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $DDDDDD)
+
+
+
+  ; Column headers
+
+HGui.Theme.ListView.nSkin = HGui.Theme.Generate_SkinGradient($EEEEEE, $888888)
+
+HGui.Theme.ListView.hSkin = HGui.Theme.Generate_SkinGradient($FFFFFF, $999999)
+
+HGui.Theme.ListView.pSkin = HGui.Theme.Generate_SkinGradient($666666, $AAAAAA)
+
+HGui.Theme.ListView.dSkin = HGui.Theme.Generate_SkinGradient($999999, $888888)
+
+HGui.Theme.ListView.nText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_LEFT, False, False, { top = 0, bottom = 0, left = 4, right = 0 })
+
+HGui.Theme.ListView.hText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_LEFT, False, True, { top = 0, bottom = 0, left = 4, right = 0 })
+
+HGui.Theme.ListView.pText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_LEFT, False, True, { top = 0, bottom = 0, left = 4, right = 0 })
+
+HGui.Theme.ListView.dText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $777777, #HGUI_ALIGN_LEFT, False, False, { top = 0, bottom = 0, left = 4, right = 0 })
+
+
+
+  ; Content's area
+
+HGui.Theme.ListView.Font     = { Name = #SANS, SizeOffset = -2, Style = #ANTIALIAS, Color = $000000 }
+
+HGui.Theme.ListView.BGColors = { odd = $8899FF, even = $99AAFF }
+
+HGui.Theme.ListView.Selected = { FontColor = $FFFFFF, BGColor = $99FF0000 }
+
+HGui.Theme.ListView.EntryHeight = 20
+
+;--NEW--
+
+HGui.Theme.ListView.AlternateLines = True
+
+HGui.Theme.ListView.VerticalLines = True
+
+HGui.Theme.ListView.VLinesColor1 = $666666
+
+HGui.Theme.ListView.VLinesColor2 = $DDDDDD
+
+HGui.Theme.ListView.ColumnsGap = 0
+
+HGui.Theme.ListView.HeadersHeight = 20
+
+HGui.Theme.ListView.IconTextGap = 2
+
+
+
+  ; Scrollbars
+
+HGui.Theme.ListView.Scrollbar.oBox = {}
+
+HGui.Theme.ListView.Scrollbar.oBox.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $AAAAAA, $444444, $888888)
+
+HGui.Theme.ListView.Scrollbar.oBox.hSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $AAAAAA, $444444, $AA8888)
+
+HGui.Theme.ListView.Scrollbar.oBox.pSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 2, $AAAAAA, $444444, $AA6666)
+
+HGui.Theme.ListView.Scrollbar.oBox.dSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $AAAAAA, $444444, $888888)
+
+;--NEW--
+
+HGui.Theme.ListView.Scrollbar.Size = 16
+
+
+
+  ; Scrollbars Cursor
+
+HGui.Theme.ListView.Scrollbar.cBox = {}
+
+HGui.Theme.ListView.Scrollbar.cBox.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEFFFF, $557788, $BBCCCC)
+
+HGui.Theme.ListView.Scrollbar.cBox.hSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEFFFF, $557788, $CCDDDD)
+
+HGui.Theme.ListView.Scrollbar.cBox.pSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEFFFF, $446666, $AABBBB)
+
+HGui.Theme.ListView.Scrollbar.cBox.dSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $BBBBBB)
+
+HGui.Theme.ListView.Scrollbar.cBox.nText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, False)
+
+HGui.Theme.ListView.Scrollbar.cBox.hText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+
+HGui.Theme.ListView.Scrollbar.cBox.pText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+
+HGui.Theme.ListView.Scrollbar.cBox.dText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $777777, #HGUI_ALIGN_CENTER, False, False)
+
+
+
+  ; Cursor's handle
+
+HGui.Theme.ListView.Scrollbar.Handle = 
+
+  { normal    = { color1 = $EEEEEE, color3 = $CCCCCC, color2 = $444444 },
+
+    hilighted = { color1 = $FFFFFF, color3 = $CCCCCC, color2 = $666666 },
+
+    pushed    = { color1 = $444444, color3 = $777777, color2 = $DDDDDD },
+
+    disabled  = { color1 = $777777, color3 = $888888, color2 = $999999 },
+
+    type      = "dots", ; lines, dots, box, none
+
+    quantity  = 2,      ; solo per lines, dots
+
+    size      = 2,
+
+    gap       = 1 }     ; solo per lines, dots, box = border's height
+
+</code></pre>
+    <p>&nbsp;</p>
+    <p><strong>TREEVIEW GADGET</strong>
+    </p><pre><code class="language-text-plain">HGui.Theme.TreeView = {}
+
+HGui.Theme.TreeView.OuterBox = {}
+
+HGui.Theme.TreeView.Body = {}
+
+HGui.Theme.TreeView.TopBox = {}
+
+HGui.Theme.TreeView.Scrollbar = {}
+
+
+
+HGui.Theme.TreeView.OuterBox.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $DDDDDD)
+
+HGui.Theme.TreeView.Body.nSkin     = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $DDDDDD)
+
+HGui.Theme.TreeView.TopBox.nSkin   = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $DDDDDD)
+
+
+
+  ; Column headers
+
+HGui.Theme.TreeView.nSkin = HGui.Theme.Generate_SkinGradient($888888, $EEEEEE)
+
+HGui.Theme.TreeView.hSkin = HGui.Theme.Generate_SkinGradient($999999, $FFFFFF)
+
+HGui.Theme.TreeView.pSkin = HGui.Theme.Generate_SkinGradient($555555, $FFFFFF)
+
+HGui.Theme.TreeView.dSkin = HGui.Theme.Generate_SkinGradient($888888, $999999)
+
+HGui.Theme.TreeView.nText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_LEFT, False, False, { top = 0, bottom = 0, left = 4, right = 0 })
+
+HGui.Theme.TreeView.hText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_LEFT, False, True, { top = 0, bottom = 0, left = 4, right = 0 })
+
+HGui.Theme.TreeView.pText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_LEFT, False, True, { top = 0, bottom = 0, left = 4, right = 0 })
+
+HGui.Theme.TreeView.dText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $777777, #HGUI_ALIGN_LEFT, False, False, { top = 0, bottom = 0, left = 4, right = 0 })
+
+
+
+  ; Content's area
+
+HGui.Theme.TreeView.Font     = { Name = #SANS, SizeOffset = -2, Style = #ANTIALIAS, Color = $000000 }
+
+HGui.Theme.TreeView.BGColors = { odd = $BBBBAA, even = $CCCCBB }
+
+HGui.Theme.TreeView.Selected = { FontColor = $FFFF00, BGColor = $99007777 }
+
+;--NEW--
+
+HGui.Theme.TreeView.EntryHeight = 20
+
+HGui.Theme.TreeView.AlternateLines = True
+
+HGui.Theme.TreeView.VerticalLines = True
+
+HGui.Theme.TreeView.VLinesColor1 = $DDDDDD
+
+HGui.Theme.TreeView.VLinesColor2 = $666666
+
+HGui.Theme.TreeView.ColumnsGap = 0
+
+HGui.Theme.TreeView.HeadersHeight = 20
+
+HGui.Theme.TreeView.NodeStyle = 1
+
+HGui.Theme.TreeView.IconTextGap = 2
+
+
+
+  ; Scrollbars
+
+HGui.Theme.TreeView.Scrollbar.oBox = {}
+
+HGui.Theme.TreeView.Scrollbar.oBox.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $AAAAAA, $444444, $888888)
+
+HGui.Theme.TreeView.Scrollbar.oBox.hSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $AAAAAA, $444444, $AA8888)
+
+HGui.Theme.TreeView.Scrollbar.oBox.pSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 2, $AAAAAA, $444444, $AA6666)
+
+HGui.Theme.TreeView.Scrollbar.oBox.dSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $AAAAAA, $444444, $888888)
+
+;--NEW--
+
+HGui.Theme.TreeView.Scrollbar.Size = 16
+
+
+
+; Scrollbars Cursor
+
+HGui.Theme.TreeView.Scrollbar.cBox = {}
+
+HGui.Theme.TreeView.Scrollbar.cBox.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEFFFF, $557788, $BBCCCC)
+
+HGui.Theme.TreeView.Scrollbar.cBox.hSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEFFFF, $557788, $CCDDDD)
+
+HGui.Theme.TreeView.Scrollbar.cBox.pSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEFFFF, $446666, $AABBBB)
+
+HGui.Theme.TreeView.Scrollbar.cBox.dSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $BBBBBB)
+
+HGui.Theme.TreeView.Scrollbar.cBox.nText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, False)
+
+HGui.Theme.TreeView.Scrollbar.cBox.hText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+
+HGui.Theme.TreeView.Scrollbar.cBox.pText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+
+HGui.Theme.TreeView.Scrollbar.cBox.dText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $777777, #HGUI_ALIGN_CENTER, False, False)
+
+
+
+; Cursor's handle
+
+HGui.Theme.TreeView.Scrollbar.Handle = 
+
+  { normal    = { color1 = $EEEEEE, color3 = $DDDDDD, color2 = $444444 },
+
+    hilighted = { color1 = $FFFFFF, color3 = $EEEEEE, color2 = $666666 },
+
+    pushed    = { color1 = $444444, color3 = $777777, color2 = $DDDDDD },
+
+    disabled  = { color1 = $777777, color3 = $888888, color2 = $999999 },
+
+    type      = "box", ; lines, dots, box, none
+
+    quantity  = 1,      ; solo per lines, dots
+
+    size      = 4,
+
+    gap       = 1 }     ; solo per lines, dots, box = border's height
+
+</code></pre>
+    <p>&nbsp;</p>
+    <p><strong>SCROLLBAR GADGET</strong>
+    </p><pre><code class="language-text-plain">OUTERBOX
+HGui.Theme.Scrollbar = {}
+HGui.Theme.Scrollbar.oBox = {}
+HGui.Theme.Scrollbar.oBox.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $DDDDDD, $444444, $888888)
+HGui.Theme.Scrollbar.oBox.hSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEEEEE, $333333, $777777)
+HGui.Theme.Scrollbar.oBox.pSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 2, $FFFFFF, $222222, $666666)
+HGui.Theme.Scrollbar.oBox.dSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $AAAAAA, $444444, $888888)
+HGui.Theme.Scrollbar.oBox.nText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_LEFT, False, False)
+HGui.Theme.Scrollbar.oBox.hText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_LEFT, False, True)
+HGui.Theme.Scrollbar.oBox.pText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_LEFT, False, True)
+HGui.Theme.Scrollbar.oBox.dText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $666666, #HGUI_ALIGN_LEFT, False, False)
+CURSOR
+HGui.Theme.Scrollbar.cBox = {}
+HGui.Theme.Scrollbar.cBox.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEFFFF, $557788, $BBCCCC)
+HGui.Theme.Scrollbar.cBox.hSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEFFFF, $557788, $CCDDDD)
+HGui.Theme.Scrollbar.cBox.pSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 2, $EEFFFF, $222222, $AABBBB)
+HGui.Theme.Scrollbar.cBox.dSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $BBBBBB)
+HGui.Theme.Scrollbar.cBox.nText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Scrollbar.cBox.hText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+HGui.Theme.Scrollbar.cBox.pText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+HGui.Theme.Scrollbar.cBox.dText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $777777, #HGUI_ALIGN_CENTER, False, False)
+CURSOR'S HANDLE
+HGui.Theme.Scrollbar.Handle = 
+ { normal    = { color1 = $EEEEEE, color3 = $CCCCCC, color2 = $444444 },
+   hilighted = { color1 = $FFFFFF, color3 = $CCCCCC, color2 = $666666 },
+   pushed    = { color1 = $444444, color3 = $777777, color2 = $DDDDDD },
+   disabled  = { color1 = $777777, color3 = $888888, color2 = $999999 },
+   type      = "lines", ; lines, dots, box, none
+   quantity  = 2,       ; solo per lines, dots
+   size      = 1,
+   gap       = 4 }      ; solo per lines, dots</code></pre>
+    <p>&nbsp;</p>
+    <p><strong>SLIDER GADGET</strong>
+    </p><pre><code class="language-text-plain">OUTER BOX
+HGui.Theme.Slider = {}
+HGui.Theme.Slider.oBox = {}
+HGui.Theme.Slider.oBox.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $AAAAAA, $444444, $888888)
+HGui.Theme.Slider.oBox.hSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $AAAAAA, $444444, $AA8888)
+HGui.Theme.Slider.oBox.pSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 2, $AAAAAA, $444444, $AA6666)
+HGui.Theme.Slider.oBox.dSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $AAAAAA, $444444, $888888)
+HGui.Theme.Slider.oBox.nText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Slider.oBox.hText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+HGui.Theme.Slider.oBox.pText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+HGui.Theme.Slider.oBox.dText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $777777, #HGUI_ALIGN_CENTER, False, False)
+CURSOR'S BOX
+HGui.Theme.Slider.cBox = {}
+HGui.Theme.Slider.cBox.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEFFFF, $557788, $BBCCCC)
+HGui.Theme.Slider.cBox.hSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEFFFF, $557788, $CCDDDD)
+HGui.Theme.Slider.cBox.pSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEFFFF, $446666, $AABBBB)
+HGui.Theme.Slider.cBox.dSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $BBBBBB)
+HGui.Theme.Slider.cBox.nText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Slider.cBox.hText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+HGui.Theme.Slider.cBox.pText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+HGui.Theme.Slider.cBox.dText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $777777, #HGUI_ALIGN_CENTER, False, False)
+CURSOR'S HANDLE
+HGui.Theme.Slider.Handle = 
+ { normal    = { color1 = $EEEEEE, color3 = $CCCCCC, color2 = $444444 },
+   hilighted = { color1 = $FFFFFF, color3 = $CCCCCC, color2 = $666666 },
+   pushed    = { color1 = $444444, color3 = $777777, color2 = $DDDDDD },
+   disabled  = { color1 = $777777, color3 = $888888, color2 = $999999 },
+   type      = "lines", ; lines, dots, box, none
+   quantity  = 2,    ; solo per lines, dots
+   size      = 1,
+   gap       = 3 }   ; solo per lines, dots</code></pre>
+    <p>&nbsp;</p>
+    <p><strong>PROGRESS BAR GADGET</strong>
+    </p><pre><code class="language-text-plain">OUTER BOX
+HGui.Theme.Progressbar = {}
+HGui.Theme.Progressbar.oBox = {}
+HGui.Theme.Progressbar.oBox.nskin = HGui.Theme.Generate_SkinGradient($444444, $BBBBBB)
+CURSOR'S BOX
+HGui.Theme.Progressbar.cBox = {}
+HGui.Theme.Progressbar.cBox.nSkin = HGui.Theme.Generate_SkinGradient($BBFFDD, $55AA66)
+HGui.Theme.Progressbar.cBox.nText = HGui.Theme.Generate_Text(14, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, False)</code></pre>
+    <p>&nbsp;</p>
+    <p><strong>SWITCH GADGET</strong>
+    </p><pre><code class="language-text-plain">HGui.Theme["switch"] = {}
+HGui.Theme["switch"].nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $D0D0C6)
+HGui.Theme["switch"].hSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $E0E0D6)
+HGui.Theme["switch"].pSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 2, $EEEEEE, $888888, $C0C0B6)
+HGui.Theme["switch"].dSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $BBBBBB)
+HGui.Theme["switch"].npSkin= HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEEEEE, $888888, $B0B0A6)
+HGui.Theme["switch"].hpSkin= HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEEEEE, $888888, $C6C6B6)
+HGui.Theme["switch"].dpSkin= HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEEEEE, $888888, $A6A6A6)
+HGui.Theme["switch"].nText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme["switch"].hText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme["switch"].pText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+HGui.Theme["switch"].dText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $666666, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme["switch"].npText= HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+HGui.Theme["switch"].hpText= HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+HGui.Theme["switch"].dpText= HGui.Theme.Generate_Text(16, #ANTIALIAS, $666666, #HGUI_ALIGN_CENTER, False, True)</code></pre>
+    <p>&nbsp;</p>
+    <p><strong>VIRTUAL BOX</strong>
+    </p><pre><code class="language-text-plain">HGui.Theme.Virtual = {}
+CONTAINER
+HGui.Theme.Virtual.Container = {}
+HGui.Theme.Virtual.Container.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEEEEE, $888888, $D0D0C6)
+VIRTUAL CONTAINER
+HGui.Theme.Virtual.VirtualBox = {}
+HGui.Theme.Virtual.VirtualBox.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $D0D0C6)
+SCROLLBARS
+HGui.Theme.Virtual.Scroller = {}
+HGui.Theme.Virtual.Scroller.oBox = {}
+HGui.Theme.Virtual.Scroller.oBox.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $AAAAAA, $444444, $888888)
+HGui.Theme.Virtual.Scroller.oBox.hSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $AAAAAA, $444444, $AA8888)
+HGui.Theme.Virtual.Scroller.oBox.pSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 2, $AAAAAA, $444444, $AA6666)
+HGui.Theme.Virtual.Scroller.oBox.dSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $AAAAAA, $444444, $888888)
+SCROLLBAR'S CURSOR
+HGui.Theme.Virtual.Scroller.cBox = {}
+HGui.Theme.Virtual.Scroller.cBox.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEFFFF, $557788, $BBCCCC)
+HGui.Theme.Virtual.Scroller.cBox.hSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEFFFF, $557788, $CCDDDD)
+HGui.Theme.Virtual.Scroller.cBox.pSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEFFFF, $446666, $AABBBB)
+HGui.Theme.Virtual.Scroller.cBox.dSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $888888, $BBBBBB)
+HGui.Theme.Virtual.Scroller.cBox.nText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Virtual.Scroller.cBox.hText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+HGui.Theme.Virtual.Scroller.cBox.pText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $000000, #HGUI_ALIGN_CENTER, False, True)
+HGui.Theme.Virtual.Scroller.cBox.dText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $777777, #HGUI_ALIGN_CENTER, False, False)
+CURSOR'S HANDLE
+HGui.Theme.Virtual.Scroller.Handle = 
+ { normal    = { color1 = $EEEEEE, color3 = $DDDDDD, color2 = $444444 },
+   hilighted = { color1 = $FFFFFF, color3 = $EEEEEE, color2 = $666666 },
+   pushed    = { color1 = $444444, color3 = $777777, color2 = $DDDDDD },
+   disabled  = { color1 = $777777, color3 = $888888, color2 = $999999 },
+   type      = "box", ; lines, dots, box, none
+   quantity  = 1,      ; solo per lines, dots
+   size      = 4,
+   gap       = 1 }     ; solo per lines, dots, box = border's height</code></pre>
+    <p>&nbsp;</p>
+    <p><strong>DEFAULT TEXT SKINS</strong>
+    </p><pre><code class="language-text-plain">HGui.Theme.Text = {}
+HGui.Theme.Text.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Sunken, GFX.BevelFx_Raised, 1, $EEFFFF, $557788, $BBCCCC)
+HGui.Theme.Text.hSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Sunken, GFX.BevelFx_Raised, 1, $EEFFFF, $557788, $CCDDDD)
+HGui.Theme.Text.pSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Sunken, GFX.BevelFx_Recessed, 1, $EEFFFF, $557788, $BBCCCC)
+HGui.Theme.Text.dSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Flat, 1, $EEFFFF, $557788, $BBCCCC)
+HGui.Theme.Text.Gfx = { bgColor  = $DDDDDD,
+                       fgColor  = $000000,
+                       bgCursor = $FF0000,
+                       fgCursor = $FFFFFF,
+                       bgSelect = $FFFF00,
+                       FontName = #SANS,
+                       FontSize = 16,
+                       FontStyle = #ANTIALIAS,
+                       AdjustFontSize = False }
+</code></pre>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

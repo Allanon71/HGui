@@ -1,0 +1,55 @@
+/*******************************************************************************
+HGUI : Tutorial 212 - Activate method                        v1.2 : 09/02/2023 *
+********************************************************************************
+In this tutorial you will see how you can activate a window using the 
+:Activate() method. 
+We are going to use the :isActive() method to check if the window has the 
+active status or not.
+Try to deactivate the window 2 and see that every second the focus will be
+restored.
+*******************************************************************************/
+
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+
+; This program will create two windows and every second and interval function will
+; activate the window 1 using the Activate() method.
+win1 = HGui.Window:new(
+   { title    = "Window 1 (CTRL-C to end)",
+     position = { x = 100, y = 200 },
+     size     = { w = 400, h = 200 }
+     })
+
+win2 = HGui.Window:new(
+   { title    = "Window 2 - Activate me!",
+     position = { x = 510, y = 200 },
+     size     = { w = 400, h = 200 }
+     })
+     
+Function ActivateMyWindow()
+  If win2:isClosed()
+    win1:Activate()
+    NPrint("You have closed Window 2! " .. GetDate(True))
+
+  EndIf
+  
+  If Not(win1:isActive())
+    If win1:isClosed()
+      NPrint("You have closed the Window 1!")
+      
+    Else
+      win1:Activate()
+      NPrint("Activated! " .. GetDate(True))
+      
+    EndIf
+    
+  EndIf
+  
+EndFunction
+
+SetInterval(Nil, ActivateMyWindow, 1000)
+
+Repeat
+  WaitEvent
+Forever

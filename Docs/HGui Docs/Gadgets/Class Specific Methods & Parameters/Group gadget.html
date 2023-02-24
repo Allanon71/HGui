@@ -1,0 +1,50 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>Group gadget</h1>
+
+    <p>For common methods have a look <a href="../Common%20Methods.html">here</a>,</p>
+    <p>&nbsp;</p>
+    <p><span class="text-big"><strong>GROUP GADGET METHODS</strong></span>
+    </p>
+    <ul>
+      <li><span class="text-big"><code>gadList = gadObj:getValues()</code></span>
+        <br>Returns a list (table) of included gadgets and their values, each entry
+        has this format:
+        <br>&nbsp; <code>{ index = n, name = s, value = n, gadget = &lt;gadobject&gt; }</code>
+        <br>- <strong>gadList </strong>: A table composed of records as explained above&nbsp;</li>
+    </ul>
+    <p>&nbsp;</p>
+    <p><span class="text-big"><strong>Additional arguments accepted by :New() method</strong></span>
+    </p>
+    <ul>
+      <li><strong>Outer_Box </strong>: BOX class options to customize the outer
+        box</li>
+      <li><strong>Inner_Box </strong>: BOX class options to customize the inner
+        box</li>
+      <li><strong>Header </strong>: LABEL class options to customize the group header</li>
+      <li><strong>Group_LabelSide </strong>: Specify the header label position :&nbsp;
+        <br><code>#HGUI_ALIGN_TOP, #HGUI_BOTTOM, #HGUI_LEFT, #HGUI_RIGHT</code>
+      </li>
+      <li><strong>Group_LabelGap </strong>: Value used to increase/deacrease the
+        header size</li>
+      <li><strong>GroupType </strong>: Specify the group type :&nbsp;
+        <br><code>#HGUI_GTYPE_GENERIC, #HGUI_GTYPE _CHECK, #HGUI_GTYPE_RADIO</code>
+      </li>
+    </ul>
+    <p>&nbsp;</p>
+    <p><span class="text-big"><strong>NOTES</strong></span>
+    </p>
+    <p style="margin-left:40px;">If caption is not specified or it is an empty string the label gadget
+      will be replaced by an empty box with the minimum possible size.
+      <br>&nbsp;</p>
+  </body>
+
+</html>

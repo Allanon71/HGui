@@ -1,0 +1,2291 @@
+/**************************************************************************
+ * TABLES LIBRARY                                                         *
+ * Author : Fabio Falcucci (Allanon)                                      *
+ * License : Donationware                                                 *
+ * Dependancies : HELPERS, EASING Libraries                               *
+ * PayPal Support : hijoe@tin.it                                          *
+ * Patreon Support : https://www.patreon.com/Allanon71                    *
+ * Version : 1.7                                                          *
+ * Release : 27.10.2022                                                   *
+ *-------------------------------------------------------------------------
+ *
+ *   Tables library is an include file for Hollywood with many
+ * functions suited to handle tables and their data.
+
+
+  CONTENTS
+ --------
+ :: TABLE COMPARISONS ::
+ TB.Compare()
+ TB.CompareScore()
+ TB.Item.Comapare()
+ TB.Item.Exists()
+ TB.Item.Find()
+ TB.Item.DeepFind()
+ TB.Item.IsNil()
+  
+ :: TABLE CONVERSIONS ::
+ TB.Convert.String2Table()
+ TB.Convert.Table2String()
+ TB.Serialize()
+ TB.Deserialize()
+ 
+ :: TABLE HANDLING ::
+ TB.Fill()
+ TB.Interpolate()
+ TB.Join()
+ TB.Merge()
+ TB.PushDown()
+ TB.PushDown()
+ TB.Reindex()
+ TB.ReplaceChars()
+ TB.Set()
+ TB.ShiftDown()
+ TB.ShiftUp()
+ TB.Sort()
+ 
+ :: MISC ::
+ TB.Copy()
+ TB.Count()
+ TB.PickRandom()
+ 
+ :: CHANGE LOG ::
+ 27/10/2022
+ - Added TB.PickRandom()
+ 
+ 09/02/2021
+ - Optimized TB.Set() routine
+
+ 18/11/2020
+ - Fixed a bug in TB.Item.DeepFind()
+ 
+ *********************************************************************/
+
+@INCLUDE "+Includes.hws"
+@INCLUDE #INC_HELPERS
+@INCLUDE #INC_EASING
+;@INCLUDE #INC_DEBUG
+
+Global TB = {}
+       TB.Item    = {}
+       TB.Convert = {}
+       TB.Version = "1.4"
+       TB.Build   = "02/05/2020"
+
+;--| TODO |-------------------------------------------------------------
+; POSSIBLE FEATURE IN TB.Count() -> Count also subitems using recursion.
+;-----------------------------------------------------------------------
+
+Function TB.Join(table1, table2)
+/***********************************************************************
+| table1 = TB.Join(table1, table2)
+|
+| Join 'table1' and 'table2', 'table1' will be modified directly adding
+| all 'table2' entries.
+| This function can be used only with numerical-indexed tables.
+| 
+| INPUT
+|   table1 : 'table1' to join
+|   table2 : 'table2' to join
+|
+| OUTPUT
+|   table1 : 'table1' with all the 'table2' entries added at the end
+***********************************************************************/
+  Local l1, l2 = ListItems(table1), ListItems(table2)-1
+  
+  For Local i = 0 To l2
+    table1[l1+i] = table2[i]
+  Next
+  
+  Return(table1)
+  
+EndFunction
+
+Function TB.Item.IsNil(table, index)
+/************************************************************************
+| result = TB.Item.IsNil(table, index)
+|
+| Returns TRUE if 'index' doesn't exists in 'table' otherwise returns FALSE.
+| This function is usefull to test if there are undefined items within tables.
+| Even if the most recent version of Hollywood has the inbuilt function
+| HaveItem() to achieve the same goal (using Not operator), TB.Item.IsNil()
+| is able to test string indexes including lowercase and uppercase letters
+| while the Hollywood function can check only lowercase string indexes.
+| 
+| INPUT
+|   table : The table you need to check for the <index> key
+|   index : The index/key to check
+|
+| OUTPUT
+|   result : TRUE if 'index' is not defined in 'table', otherwise FALSE.
+|            FALSE will be returned also if 'table' is NIL.
+************************************************************************/
+  If GetType(table) = #NIL Then Return(True)
+  If GetType(RawGet(table, index)) = #NIL Then Return(True) Else Return(False)
+
+EndFunction
+
+
+Function TB.Item.Exists(table, index)
+/******************************************************************************
+| result = TB.Item.Exists(table, index)
+| 
+| Returns TRUE if 'index' is not NIL within 'table' otherwise returns FALSE.
+| This function is usefull to test if there are defined items within tables.
+| Even if the most recent version of Hollywood has the inbuilt function
+| HaveItem() to achieve the same goal, TB.Item.Exists() is able to test
+| string indexes including lowercase and uppercase letters while the
+| Hollywood function can check only lowercase string indexes.
+| 
+| INPUT
+|   table : The table you need to check for 'index' key
+|   index . The index to check
+| OUTPUT
+|   result : True if 'index' is defined within 'table'
+******************************************************************************/
+
+   If GetType(table) = #NIL Then Return(False)
+   If GetType(RawGet(table, index)) = #NIL Then Return(False) Else Return(True)
+
+EndFunction
+
+
+Function TB.PushUp(table, pos)
+/******************************************************************************
+| TB.PushUp(table, pos)
+| 
+| Move the item at position 'pos' from its current position to position 0 (to the
+| top of the table) and move all the rest down by one position.
+| 
+| INPUT
+|   table : Source table
+|   pos   : Index of the item to push up
+| NOTES
+|   This function is only for tables with consecutive numeric indexes starting
+|   from 0.
+******************************************************************************/
+   Local item = table[pos]
+   InsertItem(table, item, 0)
+   RemoveItem(table, pos+1)
+
+EndFunction
+
+Function TB.PushDown(table, pos)
+/******************************************************************************
+| TB.PushUp(table, pos)
+| 
+| Move the item at position 'pos' from its current position to the bottom and 
+| move all the rest up by one position.
+| 
+| INPUT
+|   table : Source table
+|   pos   : Index of the item to push down
+| NOTES
+|   This function is only for tables with consecutive numeric indexes starting
+|   from 0.
+******************************************************************************/
+   Local item = table[pos]
+   InsertItem(table, item)
+   RemoveItem(table, pos)
+
+EndFunction
+
+Function TB.ShiftUp(table)
+/******************************************************************************
+| result = TB.ShiftUp(table)
+| 
+| Shifts all 'table' items up by one position, the first item will be placed at 
+| the last position.
+| 
+| INPUT
+|   table : Source table
+| OUTPUT
+|   result : Returns TRUE if 'table' was processed correctly
+| NOTES
+|   This function is for tables with consecutive numeric indexes starting from 0.
+******************************************************************************/
+   If GetType(table) <> #TABLE Then Return(False)
+   Local cnt = ListItems(table)-1
+   If cnt < 2 Then Return(False)
+   
+   InsertItem(table, table[0])
+   RemoveItem(table, 0)
+
+   Return(True)
+
+EndFunction
+
+
+Function TB.ShiftDown(table)
+/******************************************************************************
+| result = TB.ShiftDown(table)
+| 
+| Shifts all 'table' items down by one position, the last item will be placed at 
+| the first position.
+| 
+| INPUT
+|   table : Source table
+| OUTPUT
+|   result : Returns TRUE if 'table' was processed correctly
+| NOTES
+|   This function is for tables with consecutive numeric indexes starting from 0.
+******************************************************************************/
+   If GetType(table) <> #TABLE Then Return(False)
+   Local cnt = ListItems(table)-1
+   If cnt < 2 Then Return(False)
+   
+   InsertItem(table, table[cnt], 0)
+   RemoveItem(table, cnt+1)
+   
+   Return(True)
+
+EndFunction
+
+Function TB.PickRandom(table)
+/******************************************************************************
+| result = TB.PickRandom(table)
+| 
+| Returns a random item from the given table
+| 
+| INPUT
+|   table : Source table
+| OUTPUT
+|   result : Returns a random item from the given table
+| NOTES
+|   This function is for tables with consecutive numeric indexes starting from 0.
+******************************************************************************/
+  Local c = ListItems(table)
+  Local r = Rnd(c)
+  
+  Return(table[r])
+
+EndFunction
+
+Function TB.Count(table)
+/******************************************************************************
+| count = TB.Count(table)
+| 
+| Return how many entries are stored in 'table'. This function is able to count 
+| any type of table with any type of index.
+| 
+| INPUT
+|   table : Source table
+| OUTPUT
+|   count : Returns the number of items in the table or -1 if an error was
+|           occurred.
+******************************************************************************/
+  ; If IsNil(Table) Then Return(-1)
+  ; If GetType(Table) <> #TABLE Then Return(-1)
+   
+  Local count, i, v = 0
+
+  ; Scan the given table and count its entries
+  For i, v In Pairs(table) Do count = count + 1
+
+  Return(count)
+
+EndFunction
+
+
+Function TB.Merge(table1, table2, overwrite)
+/******************************************************************************
+| table1 = TB.Merge(table1, table2, overwrite)
+| 
+| Adds all 'table2' items to 'table1', note that 'table1'will be directly 
+| modified. 'overwrite' is used to specify if any existing 'table1' item should 
+| be overwritten by 'table2' items or not.
+| 
+| INPUT
+|   table1    : Target table
+|   table2    : Table to merge into 'table1'
+|   overwrite : Set to TRUE to overwrite existing items
+| OUTPUT
+|   table1 : The modified table (same as 'table1')
+| NOTE
+|   This function is fully recursive.
+******************************************************************************/
+   If HL.IsNil(table1) Or HL.IsNil(table2) Then Return(table1)
+   If HL.IsNil(overwrite) Then overwrite = False
+   
+   Local i, v = NextItem(table2)
+   While Not(HL.IsNil(i))
+      If TB.Item.IsNil(table1, i)
+         If GetType(v) = #TABLE
+            table1[i] = {}
+            TB.Merge(table1[i], v, overwrite)
+         Else
+            table1[i] = v
+         EndIf
+      Else
+         If overwrite
+            If GetType(v) = #TABLE
+               TB.Merge(table1[i], v, overwrite)
+            Else
+               table1[i] = v
+            EndIf
+         EndIf
+      EndIf
+      i, v = NextItem(table2, i)
+   Wend
+   
+   Return(table1)
+EndFunction
+
+
+Function TB.Item.Compare(record1, record2, greater, columns)
+/******************************************************************************
+| result = TB.Item.Compare(record1, record2, greater, columns)
+| 
+| This routine is used to compare two records (tables). The comparison is based 
+| on one or more fields (indexes), this fields must be specified in the 'columns'
+| table. 'greater' is a table with booleans and specify what kind of comparisons
+| must be performed: if TRUE means that the following check will be made:
+| > record1.field is greater then record2.field ?
+| This routine supports multilevel comparisons, just supply the field names in 
+| the 'columns' table and in the right order.
+| 
+| INPUT
+|   record1 : First record to compare
+|   record2 : Second record to compare
+|   greater : One or more comparison specification(s)
+|   columns : One or more field name(s)
+| OUTPUT
+|   result : Returns TRUE if the comparison is satisfied.
+******************************************************************************/
+   Local CCount = TB.Count(Columns) - 1
+   For Local c = 0 To CCount
+      Local CName = columns[c]
+      Local Desce = greater[c]
+      Local R1    = record1[CName]
+      Local R2    = record2[CName]
+      
+      ; If items are equal continue the loop checking the next field
+      /* tentativo di ottimizzazione */
+         /* OLD WORKING CODE
+      If GetType(R1[CName]) = #STRING And GetType(R2[CName]) <> #STRING
+         R2[CName] = ToString(R2[CName])
+      ElseIf GetType(R1[CName]) <> #STRING And GetType(R2[CName]) = #STRING
+         R1[CName] = ToString(R1[CName])
+      EndIf */
+      If GetType(R1)=#STRING
+        If GetType(R2)<>#STRING Then R2 = ToString(R2)
+      ElseIf GetType(R2)=#STRING
+        If GetType(R1)<>#STRING Then R1 = ToString(R1)
+      ElseIf GetType(R1)=#TABLE Or GetType(R2)=#TABLE
+        ; Cannot compare tables
+        Return(False)
+      EndIf
+      
+      If Desce
+         If R1 > R2 Then Return(True)
+         If R1 < R2 Then Return(False)
+      Else
+         If R1 < R2 Then Return(True)
+         If R1 > R2 Then Return(False)
+      EndIf
+   Next
+   
+   Return(True)
+
+EndFunction
+
+
+Function TB.Sort(table, descending, column, associated, type)
+/******************************************************************************
+| sorted = TB.Sort(table, descending, column, associated, type)
+| 
+| Sort the given 'table' basing the sorting on 'columns'. 'table' must be composed
+| by subtables, like records, and indexed with numeric values. 'table' will be
+| directly modified while sorting items.
+| You can set sorting order setting 'descending' to TRUE or FALSE, 'column' can
+| be a field name or a table width field names we want to use to sort the 'table'.
+| 
+| INPUT
+|   table : The table we want to sort
+|   descending : To sort in descending order set this flag to TRUE, if you are
+|                are sorting the table using multiple column you have to provide
+|                a table with one flag for each column.
+|   column : Column name or a table of strings with columns names used for the
+|            sorting operation.
+|   associated : A table holding further tables associated with 'table', the
+|                subtable items will follow the sorting order of the master table.
+|                This argument is optional.
+|   type : Sort method, default = combsort
+|          Possible sorting algorhythms are:
+|          - combsort      - quicksort      - bubblesort
+|          - cocktailsort
+|          - circlesort (Right now this method must be reviewed and fixed)
+| OUTPUT
+|   sorted : The source table after the sorting process
+******************************************************************************/
+; Source:
+; --- http://www.vbforums.com/showthread.php?473677-VB6-Sorting-algorithms-%28sort-array-sorting-arrays%29 
+
+   Local entries = TB.Count(table) - 1
+   If HL.IsNil(type) Then type = "combsort"
+   If ListItems(table) <=2 Then type = "quicksort"
+   
+  ;"circlesort", "quicksort", "bubblesort", "cocktailsort"
+   
+   If GetType(column)     <> #TABLE Then column = { column }
+   If GetType(descending) <> #TABLE Then descending = { descending }
+
+   ; Sorting loop
+   Local ass = True
+   If HL.IsNil(associated)
+      ass = False
+   EndIf
+
+   Switch type
+    Case "quicksort"
+      For Local i = 0 To (entries - 1)
+        For Local ii = (i + 1) To entries
+           If Not(TB.Item.Compare(table[ii], table[i], descending, column))
+              table[i], table[ii] = table[ii], table[i]
+              If ass
+                 For k, v In IPairs(associated) Do associated[k][i], associated[k][ii] = associated[k][ii], associated[k][i]
+              EndIf
+           EndIf
+        Next
+      Next
+     
+    Case "circlesort"
+      While True
+        DebugPrompt(TB.Sort_CircleSort(table, 0, ListItems(table)-1, 0, descending, column, associated))
+      Wend
+        
+    Case "bubblesort"
+      Local iMin, iMax, blnSwapped
+       
+      iMin = 0
+      iMax = ListItems(table) - 2
+      Repeat
+        blnSwapped = False
+        For Local i = iMin To iMax
+          If TB.Item.Compare(table[i], table[i+1], descending, column)
+            table[i], table[i+1] = table[i+1], table[i]
+            If ass
+              For k, v In IPairs(associated) Do associated[k][i], associated[k][i+1] = associated[k][i+1], associated[k][i]
+            EndIf
+            blnSwapped = True
+          EndIf
+        Next
+        iMax = iMax - 1
+      Until Not(blnSwapped)
+        
+    Case "cocktailsort"
+      Local iMin, iMax, blnSwapped
+      
+      iMin = 0
+      iMax = ListItems(table) - 2
+      
+      Repeat
+        blnSwapped = False
+        For Local i = iMin To iMax
+          If TB.Item.Compare(table[i], table[i+1], descending, column)
+            table[i], table[i+1] = table[i+1], table[i]
+            If ass
+              For k, v In IPairs(associated) Do associated[k][i], associated[k][i+1] = associated[k][i+1], associated[k][i]
+            EndIf
+            blnSwapped = True
+          EndIf
+        Next
+        
+        iMax = iMax - 1
+        
+        If Not blnSwapped Then Break
+        
+        For Local i = iMax To iMin Step -1
+          If TB.Item.Compare(table[i], table[i+1], descending, column)
+            table[i], table[i+1] = table[i+1], table[i]
+            If ass
+              For k, v In IPairs(associated) Do associated[k][i], associated[k][i+1] = associated[k][i+1], associated[k][i]
+            EndIf
+            blnSwapped = True
+          EndIf
+        Next
+        
+        iMin = iMin + 1
+        
+      Until Not(blnSwapped)
+      
+    Case "combsort"
+      Local i, gap, swaps = 1
+      Local nElements = ListItems(table)-1
+      Local gap = nElements
+      Local g = nElements
+      While (gap > 1) Or (swaps = 1)
+        g = g / 1.25
+        gap = Int(g)
+        i = 0
+        swaps = 0 
+        While (i + gap) <= nElements
+          If i+gap <> i
+            If Not(TB.Item.Compare(table[i+gap], table[i], descending, column))
+              table[i], table[i+gap] = table[i+gap], table[i]
+              swaps = 1
+              If ass
+                For k, v In IPairs(associated) Do associated[k][i], associated[k][i+gap] = associated[k][i+gap], associated[k][i]
+              EndIf            
+            EndIf
+          EndIf
+          i = i + 1
+        Wend 
+      Wend 
+
+    EndSwitch
+   
+   Return(table)
+   
+EndFunction
+
+Function TB.Sort_CircleSort(table, lo, hi, swaps, descending, column, associated)
+   Local ass = True
+   If HL.IsNil(associated)
+      ass = False
+   EndIf
+  
+  If GetType(column)     <> #TABLE Then column = { column }
+  If GetType(descending) <> #TABLE Then descending = { descending }
+  
+  If lo = hi Then Return(swaps)
+  Local high = hi
+  Local low  = lo
+  Local mid = Floor((hi-lo)/2)
+
+  While lo < hi
+    If TB.Item.Compare(table[lo], table[hi], descending, column, associated)
+      table[lo], table[hi] = table[hi], table[lo]
+      If ass
+         For k, v In IPairs(associated) Do associated[k][lo], associated[k][hi] = associated[k][hi], associated[k][lo]
+      EndIf     
+      swaps = swaps + 1
+    EndIf
+    lo = lo + 1
+    hi = hi - 1
+  Wend
+
+  If lo = hi
+    If TB.Item.Compare(table[lo], table[hi+1], descending, column, associated)
+      table[lo], table[hi+1] = table[hi+1], table[lo]
+      If ass
+         For k, v In IPairs(associated) Do associated[k][lo], associated[k][hi+1] = associated[k][hi+1], associated[k][lo]
+      EndIf           
+      swaps = swaps + 1
+    EndIf
+  EndIf
+
+  swaps = TB.Sort_CircleSort(table, low, low+mid, swaps, descending, column, associated)
+  swaps = TB.Sort_CircleSort(table, low+mid+1, high, swaps, descending, column, associated)
+
+  Return(swaps)
+  
+EndFunction
+
+Function TB.ReIndex(oldKey, newKey, source)
+/******************************************************************************
+| TB.ReIndex(oldKey, newKey, source)
+| 
+| For the given 'source' table, change the current index with the given column.
+| A new table will be generated and returned.
+| 
+| INPUT
+|   oldKey : Old index name
+|   newKey : New index name (column name)
+|   source : Source table
+| OUTPUT
+|   reindexed : Reindexed table
+*******************************************************************************/
+  Local newTable = {}
+  For i, v In Pairs(source)
+    newTable[v[newKey]] = CopyTable(v)
+    newTable[v[newKey]][oldKey] = i
+    newTable[v[newKey]][newKey] = Nil
+  Next
+  Return(newTable)
+EndFunction
+
+Function TB.Item.DeepFind(table, keyword, recflag)
+/******************************************************************************
+| subset = TB.Item.DeepFind(table, keyword)
+|
+| Returns a subset of the given 'table' if any of its fields match the given
+| 'keyword'. 'keyword' can contain matching patterns.
+|
+| INPUT
+|   table : Source table
+|   keyword : Value
+|   recflag : Is a flag used internally when recursion is used
+|
+| OUTPUT
+|   subset : A table with all 'table' items with at least one matching field.
+|            the original index will be preserved.
+|
+| NOTE
+|   For string values you can use pattern matching conventions as follow:
+|    *  : Matches all characters.                
+|    ?  : Matches just a single character.
+|    #  : Matches all numbers. 
+|    [] : Matches one or several characters or a range of characters
+******************************************************************************/
+  
+  Local subset = {}
+  Local kType = GetType(keyword)
+  
+  Local i, v
+  For i, v In Pairs(table)
+    Local found = False
+    If GetType(v) = #TABLE
+      Local result = TB.Item.DeepFind(v, keyword, True)
+      If result
+        found = True
+        If recflag
+          Return(True)
+        EndIf
+      EndIf
+    
+    ElseIf GetType(v) = kType
+      If kType = #STRING
+        If MatchPattern(LowerStr(v), LowerStr(keyword))
+          found = True
+          If recflag
+            Return(True)
+          EndIf
+        EndIf
+      Else
+        If v = keyword
+          found = True
+          If recflag
+            Return(True)
+          EndIf
+        EndIf
+      EndIf
+      
+    ElseIf GetType(v) = #NUMBER
+      If kType = #STRING
+        Local conv = ToNumber(keyword)
+        If v = conv And ToString(conv) = Keyword
+          found = True
+          If recflag
+            Return(True)
+          EndIf
+        EndIf
+      EndIf
+      
+    EndIf
+    
+    If found
+      subset[i] = v
+    EndIf
+  Next
+  
+  If recflag
+    Return(found)
+  Else
+    Return(subset)
+  EndIf
+  
+EndFunction
+
+Function TB.Item.Find(table, value, caseSensitive, exactString)
+/******************************************************************************
+| found, index = TB.Item.Find(table, value, caseSensitive, exactString)
+| 
+| Search in 'table' an item with the value equal to 'value'. The search will be 
+| performed only on the first table level (subtables  will not be scanned).
+| 'value' can be of any type.
+| 
+| INPUT
+|   table : Source table
+|   value : Value to find
+|   caseSensitive : Set to TRUE for case sensitive searches (strings)
+|   exactString : Set to TRUE to match for the exact value, in this case casing
+|                 will be ignored.
+| OUTPUT
+|   found : TRUE if a result have been found
+|   index : Index of the founded item
+| NOTE
+|   Only the first occurence will be returned. For string values you can use
+|   pattern matching conventions as follow:
+|    *  : Matches all characters.                
+|    ?  : Matches just a single character.
+|    #  : Matches all numbers. 
+|    [] : Matches one or several characters or a range of characters
+******************************************************************************/
+   Local found = False
+   Local index = -1
+   
+  For i, v In Pairs(table)
+    If GetType(table[i]) = GetType(value)
+      ; SAME TYPE
+      If GetType(value) = #STRING
+        ; STRING
+        If exactString
+          If table[i] = value
+            found = True
+            index = i
+            Return(found, i)
+          EndIf
+        Else
+          If Not(caseSensitive)
+            If MatchPattern(LowerStr(table[i]), LowerStr(value))
+              found = True
+              index = i
+              Break
+            EndIf
+          Else
+            If MatchPattern(table[i], value)
+              found = True
+              index = i
+              Break
+            EndIf
+          EndIf
+        EndIf
+      Else
+        ; OTHER TYPES
+        If table[i] = value
+          found = True
+          index = i
+          Break
+        EndIf
+      EndIf
+    EndIf
+  Next
+
+  Return(found, index)
+EndFunction
+
+
+Function TB.TrimSpaces(table, recursive)
+/******************************************************************************
+| table = TB.TrimSpaces(table, recursive)
+| 
+| Remove from any string entries in the given 'table' any trailing or leading 
+| spaces. The source 'table' will be directly modified.
+| 
+| INPUT
+|   table : The table we want to process
+|   recursive : Set to TRUE to process the table recursivly
+| OUTPUT
+|   table : Processed source 'table'
+******************************************************************************/
+   If HL.IsNil(recursive) Then recursive = False
+   
+   ; Scan the table
+   Local i, v = NextItem(table)
+   While GetType(i) <> #NIL
+      ; Trim spaces from string items
+      If GetType(v) = #STRING
+         cleaned = TrimStr(v, " ", False)
+         cleaned = TrimStr(cleaned, " ", True)
+         table[i] = cleaned
+      ElseIf GetType(v) = #TABLE
+         If recursive Then TB.TrimSpaces(v, recursive)
+      EndIf
+
+      i, v = NextItem(table, i)
+   Wend
+   
+   Return(Table)
+EndFunction
+
+
+Function TB.ReplaceChars(table, chars, replacer, recursive, casing)
+/******************************************************************************
+| table = TB.ReplaceChars(table, chars, replacer, recursive)
+| 
+| Scans 'table' for each string entry and replaces any occurrencies of 'chars' 
+| with the string 'replacer'. Set 'recursive' to TRUE if you want to scan 'table'
+| recusively.
+| 
+| INPUT
+|   table : The table to process
+|   chars : String to replace with 'replacer'
+|   replacer : String that will replace 'chars'
+|   recursive : Set to TRUE to process 'table' recursively
+|   casing : True for case sensitive (default false)
+| OUTPUT
+|   table : Processed source 'table'
+| NOTE
+|   Non-string items will be skipped
+******************************************************************************/
+   If HL.IsNil(recursive) Then recursive = False
+   If HL.IsNil(casing) Then casing = False
+
+   ; Scan the source table
+   Local i, v = NextItem(table)
+   While GetType(i) <> #NIL
+      ; Process string items
+      If GetType(v) = #STRING
+         table[i] = ReplaceStr(v, chars, replacer, casing)
+      ElseIf GetType(v) = #TABLE
+         If recursive Then TB.ReplaceChars(v, chars, replacer, recursive, casing)
+      EndIf
+
+      i, v = NextItem(table, i)
+   Wend
+
+   Return(table)
+EndFunction
+
+
+Function TB.Compare(table1, table2, compare_funcs)
+/******************************************************************************
+| result = TB.Compare(table1, table2, compare_funcs)
+| 
+| Compare 'table1' and 'table2' and returns TRUE if they are equal.
+| Set 'compare_funcs' to TRUE if you want to compare function entries too. The
+| comparisons are fully recursive.
+| 
+| INPUT
+|   table1 : The first table to compare
+|   table2 : The second table to compare
+|   compare_func : Set to TRUE to compare also function fields
+| OUTPUT
+|   result : The result of the comparison: TRUE or FALSE
+******************************************************************************/
+   If GetType(table1) <> #TABLE Or GetType(table2) <> #TABLE Then Return(False)
+
+   Local table2copy = CopyTable(table2)
+   Local result     = True
+
+   For i, v In Pairs(table1)
+      If TB.Item.IsNil(table2, i)
+         ; Index of table1 not found on table2
+         Return(False)
+      ElseIf GetType(v) <> GetType(table2[i])
+         ; Item type of table1 different from item type of table2
+         Return(False)
+      ElseIf GetType(v) = #TABLE
+         ; If items are tables compares them
+         result = TB.Compare(v, table2[i], compare_funcs)
+         If result = False Then Return(False)
+      ElseIf GetType(v) = #FUNCTION
+         If compare_funcs
+            ; If we have to compare functions, do it
+            If v <> table2[i] Then Return(False)
+         Else
+            ; Skip function comparison
+         EndIf
+      ElseIf v <> table2[i]
+         ; Items are not equal
+         Return(False)
+      EndIf
+
+      ; Items are equal, remove them from the control table
+      table2copy[i] = Nil
+   Next
+
+   If TB.Count(table2copy) <> 0 Then Return(False) Else Return(True)
+
+EndFunction
+
+
+Function TB.CompareScore(table1, table2, compare_funcs, count, equals)
+/******************************************************************************
+score, compared, equals = TB.CompareScore(table1, table2, compare_funcs, count, equals)
+
+Compare 'table1' and 'table2' and returns a score. Set 'compare_funcs' to TRUE
+if you want to compare function entries too. The comparisons are recursive.
+-------------------------------------------------------------------------------
+INPUT
+  table1 => The first table to compare
+  table2 => The second table to compare
+  compare_func => Set to TRUE to compare also function fields
+  count I> This argument is used internally to handle recursive calls
+  equals I> This argument is used internally to handle recursive calls  
+OUTPUT
+  score => The resulting score between 0 and 1 where 1 means identical tables.
+  compared => Count of the compared items
+  equals => Count of the identical items
+******************************************************************************/
+   If HL.IsNil(count ) Then count  = 0
+   If HL.IsNil(equals) Then equals = 0
+
+   If GetType(table1) <> #TABLE Or GetType(table2) <> #TABLE Then Return(0)
+
+   Local table2copy = CopyTable(table2)
+   Local result     = 0
+
+   For i, v In Pairs(table1)
+      If TB.Item.IsNil(table2, i)
+         ; Index of table1 not found on table2
+         count = count + 1
+      ElseIf GetType(v) <> GetType(table2[i])
+         ; Item type of table1 different from item type of table2
+         count = count + 1
+      ElseIf GetType(v) = #TABLE
+         ; If items are tables compares them
+         If v = table2[i]
+            ; Same table
+            count = count + 1
+            equals = equals + 1
+         Else
+            r1, count1, equals1 = TB.CompareScore(v, table2[i], compare_funcs, count, equals)
+            r = r + 1
+            count = count + count1
+            equals = equals + equals1
+         EndIf
+      ElseIf GetType(v) = #FUNCTION
+         If compare_funcs
+            ; If we have to compare functions, do it
+            If v = table2[i]
+               equals = equals + 1
+               count  = count + 1
+            EndIf
+         Else
+            ; Skip function comparison
+         EndIf
+      ElseIf v <> table2[i]
+         ; Items are not equal
+         count = count + 1
+      Else
+         ; Items are equal, remove them from the control table
+         table2copy[i] = Nil
+         count  = count  + 1
+         equals = equals + 1
+      EndIf
+
+   Next
+
+   Local result = 0
+   If count > 0
+      result = equals/count
+   EndIf
+   Return(result, count, equals)
+
+EndFunction
+
+
+Function TB.Set(Source, Changes, ReturnsNew)
+/******************************************************************************
+result = TB.Set(Source, Changes, ReturnsNew)
+
+Sets all fields found in the table 'source' with the corrisponding fields in
+the table 'changes', returns a new modified table if 'returnsNew' has been set 
+to TRUE otherwise modify 'source' directly. 
+The process is recursive.
+-------------------------------------------------------------------------------
+INPUT
+  source => The source table (the one we need to update)
+  changes => The table of changes
+  returnsNew => Set to TRUE to obtain a new table instead of modify directly the
+             'source' table.
+OUTPUT
+  result => Nil in case of error or the new, updated table
+******************************************************************************/
+  Local NewTable = {}
+
+  If IsNil(ReturnsNew) Then ReturnsNew = False
+  If IsNil(Source)     Then Return()
+
+  If Not(IsNil(ReturnsNew))
+    If ReturnsNew
+      NewTable = CopyTable(Source)
+      
+    Else
+      NewTable = Source
+      
+    EndIf
+    
+  EndIf
+
+  If IsNil(Changes) Then Return(NewTable)
+
+  ; Scan <Source> table
+  Local index, value
+  For index, value In Pairs(Changes)
+    If GetType(value) = #TABLE
+      If TB.Item.Exists(NewTable, index)
+        If GetType(NewTable[index]) = #TABLE 
+          NewTable[index] = TB.Set(NewTable[index], value, True)
+          
+        EndIf
+        
+      EndIf
+      
+    Else
+      If GetType(Index) = #STRING
+        If TB.Item.Exists(NewTable, index)
+          NewTable[index] = value
+          
+        EndIf
+        
+      Else
+        ; Anything else...
+        NewTable[index] = value
+        
+      EndIf
+      
+    EndIf
+    
+  Next
+
+  Return(NewTable)
+  
+EndFunction
+
+
+Function TB.Convert.Table2String(table, separator)
+/******************************************************************************
+result = TB.Convert.Table2String(table, separator)
+
+Converts all 'table' items into a string using 'separator' as delimiter between
+each item. Returns the resulting string.
+-------------------------------------------------------------------------------
+INPUT
+  table => The table of strings to convert
+  separator => The character to use as a separator (one character)
+OUTPUT
+  result => The resulting string
+NOTE
+  This function is usable on tables of strings with consecutive numeric indexes
+  starting from 0.
+******************************************************************************/
+   Local result = ""
+   Local first = True
+   For i, v In IPairs(table)
+      If Not(first)
+         result = result .. separator .. v
+      Else
+         result = v
+         first = False
+      EndIf
+   Next
+
+   Return(result)
+
+EndFunction
+
+
+Function TB.Convert.String2Table(string, separator)
+/******************************************************************************
+result = TB.Convert.String2Table(string, separator)
+
+Converts the given 'string' into a table splitting its items using the provided
+'separator' as delimiter between each item. Returns the resulting table.
+Leading spaces will be trimmed out from the resulting items.
+-------------------------------------------------------------------------------
+INPUT
+  string => The string to split
+  separator => The items delimiter (one character)
+OUTPUT
+  result => The resulting table
+******************************************************************************/
+   Local result = SplitStr(string, separator)
+   For i, v In IPairs(result)
+      result[i] = TrimStr(result[i], " ", False)
+      result[i] = TrimStr(result[i], " ", True)
+   Next
+
+   Return(result)
+
+EndFunction
+
+
+Function TB.Interpolate(Source, StartIndex, EndIndex, StartValue, EndValue, mode)
+/******************************************************************************
+source = TB.Interpolate(Source, StartIndex, EndIndex, StartValue, EndValue, mode)
+
+This function is used to fill the table 'source' with values. The index range 
+is delimited by 'startIndex' and 'endIndex', the values range is delimited by 
+'startValue' and 'endValue'. 'mode' defines the interpolation mode, for all 
+supported modes have a look at the Easing library.
+-------------------------------------------------------------------------------
+INPUT
+  source => The table we want to fill with values
+  startIndex => Starting table's index
+  endIndex => Ending table's index
+  startValue => Starting value
+  endValue => Ending value
+  mode => Interpolation mode
+OUTPUT
+  source => The source table modified
+NOTE
+  This function is only for tables indexed with numbers. With this function
+  you can easily precalculate paths for your moving objects.
+******************************************************************************/
+   If HL.IsNil(mode) Then mode = "linear"
+   mode = LowerStr(mode)
+   Local efunc = getEasingFunction(mode)
+
+   If HL.IsNil(source) Then source = {}
+
+   ;Local steps = EndIndex - StartIndex
+   ;Local valueStep = (EndValue - StartValue)/steps
+
+   ;Local startingValue = StartValue
+   For Local i = StartIndex To EndIndex
+      Source[i] = efunc(i - startIndex, startValue, endValue - startValue, endIndex - startIndex)
+      ;Source[i] = startingValue
+      ;startingValue = startingValue + valueStep
+   Next
+
+   Return(Source)
+
+EndFunction
+
+
+Function TB.Fill(Source, StartIndex, EndIndex, Value)
+/******************************************************************************
+source = TB.Fill(Source, StartIndex, EndIndex, Value)
+
+Simple function to fill/initialize a table range with a value.
+-------------------------------------------------------------------------------
+INPUT
+  source => The table we want to fill with <value>
+  startIndex => Starting table's index
+  endIndex => Ending table's index
+  value => The value used to fill the table <source>
+OUTPUT
+  source => The source table modified
+NOTE
+  This function is only for linear tables indexed with numbers.
+******************************************************************************/
+   If HL.IsNil(source) Then source = {}
+
+   For Local i = StartIndex To EndIndex
+      Source[i] = Value
+   Next
+
+   Return(Source)
+
+EndFunction
+
+
+Function TB.Copy(Source, SkipFunc)
+/******************************************************************************
+result = TB.Copy(source, skipFunc)
+
+Use this function to copy tables recursively, you can skip functions setting
+'skipFunc' to TRUE.
+-------------------------------------------------------------------------------
+INPUT
+  source => Source table too copy
+  skipFunc => Set to TRUE to exclude functions from the copy
+OUTPUT
+  result => Copied table
+******************************************************************************/
+   If HL.IsNil(SkipFunc) Then SkipFunc = False
+
+   Local Result = {}
+   For i, v In Pairs(Source)
+      If GetType(v) = #TABLE
+         Result[i] = TB.Copy(v, SkipFunc)
+
+      ElseIf GetType(v) = #FUNCTION And Not(SkipFunction)
+         Result[i] = v
+      Else
+         Result[i] = v
+      EndIf
+   Next
+
+   Return(Result)
+
+EndFunction
+
+Function TB.TEST_ItemCompare()
+  ; Compares one or more fields of two records, if the comparison is
+  ; between two equal values then the next specified fields will be
+  ; checked otherwise the result of the first comparison is returned.
+  DebugPrint("TESTING TB.Item.Compare()")
+  
+  Local record1 = { name = "Spiderman", age = 34, job = "Super Hero" }
+  Local record2 = { name = "Batman",    age = 41, job = "Super Hero" }
+  
+  DebugPrint("Comparing field 'name' : record1.name > record2.name ?")
+  DebugPrint(record1.name .. " > " .. record2.name .. " ?")
+  Local result = TB.Item.Compare(record1, record2, { True }, { "name" })
+  DebugPrint(IIf(result, "YES", "NO"))
+  DebugPrint("")
+  
+  DebugPrint("Comparing field 'age' : record1.age < record2.age ?")
+  DebugPrint(record1.age .. " < " .. record2.age .. " ?")
+  Local result = TB.Item.Compare(record1, record2, { False }, { "age" })
+  DebugPrint(IIf(result, "YES", "NO"))
+  DebugPrint("")
+  
+  DebugPrint("Comparing fields 'job', 'age' : record1.job < record2.job, record1.age < record2.age ?")
+  DebugPrint(record1.job .. " < " .. record2.job .. ", " .. record1.age .. " < " .. record2.age .. " ?")
+  Local result = TB.Item.Compare(record1, record2, { False, False }, { "job", "age" })
+  DebugPrint(IIf(result, "YES", "NO"))
+  DebugPrint("\nNOTE:\nThe result is YES because the first comparison is between\ntwo equal values so the check continue to the next specified field.")
+  
+  
+  DebugPrompt("Hit ENTER to quit?")
+EndFunction
+
+Function TB.TEST_ItemFind()
+  DebugPrint("TESTING TB.Item.Find()")
+  
+  Local items = { "Jhonny", 
+                  "Michael", 
+                  "Henry", 
+                  "Mark", 
+                  "Ryan", 
+                  "Cody", 
+                  "Fred", 
+                  "Jim", 
+                  "Paul", 
+                  "Sam",
+                  "*Joe" }
+  
+  DebugPrint("\nLooking for 'mark' : Case Sensitive : OFF, Exact String : OFF")
+  Local found, index = TB.Item.Find(items, "mark", False, False)
+  
+  If found
+    DebugPrint("First result @ " .. index .. " -> " .. items[index])
+  Else
+    DebugPrint("NOT FOUND!")
+  EndIf
+  
+  DebugPrint("\nLooking for '*a*' : Case Sensitive : OFF, Exact String : OFF")
+  Local found, index = TB.Item.Find(items, "*a*", False, False)
+  
+  If found
+    DebugPrint("First result @ " .. index .. " -> " .. items[index])
+  Else
+    DebugPrint("NOT FOUND!")
+  EndIf
+  
+  DebugPrint("\nLooking for 'Ma*' : Case Sensitive : ON, Exact String : OFF")
+  Local found, index = TB.Item.Find(items, "*a*", False, False)
+  
+  If found
+    DebugPrint("First result @ " .. index .. " -> " .. items[index])
+  Else
+    DebugPrint("NOT FOUND!")
+  EndIf
+  
+  DebugPrint("\nLooking for 'Joe' : Case Sensitive : ON, Exact String : On")
+  Local found, index = TB.Item.Find(items, "Joe", False, False)
+  
+  If found
+    DebugPrint("First result @ " .. index .. " -> " .. items[index])
+  Else
+    DebugPrint("NOT FOUND!")
+  EndIf  
+  
+  DebugPrint("\nLooking for '*Joe' : Case Sensitive : ON, Exact String : On")
+  Local found, index = TB.Item.Find(items, "*Joe", False, False)
+  
+  If found
+    DebugPrint("First result @ " .. index .. " -> " .. items[index])
+  Else
+    DebugPrint("NOT FOUND!")
+  EndIf  
+  
+  DebugPrompt("\n\nHit ENTER to quit?")
+EndFunction
+
+Function TB.TEST_Push()
+  
+  Local items = { "Jhonny", 
+                  "Michael", 
+                  "Henry", 
+                  "Mark", 
+                  "Ryan", 
+                  "Cody", 
+                  "Fred", 
+                  "Jim", 
+                  "Paul", 
+                  "Sam" }  
+  
+  Local drawScreen = Function()
+                        Cls
+                        Locate(0, 0)
+                        NPrint("TESTING TB.Item.PushUp(), TB.Item.PushDown()\n")
+                        NPrint("TABLE CONTENTS:")
+                        For Local i = 0 To 9 Do NPrint(i, items[i])
+                        
+                        NPrint("\nType your choice and hit ENTER:")
+                        NPrint("1) PushUp, 2) PushDown, Q) Quit")
+                        
+                        Local command = InKeyStr(#ALL)
+                        
+                        If command = "Q"
+                          End
+                          
+                        ElseIf command = "1"
+                          NPrint("\n   Type item number and hit ENTER:")
+                          Local i = ToNumber(InKeyStr(#ALL))
+                          TB.PushUp(items, i)
+                          
+                        ElseIf command = "2"
+                          NPrint("\n   Type item number and hit ENTER:")
+                          Local i = ToNumber(InKeyStr(#ALL))
+                          TB.PushDown(items, i)
+                          
+                        EndIf
+                      EndFunction
+                      
+  Repeat
+    drawScreen()
+  Forever
+  
+EndFunction
+
+Function TB.TEST_Shift()
+  EscapeQuit(True)
+  
+  ; I've added spaces to simplify the output formatting
+  Local items1 = { "Jhonny ", "Michael", "Henry  ", "Mark   ", "Ryan   ", "Cody   ", "Fred   ", "Jim    ", "Paul   ", "Sam    " }  
+  Local items2 = CopyTable(items1)
+  
+  Repeat
+    Cls
+    Locate(0, 0)
+    NPrint("ESC to Quit")
+    NPrint("")
+    NPrint("ShiftUp   ShiftDown")
+    NPrint("-------------------")
+    For i = 0 To 9 Do NPrint(i, items1[i], items2[i])
+    NPrint("")
+    TB.ShiftUp(items1)
+    TB.ShiftDown(items2)
+    Wait(150, #MILLISECONDS)
+  Forever
+  
+EndFunction
+
+Function TB.TEST_Count()
+  
+  Local items = { [0] = 43, [1] = 49, [4] = 192, music = "test.mp3" }  
+
+  NPrint("TB.COUNT  : ", TB.Count(items))
+  NPrint("ListItems : ", ListItems(items))
+  
+  NPrint("\nENTER TO QUIT")
+  InKeyStr(#ALL)
+    
+EndFunction
+
+Function TB.TEST_Merge()
+  Local table1 = { name = "Fabio", surname = "Falcucci", age = 44 }
+  Local table2 = { hobby = "Programming", nick = "Allanon", name = "What's up?" }
+  
+  NPrint("TABLE 1")
+  ForEach(table1, NPrint)
+  NPrint("\nTABLE 2")
+  ForEach(table2, NPrint)
+  
+  Local result = TB.Merge(table1, table2, True)
+  NPrint("\nTABLE 1")
+  ForEach(table1, NPrint)
+  
+  NPrint("\nENTER TO QUIT")
+  InKeyStr(#ALL)
+  
+EndFunction
+
+Function TB.TEST_Sort()
+  Local table = { { name = "Spiderman", power = "Web" },
+                  { name = "Thor"     , power = "Hammer" },
+                  { name = "Flash"    , power = "Speed" },
+                  { name = "Iron Man" , power = "Armour" },
+                  { name = "Iron Man" , power = "Weapons" },
+                  { name = "Hulk"     , power = "Strenght" } }
+                  
+  NPrint("TABLE CONTENT")
+  For i = 0 To 5
+    Local v = table[i]
+    NPrint("[color=#yellow]" .. v.name .. "[/color] " .. v.power)
+  Next
+  
+  NPrint("\nSORTED by Name (descending order)")
+  TB.Sort(table, True, "name", Nil, "quicksort")
+  For i = 0 To 5
+    Local v = table[i]
+    NPrint("[color=#yellow]" .. v.name .. "[/color] " .. v.power)
+  Next
+  
+  NPrint("\nSORTED by Power (ascending order)")
+  TB.Sort(table, False, "power", Nil, "combsort")
+  For i = 0 To 5
+    Local v = table[i]
+    NPrint("[color=#yellow]" .. v.name .. "[/color] " .. v.power)
+  Next
+  
+  NPrint("\nSORTED by Name & Power (descending/descending order)")
+  TB.Sort(table, { True, True }, { "name", "power" }, Nil, "quicksort")
+  For i = 0 To 5
+    Local v = table[i]
+    NPrint("[color=#yellow]" .. v.name .. "[/color] " .. v.power)
+  Next
+
+  NPrint("\nSORTED by Name & Power (descending/ascending order)")
+  TB.Sort(table, { True, False }, { "name", "power" }, Nil, "quicksort")
+  For i = 0 To 5
+    Local v = table[i]
+    NPrint("[color=#yellow]" .. v.name .. "[/color] " .. v.power)
+  Next
+  
+  NPrint("\nLeft mouse to QUIT.")
+  
+  WaitLeftMouse()
+EndFunction
+
+Function TB.TEST_ReIndex()
+  Local table = { { name = "Spiderman", power = "Web" },
+                  { name = "Thor", power = "Hammer" },
+                  { name = "Flash", power = "Speed" },
+                  { name = "Iron Man", power = "Armour" },
+                  { name = "Iron Man", power = "Weapons" },
+                  { name = "Hulk", power = "Strenght" } }
+                  
+  NPrint("TABLE CONTENT")
+  For i = 0 To 5
+    Local v = table[i]
+    NPrint("INDEX : [color=#red]" .. i .. "[/color], NAME : [color=#yellow]" .. v.name .. "[/color], POWER : " .. v.power)
+  Next
+
+  NPrint("\nReindexing by power")
+  Local table = TB.ReIndex("id", "power", table)
+  For i, v In Pairs(table)
+    NPrint("INDEX : [color=#red]" .. i .. "[/color], NAME : [color=#yellow]" .. v.name .. "[/color], ID : " .. v.id)
+  Next
+  
+  NPrint("\nReindexing by name")
+  Local table = TB.ReIndex("power", "name", table)
+  For i, v In Pairs(table)
+    NPrint("INDEX : [color=#red]" .. i .. "[/color], POWER : [color=#yellow]" .. v.power .. "[/color], ID : " .. v.id)
+  Next
+  NPrint("[b][color=#blue]>> ONE RECORD <IRON MAN> AS BEEN DELETED <<[/color][/b]")
+
+  NPrint("\nLeft mouse to QUIT.")
+  
+  WaitLeftMouse()
+  
+EndFunction
+
+Function TB.TEST_ReplaceChars()
+  Local table = { { name = "Spiderman", power = "Web" },
+                  { name = "Thor", power = "Hammer" },
+                  { name = "Flash", power = "Speed" },
+                  { name = "Iron Man", power = "Armour" },
+                  { name = "Iron Man", power = "Weapons" },
+                  { name = "Hulk", power = "Strenght" } }
+                  
+  NPrint("TABLE CONTENT")
+  For i = 0 To 5
+    Local v = table[i]
+    NPrint("INDEX : [color=#red]" .. i .. "[/color], NAME : [color=#yellow]" .. v.name .. "[/color], POWER : " .. v.power)
+  Next
+
+  NPrint("\nLOCATING AND REPLACING ALL <man> WITH <woman>")
+  TB.ReplaceChars(table, "man", "woman", True, False)
+  
+  NPrint("\nTABLE CONTENT")
+  For i = 0 To 5
+    Local v = table[i]
+    NPrint("INDEX : [color=#red]" .. i .. "[/color], NAME : [color=#yellow]" .. v.name .. "[/color], POWER : " .. v.power)
+  Next
+  
+  NPrint("\nLeft mouse to QUIT.")
+  
+  WaitLeftMouse()
+  
+EndFunction
+
+Function TB.TEST_Compare()
+  Local tab01 = { { name = "Spiderman", power = "Web, Speed, Strenght" },
+                  { name = "Thor", power = "Hammer" },
+                  { name = "Flash", power = "Speed" },
+                  { name = "Iron Man", power = "Armour" },
+                  { name = "Iron Man", power = "Weapons" },
+                  { name = "Hulk", power = "Strenght" } }
+
+  Local tab02 = { { name = "Spiderman", power = "Web" },
+                  { name = "Thor", power = "Hammer" },
+                  { name = "Flash", power = "Speed" },
+                  { name = "Iron Man", power = "Armour" },
+                  { name = "Iron Man", power = "Weapons" },
+                  { name = "Hulk", power = "Strenght" } }
+                  
+  NPrint("TABLE 01 CONTENT")
+  For i = 0 To 5
+    Local v = tab01[i]
+    NPrint("INDEX : [color=#red]" .. i .. "[/color], NAME : [color=#yellow]" .. v.name .. "[/color], POWER : " .. v.power)
+  Next
+      
+  NPrint("\nTABLE 02 CONTENT")
+  For i = 0 To 5
+    Local v = tab02[i]
+    NPrint("INDEX : [color=#red]" .. i .. "[/color], NAME : [color=#yellow]" .. v.name .. "[/color], POWER : " .. v.power)
+  Next
+  NPrint("-> Please note that the two tables have a different value in item 0")
+
+  NPrint("\n[b]COMPARING USING TB.Compare()...[/b]")
+  Local result = TB.Compare(tab01, tab02, False)
+  
+  NPrint(IIf(result, "THE TABLES HAVE THE SAME CONTENTS", "THE TABLES DOES NOT HAVE THE SAME CONTENTS"))
+  
+  NPrint("\n[b]COMPARING USING TB.CompareScore()...[/b]")
+  Local score, compared, equals = TB.CompareScore(tab01, tab02, False)
+  
+  NPrint("SCORE          : " .. ToString(Int(Score*10000)/100) .. "%")
+  NPrint("COMPARED ITEMS : " .. ToString(compared))
+  NPrint("EQUAL ITEMS    : " .. ToString(equals))
+  
+  NPrint("\nLeft mouse to QUIT.")
+  
+  WaitLeftMouse()
+  
+EndFunction
+
+Function TB.TEST_Set()
+  Local table = { name     = "Fabio Falcucci", 
+                  age      = 44, 
+                  hobbies  = "music, programming, videogames, science",
+                  job      = "programmer",
+                  gender   = "male",
+                  location = "Italy",
+                  aspect   = 
+                    { eyes   = "brown",
+                      height = "1.75m",
+                      hair   = "few",
+                      weight = "too much" },
+                  }
+                  
+  NPrint("\nTABLE CONTENT")
+  For i, v In Pairs(table)
+    If GetType(v) = #TABLE
+      NPrint("[Color=#GREEN]" .. i .. " : [/color] sub-table")
+      For ii, vv In Pairs(v)        
+        NPrint("   [Color=#GREEN]" .. ii .. " : [/color]" .. vv)
+      Next
+    Else
+      NPrint("[Color=#GREEN]" .. i .. " : [/color]" .. v)
+    EndIf
+  Next
+  
+  NPrint("\nChanging contents using TB.Set()")
+  NPrint("In red all changed items.\n")
+  TB.Set(table, { job = "[color=#RED]programmer, consultant[/color]", 
+                  name = "[color=#RED]Fabio Falcucci (Allanon)[/color]",
+                  aspect = { hair = "[color=#RED]none[/color]" }
+                  }, 
+                  False)
+  
+  NPrint("\nUPDATED TABLE CONTENT")
+  For i, v In Pairs(table)
+    If GetType(v) = #TABLE
+      NPrint("[Color=#YELLOW]" .. i .. " : [/color] sub-table")
+      For ii, vv In Pairs(v)        
+        NPrint("   [Color=#YELLOW]" .. ii .. " : [/color]" .. vv)
+      Next
+    Else
+      NPrint("[Color=#YELLOW]" .. i .. " : [/color]" .. v)
+    EndIf
+  Next
+
+  NPrint("\nLeft mouse to QUIT.")
+  
+  WaitLeftMouse()
+  
+EndFunction
+
+Function TB.TEST_Interpolate()
+  NPrint("Creating a linear value range from 1 To 50 in 50 items")
+  Local table = {}
+  TB.Interpolate(table, 0, 49, 1, 50, "linear")
+  
+  For i = 0 To 49 Do NPrint(PadNum(i, 2) .. " : " .. table[i])
+  
+  NPrint("\nLeft mouse to CONTINUE...")
+  WaitLeftMouse()
+ 
+  Cls
+  Locate(0, 0)
+  NPrint("Creating an InSine value range from 5 To 10 in 50 items")
+  Local table = {}
+  TB.Interpolate(table, 0, 49, 5, 10, "insine")
+  
+  For i = 0 To 49 Do NPrint(PadNum(i, 2) .. " : " .. table[i])
+  
+  NPrint("\nLeft mouse to CONTINUE...")
+  WaitLeftMouse()
+
+  Cls
+  Locate(0, 0)
+  NPrint("Creating an OutElastic value range from 5 To 7 in 30 items")
+  Local table = {}
+  TB.Interpolate(table, 0, 29, 5, 7, "outelastic")
+  
+  For i = 0 To 29 Do NPrint(PadNum(i, 2) .. " : " .. table[i])
+  
+  NPrint("\nLeft mouse to QUIT.")
+  WaitLeftMouse()
+
+EndFunction
+
+Function TB.Serialize(table)
+  Local tBlock = ""
+  Local tbl = HL.BufferedString:New()
+  For i, v In Pairs(table)
+    Local tPair = TB._StorePair(i, v)
+    tbl:AddString(tPair)
+  Next
+  
+  tBlock = tbl:Get()
+  tbl = Nil
+  Return(tBlock)
+EndFunction
+
+Function TB._StorePair(index, value)
+  Local iType = GetType(index)
+  Local vType = GetType(value)
+ 
+  Switch iType
+    Case #STRING
+      Local sLen = PadNum(StrLen(index), 5)
+      index = "i$:" .. sLen .. ":" .. index
+      
+    Case #NUMBER
+      index = ToString(index)
+      Local sLen = PadNum(StrLen(index), 5)
+      index = "i%:" .. sLen .. ":" .. index
+
+  EndSwitch
+
+  Switch vType
+    Case #STRING
+      Local sLen = PadNum(StrLen(value), 5)
+      value = "v$:" .. sLen .. ":" .. value
+      
+    Case #NUMBER
+      value = ToString(value)
+      Local sLen = PadNum(StrLen(value), 5)
+      value = "v%:" .. sLen .. ":" .. value
+
+    Case #TABLE
+      Local ii, vv
+      Local tBlock = index .. "TBL>:"
+      ;DebugPrint("-- BEGIN TABLE -- " .. index)
+      For ii, vv In Pairs(value)
+        ;DebugPrint("Scanning index " .. ii .. ", value : " .. ToString(vv))
+        Local tPair = TB._StorePair(ii, vv)
+        tBlock = tBlock .. tPair
+      Next
+      ;DebugPrint("-- END TABLE --")
+      tBlock = tBlock .. "<TBL"
+      Return(tBlock)
+      
+    
+  EndSwitch
+  
+  Local couple = index .. value
+  Return(couple)
+
+EndFunction
+
+Function TB.Deserialize(data)
+  If data = "" Then Return({})
+  
+  Local result = {}
+  Local tbl = HL.BufferedString:New()
+  tbl:Set(data)
+  tbl:PrepareForRead()
+  
+  result = TB._ReadPair(tbl, result, 0)
+  
+  Return(result)
+    
+EndFunction
+
+Function TB._ReadPair(tBlock, table, index)
+  loop = True
+  blockLen = StrLen(tBlock:Get())
+  While loop
+    ; Check Index Type
+    ;DebugPrint("Reading ", tBlock:Read(index, 5))
+    Local iType = -1
+    If tBlock:Read(index, 3) = "i$:" ;MidStr(tBlock, index, 3) = "i$:"
+      iType = #STRING
+    ElseIf tBlock:Read(index, 3) = "i%:" ;MidStr(tBlock, index, 3) = "i%:"
+      iType = #NUMBER
+    ElseIf tBlock:Read(index, 4) = "<TBL"
+      ; Tabella vuota, dopo i : si trova <TBL
+      index = index + 4
+      Return({}, index)
+    Else
+      DebugPrint("\n\n== INDEX ERROR ==")
+      DebugPrint(tBlock:Read(index, 3))
+      DebugPrint("Index : ", index)
+      DebugPrint("Left  : ", tBlock:Read(index, 50))
+      DebugPrint("Right : ", tBlock:Read(index-50,50))
+      DebugPrompt("HIT ENTER...")
+    EndIf
+    
+    index = index + 3
+    
+    ; Read Index Lenght
+    Local iLen = ToNumber(tBlock:Read(index, 5)) ;ToNumber(MidStr(tBlock, index, 5))
+    
+    index = index + 6
+    
+    ; Read Index Value
+    Local iValue = tBlock:Read(index, iLen) ;MidStr(tBlock, index, iLen)
+    
+    index = index + iLen
+    
+    ;DebugPrint("i Type = ", iType, "i Len = ", iLen, "i Val = ", iValue)
+    
+    Local _index = iValue
+    If iType = #NUMBER Then _index = ToNumber(_index)
+
+    Local skipValue = False
+    
+    ; Check Value Type
+    Local vType = -1
+    If tBlock:Read(index, 3) = "v$:" ;MidStr(tBlock, index, 3) = "v$:"
+      vType = #STRING
+    ElseIf tBlock:Read(index, 3) = "v%:" ;MidStr(tBlock, index, 3) = "v%:"
+      vType = #NUMBER
+    Else
+      If tBlock:Read(index, 4) = "TBL>" ;MidStr(tBlock, index, 4) = "TBL>"
+        ;DebugPrint("SUBTABLE BEGIN")
+        index = index + 4 + 1
+        Local subtable = {}
+        ;DebugPrint("READING SUBTABLE @ ", index, tBlock:Read(index, 5))
+        subtable, index = TB._ReadPair(tBlock, subtable, index)
+        ;DebugPrint("*** SUBTABLE : " .. _index)
+        ;DBG.DumpTable(subtable)
+        ;DebugPrint("*************************")
+        table[_index] = subtable
+        ;DBG.DumpTable(table)
+        skipValue = True
+        ;Return(table, index)
+        
+      Else
+        DebugPrompt("ERROR -> " .. tBlock:Read(index, 3) .. " i:" .. index)
+      EndIf
+    EndIf
+    
+    If Not(skipValue)
+      index = index + 3
+      
+      ; Read Value Lenght
+      Local vLen = ToNumber(tBlock:Read(index, 5)) ;ToNumber(MidStr(tBlock, index, 5))
+      
+      index = index + 6
+      
+      ; Read Value Value
+      Local vValue = tBlock:Read(index, vLen) ;MidStr(tBlock, index, vLen)
+      
+      index = index + vLen
+      
+      ;DebugPrint("v Type = ", vType, "v Len = ", vLen, "v Value = ", vValue)
+
+      If vType = #NUMBER Then vValue = ToNumber(vValue)
+      
+      table[_index] = vValue
+    EndIf
+    
+    If index >= blockLen; StrLen(tBlock)
+      loop = False
+      ;DebugPrint("BLOCK END : index = ", index, "lenght = ", StrLen(tBlock))
+    EndIf
+    
+    If tBlock:Read(index, 4) = "<TBL" ;MidStr(tBlock, index, 4) = "<TBL"
+      index = index + 4
+      ;DebugPrint("SUBTABLE END, INDEX IS " .. index)
+      Return(table, index)
+    EndIf
+      
+    ;DBG.DumpTable(table)
+    
+  Wend
+  
+  Return(table, index)
+  
+EndFunction
+
+Function TB.TEST_Serialization()
+  Local table =
+    { "alpha",
+      "beta",
+      "gamma",
+      [8] = "delta",
+      ["omega"] = "omega",
+      subtable =
+        { 1, 
+          2, 
+          3,
+          ["sub2"] = { "one", "two", 3, 4, "this is a long string to check if it's stored as it should be" },
+          gio = "ater",
+          { subsub =
+            { subsubsub = 
+              { subsubsubsub = "Deep nesting...", 
+                { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }}}},
+      ["ciccio"] = "delta",
+      ["somedata"] =
+        { 1, 2, 3, 4, 5, 6, 7, 8, 9, "hello", { 1, 2, 3, { 4, 5, 6, { 7, 8, 9, { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }} } },
+      bool = False,
+      { "alpha",
+      "beta",
+      "gamma",
+      [8] = "delta",
+      ["omega"] = "omega",
+      subtable =
+        { 1, 
+          2, 
+          3,
+          ["sub2"] = { "one", "two", 3, 4, "this is a long string to check if it's stored as it should be" },
+          gio = "ater",
+          { subsub =
+            { subsubsub = 
+              { subsubsubsub = "Deep nesting...", 
+                { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }}}},
+      ["ciccio"] = "delta",
+      ["somedata"] =
+        { 1, 2, 3, 4, 5, 6, 7, 8, 9, "hello", { 1, 2, 3, { 4, 5, 6, { 7, 8, 9, { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }} } },
+      bool = False
+        }
+      }
+  table.pol =     { "alpha",
+      "beta",
+      "gamma",
+      [8] = "delta",
+      ["omega"] = "omega",
+      subtable =
+        { 1, 
+          2, 
+          3,
+          ["sub2"] = { "one", "two", 3, 4, "this is a long string to check if it's stored as it should be" },
+          gio = "ater",
+          { subsub =
+            { subsubsub = 
+              { subsubsubsub = "Deep nesting...", 
+                { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }}}},
+      ["ciccio"] = "delta",
+      ["somedata"] =
+        { 1, 2, 3, 4, 5, 6, 7, 8, 9, "hello", { 1, 2, 3, { 4, 5, 6, { 7, 8, 9, { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }} } },
+      bool = False,
+      { "alpha",
+      "beta",
+      "gamma",
+      [8] = "delta",
+      ["omega"] = "omega",
+      subtable =
+        { 1, 
+          2, 
+          3,
+          ["sub2"] = { "one", "two", 3, 4, "this is a long string to check if it's stored as it should be" },
+          gio = "ater",
+          { subsub =
+            { subsubsub = 
+              { subsubsubsub = "Deep nesting...", 
+                { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }}}},
+      ["ciccio"] = "delta",
+      ["somedata"] =
+        { 1, 2, 3, 4, 5, 6, 7, 8, 9, "hello", { 1, 2, 3, { 4, 5, 6, { 7, 8, 9, { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }} } },
+      bool = False
+        }
+      }
+  table.pil =     { "alpha",
+      "beta",
+      "gamma",
+      [8] = "delta",
+      ["omega"] = "omega",
+      subtable =
+        { 1, 
+          2, 
+          3,
+          ["sub2"] = { "one", "two", 3, 4, "this is a long string to check if it's stored as it should be" },
+          gio = "ater",
+          { subsub =
+            { subsubsub = 
+              { subsubsubsub = "Deep nesting...", 
+                { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }}}},
+      ["ciccio"] = "delta",
+      ["somedata"] =
+        { 1, 2, 3, 4, 5, 6, 7, 8, 9, "hello", { 1, 2, 3, { 4, 5, 6, { 7, 8, 9, { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }} } },
+      bool = False,
+      { "alpha",
+      "beta",
+      "gamma",
+      [8] = "delta",
+      ["omega"] = "omega",
+      subtable =
+        { 1, 
+          2, 
+          3,
+          ["sub2"] = { "one", "two", 3, 4, "this is a long string to check if it's stored as it should be" },
+          gio = "ater",
+          { subsub =
+            { subsubsub = 
+              { subsubsubsub = "Deep nesting...", 
+                { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }}}},
+      ["ciccio"] = "delta",
+      ["somedata"] =
+        { 1, 2, 3, 4, 5, 6, 7, 8, 9, "hello", { 1, 2, 3, { 4, 5, 6, { 7, 8, 9, { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }} } },
+      bool = False
+        }
+      }
+  table.pul =     { "alpha",
+      "beta",
+      "gamma",
+      [8] = "delta",
+      ["omega"] = "omega",
+      subtable =
+        { 1, 
+          2, 
+          3,
+          ["sub2"] = { "one", "two", 3, 4, "this is a long string to check if it's stored as it should be" },
+          gio = "ater",
+          { subsub =
+            { subsubsub = 
+              { subsubsubsub = "Deep nesting...", 
+                { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }}}},
+      ["ciccio"] = "delta",
+      ["somedata"] =
+        { 1, 2, 3, 4, 5, 6, 7, 8, 9, "hello", { 1, 2, 3, { 4, 5, 6, { 7, 8, 9, { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }} } },
+      bool = False,
+      { "alpha",
+      "beta",
+      "gamma",
+      [8] = "delta",
+      ["omega"] = "omega",
+      subtable =
+        { 1, 
+          2, 
+          3,
+          ["sub2"] = { "one", "two", 3, 4, "this is a long string to check if it's stored as it should be" },
+          gio = "ater",
+          { subsub =
+            { subsubsub = 
+              { subsubsubsub = "Deep nesting...", 
+                { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }}}},
+      ["ciccio"] = "delta",
+      ["somedata"] =
+        { 1, 2, 3, 4, 5, 6, 7, 8, 9, "hello", { 1, 2, 3, { 4, 5, 6, { 7, 8, 9, { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }} } },
+      bool = False
+        }
+      }
+  table.ppp =     { "alpha",
+      "beta",
+      "gamma",
+      [8] = "delta",
+      ["omega"] = "omega",
+      subtable =
+        { 1, 
+          2, 
+          3,
+          ["sub2"] = { "one", "two", 3, 4, "this is a long string to check if it's stored as it should be" },
+          gio = "ater",
+          { subsub =
+            { subsubsub = 
+              { subsubsubsub = "Deep nesting...", 
+                { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }}}},
+      ["ciccio"] = "delta",
+      ["somedata"] =
+        { 1, 2, 3, 4, 5, 6, 7, 8, 9, "hello", { 1, 2, 3, { 4, 5, 6, { 7, 8, 9, { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }} } },
+      bool = False,
+      { "alpha",
+      "beta",
+      "gamma",
+      [8] = "delta",
+      ["omega"] = "omega",
+      subtable =
+        { 1, 
+          2, 
+          3,
+          ["sub2"] = { "one", "two", 3, 4, "this is a long string to check if it's stored as it should be" },
+          gio = "ater",
+          { subsub =
+            { subsubsub = 
+              { subsubsubsub = "Deep nesting...", 
+                { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }}}},
+      ["ciccio"] = "delta",
+      ["somedata"] =
+        { 1, 2, 3, 4, 5, 6, 7, 8, 9, "hello", { 1, 2, 3, { 4, 5, 6, { 7, 8, 9, { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }} } },
+      bool = False
+        }
+      }
+  table.oli =     { "alpha",
+      "beta",
+      "gamma",
+      [8] = "delta",
+      ["omega"] = "omega",
+      subtable =
+        { 1, 
+          2, 
+          3,
+          ["sub2"] = { "one", "two", 3, 4, "this is a long string to check if it's stored as it should be" },
+          gio = "ater",
+          { subsub =
+            { subsubsub = 
+              { subsubsubsub = "Deep nesting...", 
+                { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }}}},
+      ["ciccio"] = "delta",
+      ["somedata"] =
+        { 1, 2, 3, 4, 5, 6, 7, 8, 9, "hello", { 1, 2, 3, { 4, 5, 6, { 7, 8, 9, { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }} } },
+      bool = False,
+      { "alpha",
+      "beta",
+      "gamma",
+      [8] = "delta",
+      ["omega"] = "omega",
+      subtable =
+        { 1, 
+          2, 
+          3,
+          ["sub2"] = { "one", "two", 3, 4, "this is a long string to check if it's stored as it should be" },
+          gio = "ater",
+          { subsub =
+            { subsubsub = 
+              { subsubsubsub = "Deep nesting...", 
+                { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }}}},
+      ["ciccio"] = "delta",
+      ["somedata"] =
+        { 1, 2, 3, 4, 5, 6, 7, 8, 9, "hello", { 1, 2, 3, { 4, 5, 6, { 7, 8, 9, { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }} } },
+      bool = False
+        }
+      }
+  table.ulu =      { "alpha",
+      "beta",
+      "gamma",
+      [8] = "delta",
+      ["omega"] = "omega",
+      subtable =
+        { 1, 
+          2, 
+          3,
+          ["sub2"] = { "one", "two", 3, 4, "this is a long string to check if it's stored as it should be" },
+          gio = "ater",
+          { subsub =
+            { subsubsub = 
+              { subsubsubsub = "Deep nesting...", 
+                { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }}}},
+      ["ciccio"] = "delta",
+      ["somedata"] =
+        { 1, 2, 3, 4, 5, 6, 7, 8, 9, "hello", { 1, 2, 3, { 4, 5, 6, { 7, 8, 9, { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }} } },
+      bool = False,
+      { "alpha",
+      "beta",
+      "gamma",
+      [8] = "delta",
+      ["omega"] = "omega",
+      subtable =
+        { 1, 
+          2, 
+          3,
+          ["sub2"] = { "one", "two", 3, 4, "this is a long string to check if it's stored as it should be" },
+          gio = "ater",
+          { subsub =
+            { subsubsub = 
+              { subsubsubsub = "Deep nesting...", 
+                { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }}}},
+      ["ciccio"] = "delta",
+      ["somedata"] =
+        { 1, 2, 3, 4, 5, 6, 7, 8, 9, "hello", { 1, 2, 3, { 4, 5, 6, { 7, 8, 9, { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }} } },
+      bool = False
+        }
+      }
+  table.oll =      { "alpha",
+      "beta",
+      "gamma",
+      [8] = "delta",
+      ["omega"] = "omega",
+      subtable =
+        { 1, 
+          2, 
+          3,
+          ["sub2"] = { "one", "two", 3, 4, "this is a long string to check if it's stored as it should be" },
+          gio = "ater",
+          { subsub =
+            { subsubsub = 
+              { subsubsubsub = "Deep nesting...", 
+                { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }}}},
+      ["ciccio"] = "delta",
+      ["somedata"] =
+        { 1, 2, 3, 4, 5, 6, 7, 8, 9, "hello", { 1, 2, 3, { 4, 5, 6, { 7, 8, 9, { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }} } },
+      bool = False,
+      { "alpha",
+      "beta",
+      "gamma",
+      [8] = "delta",
+      ["omega"] = "omega",
+      subtable =
+        { 1, 
+          2, 
+          3,
+          ["sub2"] = { "one", "two", 3, 4, "this is a long string to check if it's stored as it should be" },
+          gio = "ater",
+          { subsub =
+            { subsubsub = 
+              { subsubsubsub = "Deep nesting...", 
+                { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }}}},
+      ["ciccio"] = "delta",
+      ["somedata"] =
+        { 1, 2, 3, 4, 5, 6, 7, 8, 9, "hello", { 1, 2, 3, { 4, 5, 6, { 7, 8, 9, { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }} } },
+      bool = False
+        }
+      }
+  table.oiu =      { "alpha",
+      "beta",
+      "gamma",
+      [8] = "delta",
+      ["omega"] = "omega",
+      subtable =
+        { 1, 
+          2, 
+          3,
+          ["sub2"] = { "one", "two", 3, 4, "this is a long string to check if it's stored as it should be" },
+          gio = "ater",
+          { subsub =
+            { subsubsub = 
+              { subsubsubsub = "Deep nesting...", 
+                { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }}}},
+      ["ciccio"] = "delta",
+      ["somedata"] =
+        { 1, 2, 3, 4, 5, 6, 7, 8, 9, "hello", { 1, 2, 3, { 4, 5, 6, { 7, 8, 9, { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }} } },
+      bool = False,
+      { "alpha",
+      "beta",
+      "gamma",
+      [8] = "delta",
+      ["omega"] = "omega",
+      subtable =
+        { 1, 
+          2, 
+          3,
+          ["sub2"] = { "one", "two", 3, 4, "this is a long string to check if it's stored as it should be" },
+          gio = "ater",
+          { subsub =
+            { subsubsub = 
+              { subsubsubsub = "Deep nesting...", 
+                { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }}}},
+      ["ciccio"] = "delta",
+      ["somedata"] =
+        { 1, 2, 3, 4, 5, 6, 7, 8, 9, "hello", { 1, 2, 3, { 4, 5, 6, { 7, 8, 9, { 1, 2, 3, { 4, 5, 6, { 7, 8, 9 }} } }} } },
+      bool = False
+        }
+      }
+  
+  table = { empty = {}, tablewithempty = { empty2 = {}} };{ emptyString = "", { emtpystring = "", emptytable = {} } }
+  table = {}
+  DebugPrint("*** TESTING SERIALIZE/DESERIALIZE FUNCTIONS ***")
+  DebugPrint("These routines use bufferedStrings to achieve")
+  DebugPrint("speed!")
+  DebugPrint("----------------------------------------------") 
+  DebugPrint("Serialize a big table into a string...")
+  StartTimer(1)
+  Local serialized = TB.Serialize(table)
+  DebugPrint("Done in " .. GetTimer(1) .. "ms")
+  DebugPrint("Serialized string lenght : " .. StrLen(serialized) .. " characters")
+  DebugPrint("serialized:\n" .. serialized)
+  DebugPrint("")
+
+  DebugPrint("Deserialize the string back to a table...")
+  StartTimer(1)
+  Local unserialized = TB.Deserialize(serialized)
+  DebugPrint("Done in " .. GetTimer(1) .. "ms")
+  DebugPrint("deserialized:\n")
+  
+  ; To dump the table you have to include the DEBUG library
+  ;DBG.DumpTable(unserialized)
+  
+  DebugPrint("")
+  
+  DebugPrint("Write the serialized table to a file using <StringToFile()>...")
+  StringToFile(serialized, "serialized.data")
+  DebugPrint("Done.\n")
+  
+  DebugPrint("Compressing the written file...")
+  CompressFile("serialized.data", "serialized.packed")
+  DebugPrint("Done.\n")
+  
+  DebugPrint("Decompressing the compressed file...")
+  DecompressFile("serialized.packed", "serialized.decompressed")
+  DebugPrint("Done.\n")
+  
+  DebugPrint("Reading back from file and deserialize...")
+  StartTimer(1)
+  Local serialized2 = FileToString("serialized.decompressed")
+  Local deserialized2 = TB.Deserialize(serialized2)
+  DebugPrint("Done in " .. GetTimer(1) .. "ms\n\n")
+  
+  DebugPrompt("== HIT ENTER TO QUIT ==")
+EndFunction
+
+Function TB.TEST_DeepFind()
+
+  Local testTable =
+    { ["index0"] = 
+        { ["sayhello"] = "hello",
+          ["sayhi"]    = "hi",
+          [0] = 100,
+          [1] = 
+            { [100] = 1000,
+              [120] = 2000 },
+          ["saywow"] = "Wow!",
+          },
+          
+      [0] =
+        { [5] = "five",
+          [8] = "eight",
+          [0] =
+          { ["alpha"] = "ALFA" }
+          },
+          
+      [1] = "five",
+      
+      ["nice"] =
+        { [5] = "123",
+          [8] = "345",
+          [0] =
+          { ["beta"] = "BETA",
+            ["test"] =
+              { [0] = 1234,
+                [1] = 5678,
+                [2] = 9999 },
+            ["zero"] = 0
+            }
+          },
+      
+      }
+      
+  Local k = "*"
+
+  Local subset = TB.Item.DeepFind(testTable, k)
+
+  Local recursivePrint
+  
+  recursivePrint =
+    Function(t, s)
+      If IsNil(s) Then s = 0
+      Local i, v
+      For i, v In Pairs(t)
+        If GetType(v) = #TABLE
+          DebugPrint(RepeatStr(" ", s) .. ToString(i) .. " : ")
+          recursivePrint(v, s+2)
+        Else
+          DebugPrint(RepeatStr(" ", s) .. ToString(i) .. " : " .. ToString(v))
+        EndIf
+      Next
+    EndFunction
+    
+  recursivePrint(subset)
+  DebugPrompt("ENTER TO QUIT")
+EndFunction
+
+/* TEST AREA
+   =========
+   Uncomment the test function you want to run */
+
+;TB.TEST_Serialization()
+;TB.TEST_Interpolate()
+;TB.TEST_Set()
+;TB.TEST_Compare()
+;TB.TEST_ItemCompare()
+;TB.TEST_ItemFind()
+;TB.TEST_Push()
+;TB.TEST_Shift()
+;TB.TEST_Count()
+;TB.TEST_Merge()
+;TB.TEST_Sort()
+;TB.TEST_ReIndex()
+;TB.TEST_ReplaceChars()
+;TB.TEST_DeepFind()

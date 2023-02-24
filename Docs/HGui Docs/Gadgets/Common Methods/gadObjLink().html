@@ -1,0 +1,50 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>gadObj:Link()</h1>
+
+    <p><span class="text-big"><code>gadObj:Link(target, action, params)</code></span>
+    </p>
+    <p>Links this gadget to another one identified by <code>target</code>, <code>action</code> determines
+      the link behaviour (always attached to the <code>OnPushed</code> event) while <code>params</code> is
+      used to configure the action.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>target </strong>: Gadget object to target</li>
+      <li><strong>action </strong>: A string representing the action, actually the
+        following are supported:
+        <br>&nbsp; &nbsp;- "+/-" : Increase/Decrease Current Value (BUTTON Gadget
+        linked to TEXT Gadget)</li>
+      <li><strong>params </strong>: Table used to configure the action, it depends
+        on the action:
+        <br>&nbsp; &nbsp;- "+/-" : You have to provide the following items:
+        <br>&nbsp; &nbsp; &nbsp;→ <strong>range </strong>: { min_value, max_value }
+        <br>&nbsp; &nbsp; &nbsp;→ <strong>value </strong>: Indrease or decrease value</li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <p><u>NOTES</u>
+    </p>
+    <p style="margin-left:40px;">&nbsp;Available links:</p>
+    <ul>
+      <li style="margin-left:40px;">Button Gadget → Text Gadget
+        <br>&nbsp; &nbsp; &nbsp;“+/-”</li>
+    </ul>
+    <p style="margin-left:40px;"><span style="background-color:hsl(0, 75%, 60%);">This is an experimental, incomplete method to try to automatize links between gadget objects</span>
+    </p>
+    <p><u>EXAMPLES</u>&nbsp;</p>
+    <p><u>SEE ALSO</u>
+    </p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

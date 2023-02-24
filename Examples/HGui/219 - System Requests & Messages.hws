@@ -1,0 +1,170 @@
+/******************************************************************************
+HGUI : Tutorial 219 - System Requests & Messages            v1.0 : 10/02/2023 *
+*******************************************************************************
+HGui simplifies your programmer's life offering you some prebuilt interfaces
+for the most common task, they commonly mimic system requesters but using the
+power of HGui with many customization options.
+
+In this tutorial we are going to see non-blocking system request, blocking
+system requests and message windows.
+******************************************************************************/
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+;=== SYSTEM REQUESTER ===
+;========================
+/* result = HGui.Window:SysRequest(params)
+
+Creates a system request window to show messages and let the user interact
+with the available options.
+The requester can work in two modes 'blocking' and 'non-blocking', in both 
+modes button's callbacks and a global callback function can be used to manage
+the available option's buttons.
+In 'blocking' mode the code flow will be blocked until an option is selected
+and the requester will be threated as a modal window. 
+This mode will return the number of the selected option or -1 if the requester
+has been closed by its close gadget.
+If used in ‘non-blocking’ mode the code flow will continue and when an event
+is detected the associated callback functions will be called.
+*/
+
+; To use requesters we need at least one HGui window
+Local win = HGui.Window:new({ title = "Dummy window..." })
+
+; Let's start with a message window
+Local msgWin = HGui.Window:MessageNew(
+  { title = "MESSAGE",
+    message = { "In 5 seconds a blocking", "requester will appear!" }, 
+    position = { x = #CENTER, y = #CENTER-250 }
+    })
+
+Wait(5000, #MILLISECONDS)
+
+
+; BLOCKING SYSTEM REQUEST
+; -----------------------
+; I'm going to set all available parameters but most of them are optional!
+Local result = HGui.Window:SysRequestNew(
+  { ; you can specify here any window's standard option, like the title
+    ; for example:
+    title = "Blocking requester",
+    
+    ; with this additional parameters:
+    name = "blockreq",                    ; Unique window name
+    icon = "Resources/icon.png",          ; Optional icon image or preloaded brush id
+    blocking = True,                      ; This is a blocking requester
+    text = "Blocking requester example!", ; The requester's body
+    wordwrap = True,                      ; Enable/Disable text wordwrap
+    buttons =                             ; A numeric-indexed table, for each entry you
+                                          ; have to pass the button's parameters
+      { { caption = "Button 1" },         ;   Nothing stops you to pass more parameters or
+        { caption = "Button 2" },         ;   put your callback functions here!
+        { caption = "Button 3" } },
+    align = #HGUI_ALIGN_CENTER,           ; Text alignment (body)
+    buttonweights = { 0.25, 0.4, 0.35 },  ; Used to customize the space balance between the buttons
+    groupweights = { 0.8, 0.2 },          ; Used to balance the space between the bady and the buttons
+    layout = #HGUI_VERTICAL_LAYOUT,       ; You can also use HORIZONTAL and GRID layouts
+    callback =                            ; Callback function
+      Function(wObj, bObj, bNum)
+        ; Let's use the opened message window!
+        If bNum = -1
+          msgWin:MessageUpdate({ message = "You have closed the requester!" })
+          
+        Else
+          msgWin:MessageUpdate(
+            { message = 
+              { "Button object : " .. ToString(bObj.name),
+                "Button pressed: " .. bNum,
+                "Window's name : " .. ToString(wObj.name) }
+              })
+        EndIf
+      EndFunction
+    })
+
+; Let's use another message to show the result
+Local msgWin2 = HGui.Window:MessageNew(
+  { title = "RESULT",
+    message = { "You have pressed button " .. ToString(result),
+                "Please wait 5 seconds..." }
+    })
+
+For Local i = 5 To 0 Step -1
+  Wait(1000, #MILLISECONDS)
+  msgWin2:MessageUpdate(
+  { message = 
+    { "You have pressed button " .. ToString(result),
+      "Please wait " .. i .. " seconds..." }
+    })
+Next
+
+msgWin2:Free() ; We are closing the second message window
+
+; Let's see a NON-BLOCKING REQUESTER
+; ----------------------------------
+; Right now there is no options to define the icon size on the fly
+; but exists a global variable in the theme you can set for this purpose
+;  HGui.Theme.SysRequest.iconSize
+; It's default value is 64, but let's change it
+HGui.Theme.SysRequest.iconSize = 256
+
+Local result = HGui.Window:SysRequestNew(
+  { ; you can specify here any window's standard option, like the title
+    ; for example:
+    title = "NON-Blocking requester",
+    
+    ; with this additional parameters:
+    name = "requester 2",                 ; Unique window name
+    icon = "Resources/pic2.jpg",          ; Optional icon image or preloaded brush id
+    blocking = False,                     ; This is a NON-BLOCKING
+    text = { "NON-Blocking requester example!",
+             "with vertical buttons" },   ; The requester's body
+    wordwrap = True,                      ; Enable/Disable text wordwrap
+    buttons =                             ; A numeric-indexed table, for each entry you
+                                          ; have to pass the button's parameters
+      { { caption = "Button A" },         ;   Nothing stops you to pass more parameters or
+        { caption = "Button B" },         ;   put your callback functions here!
+        { caption = "Button C" } },
+    align = #HGUI_ALIGN_CENTER,           ; Text alignment (body)
+    buttonweights = { 0.15, 0.15, 0.70 }, ; Used to customize the space balance between the buttons
+    groupweights = { 0.8, 0.2 },          ; Used to balance the space between the bady and the buttons
+    layout = #HGUI_HORIZONTAL_LAYOUT,     ; You can also use VERTICAL and GRID layouts
+    callback =                            ; Callback function
+      Function(wObj, bObj, bNum)
+        ; Let's use the message window to show what's appened!
+        If bNum = -1
+          msgWin:MessageUpdate({ message = 
+            { "You have closed the requester!",
+              "== Close all windows to quit ==" } })
+          
+        Else
+          msgWin:MessageUpdate(
+            { message = 
+              { "Button object : " .. ToString(bObj.name),
+                "Button pressed: " .. bNum,
+                "Window's name : " .. ToString(wObj.name),
+                "== Close all windows to quit ==" }
+              })
+
+        EndIf
+      EndFunction
+    })
+
+; It's obvious that you cannot have a result in 'result' because the user
+; hasn't yet pressed a button, instead you have the requester window's object
+
+msgWin:MessageUpdate(
+  { message = 
+    { "Do you see?",
+      "The message has been updated before",
+      "you have pressed any button!",
+      ">> Request's name: " .. result.name }
+      }) 
+
+; To demonstrate that now you got a window object let's move the
+; requester window
+result:move(#CENTER, #BOTTOM-100)
+
+
+Repeat
+  WaitEvent()
+Forever

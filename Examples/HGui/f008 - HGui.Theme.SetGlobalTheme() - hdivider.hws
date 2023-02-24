@@ -1,0 +1,76 @@
+/*
+********************
+* HGui Test Script *
+* Fabio Falcucci   *
+*    Feb-2023      *
+********************
+  This script is used as a test and to show how it's possible to use the
+helper function 
+  HGui.Theme.SetGlobalTheme()
+to globally change the theme for a specific gadget class, in this case for
+HDIVIDER gadgets.
+-------------------
+
+HGui.Theme.SetGlobalTheme(GadgetType, Theme)
+  Set the specified theme to the given gadget class
+*/
+
+; INCLUDE THE LIBRARIES DEFINITIONS
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; Creates a new HGui window
+Local myWin = HGui.Window:new(
+                { title = "HGui.Theme.SetGlobalTheme()",
+                  name  = "myWindow",
+                  position = { x = #CENTER, y = #CENTER }
+                  })
+                   
+; Disable auto-rendering to avoid flickering
+HGui.SetAutoRendering(False)
+
+; Let's create 3 skins that we will use with our HDIVIDER gadget
+Local current, skins = 0, {}
+skins = { [0] = { nSkin   = HGui.Theme.Generate_SkinColor($FF0000),
+                  colors  = { color1 = $FF0000, color2 = $00FF00 },
+                  size    = 2,
+                  padding = 4 },
+          [1] = { nSkin   = HGui.Theme.Generate_SkinGradient(GetRandomColor(), GetRandomColor()),
+                  colors  = { color1 = GetRandomColor(), color2 = GetRandomColor() },
+                  size    = 4,
+                  padding = 10 },
+          [2] = { nSkin   = HGui.Theme.Generate_SkinDoubleGradient($FF00FF, $00FF00, 10),
+                  colors  = { color1 = $FF00FF, color2 = $FFFF00 },
+                  size    = 1,
+                  padding = 0 }
+          }
+
+; We are going to create a HDIVIDER for our tests and a button we will use
+; to rotate the skins we have defined above.
+Local myDiv    = HGui.Gadget:new(#HGUI_HDIVIDER_GADGET)
+Local myButton = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { caption = { "Click me", "to change the hDivider skin"},
+    actions = {
+      onpushed =
+        Function(gadObj)
+          ; Change the hdivider skin everytime the button is pushed
+          HGui.Theme.SetGlobalTheme(#HGUI_HDIVIDER_GADGET, skins[current])
+          current = current+1
+          If current > 2 Then current = 0
+        EndFunction }
+      })
+
+
+; Let's arrange the gadgets into the window
+mywin.rootgadget:layoutSet({ gadgets = { myDiv, myButton },
+                             weights = { 0.70, 0.30 },
+                             gap     = 1
+                             }, True )
+                             
+; Finally enable the auto-rendering and refresh the window
+HGui.SetAutoRendering(True)
+myWin:Render()
+                 
+Repeat
+   WaitEvent()
+Forever

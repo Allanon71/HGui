@@ -1,0 +1,67 @@
+/*
+********************
+* HGui Test Script *
+* Fabio Falcucci   *
+*    Feb-2023      *
+********************
+  This script is used as a test and to show how it's possible to use the
+helper function 
+  HGui.Theme.SetGlobalTheme()
+to globally change the theme for a specific gadget class, in this case for
+BOX gadgets.
+-------------------
+
+HGui.Theme.SetGlobalTheme(GadgetType, Theme)
+  Globally set the given theme for the specified gadget class
+*/
+
+; INCLUDE THE LIBRARIES DEFINITIONS
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; Creates a new HGui window
+Local myWin = HGui.Window:new(
+                { title = "HGui.Theme.SetGlobalTheme()",
+                  name  = "myWindow",
+                  position = { x = #CENTER, y = #CENTER }
+                  })
+                   
+; Disable auto-rendering to avoid flickering
+HGui.SetAutoRendering(False)
+
+; Let's create 3 skins that we will use with our BOX gadget
+Local current, skins = 0, {}
+skins = { [0] = { nSkin = HGui.Theme.Generate_SkinColor($FF0000) },
+          [1] = { nSkin = HGui.Theme.Generate_SkinGradient($0000FF, $00FF00) },
+          [2] = { nSkin = HGui.Theme.Generate_SkinDoubleGradient($FF00FF, $00FF00, 10) }
+          }
+
+; We are going to create a BOX for our tests and a button we will use
+; to rotate the skins we have defined above.
+Local myBox  = HGui.Gadget:new(#HGUI_BOX_GADGET)
+Local myButton = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { caption = { "Click me", "to change the box skin"},
+    actions = {
+      onpushed =
+        Function(gadObj)
+          ; Change the box skin everytime the button is pushed
+          HGui.Theme.SetGlobalTheme(#HGUI_BOX_GADGET, skins[current])
+          current = current+1
+          If current > 2 Then current = 0
+        EndFunction }
+      })
+
+
+; Let's arrange the gadgets into the window
+mywin.rootgadget:layoutSet({ gadgets = { myBox, myButton },
+                             weights = { 0.70, 0.30 },
+                             gap     = 1
+                             }, True )
+                             
+; Finally enable the auto-rendering and refresh the window
+HGui.SetAutoRendering(True)
+myWin:Render()
+                 
+Repeat
+   WaitEvent()
+Forever

@@ -1,0 +1,1736 @@
+@INCLUDE "+Includes.hws"
+@INCLUDE #INC_HELPERS
+@INCLUDE #INC_TABLES
+@INCLUDE #INC_DEBUG
+@INCLUDE #INC_GFX
+@INCLUDE #INC_G2D
+
+/*
+ATTENZIONE: Manca allineamento verticale, adesso viene centrato automaticamente, ma opzionalmente potrei
+            allinearlo in alto o in basso.
+
+01/02/2022 : Sistemato un bug provocato da del testo incollato da windows che usava CR+LF
+07/01/2021 : Sistemato il sistema di rilevamento input, adesso copia, taglia
+             e incolla funzionano nuovamente.
+25.03.2015 : Cambiato limite ultimo carattere in :mCursorForward()
+             Cambiato limite ultimo carattere in :CursorValidate()
+             Sembra che funzioni per poter inserire alla fine del testo
+
+/*
+Mancano i metodi
+ :mCursorNextWord()
+ :mCursorPrevWord()
+*/
+
+SetDefaultEncoding(#ENCODING_UTF8, #ENCODING_UTF8)
+
+CtrlCode =
+   { ["CTRL@"] = 0,
+     ["CTRLa"] = 1,
+     ["CTRLb"] = 2,
+     ["CTRLc"] = 3,
+     ["CTRLd"] = 4,
+     ["CTRLe"] = 5,
+     ["CTRLf"] = 6,
+     ["CTRLg"] = 7,
+     ["CTRLh"] = 8,
+     ["CTRLi"] = 9,
+     ["CTRLj"] = 10,
+     ["CTRLk"] = 11,
+     ["CTRLl"] = 12,
+     ["CTRLm"] = 13,
+     ["CTRLn"] = 14,
+     ["CTRLo"] = 15,
+     ["CTRLp"] = 16,
+     ["CTRLq"] = 17,
+     ["CTRLr"] = 18,
+     ["CTRLs"] = 19,
+     ["CTRLt"] = 20,
+     ["CTRLu"] = 21,
+     ["CTRLv"] = 22,
+     ["CTRLw"] = 23,
+     ["CTRLx"] = 24,
+     ["CTRLy"] = 25,
+     ["CTRLz"] = 26,
+     ["CTRL["] = 27,
+     ;["CTRL FS"] = 0,
+     ["CTRL]"] = 29,
+     ["CTRL^"] = 30,
+     ["CTRL_"] = 31
+     }
+
+
+TP =
+   { text = "",                                           ; Buffer del testo originale
+     copied  = "",                                        ; Buffer del testo copiato
+     backupText = "",                                     ; Backup per ripristino dell'originale
+     actions = { OnUnactivate = Function() EndFunction,
+                 OnChange     = Function() EndFunction },
+     encoding = #ENCODING_UTF8,
+     tokens = { "[b]", "[/b]",                            ; Elenco delle tokens da gestire
+
+                "[i]", "[/i]",
+                "[u]", "[/u]",
+                "[shadow",
+                "[edge",
+                "[color",
+                "[/color]",
+                "[/edge]",
+                "[/shadow]",
+                "\n\r", "\n", "\r" },
+     delTokens = { "", "",                                ; Elenco dei delimitatori per le token
+                   "", "",                                ; vairabili
+                   "", "",
+                   "]",
+                   "]",
+                   "]",
+                   "",
+                   "",
+                   "",
+                   "", "", ""
+                   },
+
+     maxLen = -1,                                         ; Lunghezza massima del testo (-1 infinita)
+     allowedChars = "",                                   ; Caratteri ammessi in input (se non specificato tutti)
+     allowNewLine = True,                                 ; Permette l'inserimento di nuove righe?
+
+     actionKeys =                                         ; Tasti a cui è possibile associare una funzione di callback
+     { ["HELP"] = -1,
+       ["TAB"]  = -1,
+       ["RETURN"] = -1,
+       ["ENTER"] = -1,
+       ["ESC"] = -1,
+       ["SPACE"] = -1,
+       ["F1"] = -1,
+       ["F2"] = -1,
+       ["F3"] = -1,
+       ["F4"] = -1,
+       ["F5"] = -1,
+       ["F6"] = -1,
+       ["F7"] = -1,
+       ["F8"] = -1,
+       ["F9"] = -1,
+       ["F10"] = -1,
+       ["F11"] = -1,
+       ["F12"] = -1,
+       ["F13"] = -1,
+       ["F14"] = -1,
+       ["F15"] = -1,
+       ["F16"] = -1,
+       ["PRINT"] = -1,
+       ["PAUSE"] = -1
+       },
+
+     pwdMode = False,                                     ; Password mode (mostra asterischi)
+
+     cursorPos = -1,                                      ; Privata (posizione del cursore)
+     cursorCol = -1,                                      ; Privata (colonna del cursore)
+     cursorRow = -1,                                      ; Privata (riga del cursore)
+     cursorOn  = False,                                    ; Render cursor?
+
+     insertMode = True,                                   ; Insert/Overwrite mode
+     enterCloseInput = True,                              ; Defines if ENTER key closes input or not
+                                                          ; If TRUE SHIFT+ENTER for a new line
+
+     selectActive = False,                                ; Selezione attiva/disattiva
+     Select_Start = { Pos = -1, Col = -1, Row = -1, x = -1, y = -1 },     ; Inizio selezione
+     Select_End   = { Pos = -1, Col = -1, Row = -1, x = -1, y = -1 },     ; Fine selezione
+
+     gfx = { area = { x = 50, y = 50, w = 300, h = 150 }, ; Area di rendering
+             bgColor = $dddddd,                           ; Colore sfondo
+             fgColor = $000000,                           ; Colore carattere
+             bgCursor = $ff0000,                          ; Colore sfondo cursore
+             fgCursor = $ffffff,                          ; Colore carattere cursore
+             bgSelect = $ffff00,                          ; Colore sfondo selezione
+
+             cursorX = -1,                                ; Privata (coord. x cursore)
+             cursorY = -1,                                ; Privata (coord. y cursore)
+             RowHeight = -1,                              ; Privata (altezza riga in pixel)
+             RowVisible = -1,                             ; Privata (righe visibili)
+             RowFirst = 0,                                ; Privata (prima riga visibile)
+             Interline = 0,                               ; Interlinea aggiuntiva
+             FontName = #SANS,                            ; Font name
+             FontSize = 16,                               ; Font size
+             FontStyle = #ANTIALIAS,                      ; Font style
+             Font = {},                                   ; SPERIMENTALE ::: FONT OBJECT :::
+             AdjustFontSize = False,                      ; Imposta l'altezza del font con l'area
+             },
+
+     control =
+     { MoveRight = { q = "", k = "RIGHT" },
+       MoveLeft  = { q = "", k = "LEFT"  },
+       MoveUp    = { q = "", k = "UP"    },
+       MoveDown  = { q = "", k = "DOWN"  },
+       MoveEOL   = { q = "LSHIFT", k = "END"  },
+       MoveBOL   = { q = "LSHIFT", k = "HOME" },
+       MoveEnd   = { q = "", k = "END"  },
+       MoveBegin = { q = "", k = "HOME" },
+       Selection = { q1 = "LSHIFT", q2 = "RSHIFT" },
+       Copy      = { q = #MODLCONTROL, k = "C", alt = CtrlCode["CTRLc"] },
+       Cut       = { q = #MODLCONTROL, k = "X", alt = CtrlCode["CTRLx"] },
+       Paste     = { q = #MODLCONTROL, k = "V", alt = CtrlCode["CTRLv"] },
+       Del       = { q = "", k = "DEL", alt = -1 },
+       Backspace = { q = "", k = "BACKSPACE", alt = -1 },
+       Insert    = { q = "", k = "INSERT", alt = -1 },
+       PageUp    = { q = "", k = "PAGEUP", alt = -1 },
+       PageDown  = { q = "", k = "PAGEDOWN", alt = -1 }
+       },
+
+     Flag_NextForwardIsNewLine = False,                   ; Privata (Flag nuova linea al prossimo avanzamento)
+
+     _Verbose = False                                     ; Debug mode
+     }
+
+Function TP:SetArea(Area)
+   ; Set options
+   TB.Set(self.Gfx.Area, Area, False)
+
+   Local n = self
+
+   ; SPERIMENTALE ::: FONT OBJECT :::
+   If n.gfx.AdjustFontSize
+      n.gfx.font:set({ Size = n.gfx.area.h*0.9 })
+   EndIf
+   n.gfx.Font:Apply()
+
+   n.Gfx.RowHeight = TextHeight("|") + n.gfx.Interline
+   n.Gfx.RowVisible = Int(n.gfx.Area.h/n.gfx.RowHeight)
+   n.Gfx.RowFirst = 0
+
+   n.Gfx.CursorX = 0
+   n.Gfx.CursorY = 0
+
+   n.cursorPos = 0
+   n.cursorRow = 0
+   n.cursorCol = 0
+
+EndFunction
+
+Function TP:NewObject(options, fontObj)
+   ; Nuovo oggetto
+   Local n = CopyTable(self)
+
+   ; Standard Char Set
+   ;For i = 32 To 255 Do n.AllowedChars = n.AllowedChars .. Chr(i)
+   ;n.AllowedChars = n.AllowedChars .. Chr(10)
+
+   ; Set options
+   TB.Set(n, options, False)
+
+   ; Setup
+   n.BackupText = n.Text
+   ;SetFont(n.gfx.FontName, n.gfx.FontSize)
+
+   ; SPERIMENTALE ::: FONT OBJECT :::
+   If HL.IsNil(fontObject)
+      n.gfx.Font = GFX.Font:New({ name = n.Gfx.FontName, size = n.Gfx.FontSize, style = n.Gfx.FontStyle, shadow = False, encoding = self.Encoding })
+   Else
+      n.gfx.Font = fontObject
+   EndIf
+
+   If n.gfx.AdjustFontSize
+      n.gfx.font:set({ Size = n.gfx.area.h*0.9 })
+   EndIf
+   n.gfx.Font:Apply()
+
+   n.Gfx.RowHeight = TextHeight("|") + n.gfx.Interline
+   n.Gfx.RowVisible = Int(n.gfx.Area.h/n.gfx.RowHeight)
+
+   n.Gfx.CursorX = 0
+   n.Gfx.CursorY = 0
+
+   n.cursorPos = 0
+   n.cursorRow = 0
+   n.cursorCol = 0
+
+   Return(n)
+
+EndFunction
+
+Function TP:SetText(value, refresh)
+  self.text = value
+  If refresh Then self:Render()
+  
+EndFunction
+
+Function TP:Set(options)
+   ; Standard Char Set
+
+   ; Set options
+   TB.Set(self, options, False)
+
+   ; Setup
+   self.Gfx.Font:Apply()
+   self.Gfx.RowHeight = TextHeight("|") + self.gfx.Interline
+   self.Gfx.RowVisible = Int(self.gfx.Area.h/self.gfx.RowHeight)
+
+   self.Gfx.CursorX = 0
+   self.Gfx.CursorY = 0
+
+   self.cursorPos = 0
+   self.cursorRow = 0
+   self.cursorCol = 0
+
+EndFunction
+
+Function TP:mCursorPageUp()
+   For i = 1 To self.gfx.RowVisible Do self:mCursorUp()
+EndFunction
+
+Function TP:mCursorPageDown()
+   For i = 1 To self.gfx.RowVisible Do self:mCursorDown()
+EndFunction
+
+Function TP:StripFX(text)
+   ; Remove all formatting tags
+   Local result = ReplaceStr(text, "[b]", "")
+   Local result = ReplaceStr(result, "[/b]", "")
+   Local result = ReplaceStr(result, "[i]", "")
+   Local result = ReplaceStr(result, "[/i]", "")
+   Local result = ReplaceStr(result, "[u]", "")
+   Local result = ReplaceStr(result, "[/u]", "")
+   Local result = PatternReplaceStr(result, "%[edge.-%]", "")
+   Local result = ReplaceStr(result, "[/edge]", "")
+   Local result = PatternReplaceStr(result, "%[color.-%]", "")
+   Local result = ReplaceStr(result, "[/color]", "")
+   Local result = PatternReplaceStr(result, "%[shadow.-%]", "")
+   Local result = ReplaceStr(result, "[/shadow]", "")
+
+   Return(result)
+EndFunction
+
+Function TP:Render()
+   ; Render the text (utilizza un brush)
+   SetFillStyle(#FILLCOLOR)
+   Local Area = self.gfx.Area
+
+   ;Box(Area.x, Area.y, Area.w, Area.h, self.Gfx.bgColor)
+
+   ; Crea un vettore con le righe visibili
+   Local t = self.Text
+   t = ReplaceStr(t, "\n\r", "\n")
+   t = ReplaceStr(t, "\r", "\n")
+   Local lines, count = SplitStr(t, "\n")
+
+   ; Rimuove le linee non visibili
+   If self.CursorRow-self.gfx.RowFirst >= self.gfx.RowVisible
+      self.gfx.RowFirst = self.CursorRow-self.gfx.RowVisible+1
+   EndIf
+   
+   If self.CursorRow-self.gfx.RowFirst < 0
+      self.gfx.RowFirst = self.gfx.RowFirst-1
+   EndIf
+
+   Local buffer = {}
+   
+   If self.gfx.RowVisible < 1 Then self.gfx.RowVisible = 1
+   /*
+   If self.gfx.RowFirst+self.gfx.RowVisible-1 < 0
+     ; Nothing visible
+     Return()
+   EndIf */
+    
+   For i = self.gfx.RowFirst To self.gfx.RowFirst+self.gfx.RowVisible-1
+      If TB.Item.Exists(lines, i)
+         InsertItem(buffer, lines[i])
+      Else
+         InsertItem(buffer, "")
+      EndIf
+   Next
+
+   ; Cerca la riga più lunga
+   self.gfx.font:Apply()
+   Local mLen = 0
+   For i = 0 To ListItems(buffer)-1
+      Local t = self:StripFX(buffer[i])
+      Local tLen = TextWidth(t)
+      If self.pwdMode
+         If StrLen(t) > 0 Then t = RepeatStr("*", StrLen(t))
+         tLen = TextWidth(t)
+      EndIf
+
+      If tLen > mLen Then mLen = tLen
+   Next
+
+   ; Rendering
+   Local bw = IIf(mLen>self.gfx.area.w, mLen, self.gfx.area.w)
+   Local bh = self.Gfx.Area.h ; self.gfx.RowVisible*self.gfx.RowHeight
+   
+   Local bid = CreateBrush(Nil, bw, bh, self.Gfx.bgColor, { AlphaChannel = True, Clear = Not(self.CursorOn) })
+   GFX.OutputDevice.Select(#BRUSH, bid, #SELMODE_COMBO, 2) ; SelectBrush(bid, #SELMODE_COMBO)
+
+   
+
+   ; Cursor
+   Local y = 0
+   Local x = 0
+
+   Local ccol = self.CursorCol
+   Local crow = self.CursorRow-self.gfx.RowFirst
+   Local r, c, k, t = self:GetCursor()
+   Local charwidth = TextWidth(k)+1
+   Local hos = TextWidth(LeftStr(buffer[crow], ccol))
+
+   If self.pwdMode
+      charwidth = TextWidth("*")
+      If ccol > 0
+         hos = TextWidth(RepeatStr("*", ccol))
+      Else
+         hos = 0
+      EndIf
+   EndIf
+
+   Local Cx, Cy = x+hos, (crow+1)*self.gfx.RowHeight+y-3
+   Local Rf1 = self.Gfx.RowFirst*self.gfx.RowHeight
+   Local Rf2 = Rf1
+   Local Rf = Rf1
+
+   If self.cursorOn
+      Local e = self.Select_End
+      Local s = self.Select_Start
+      If s.Pos > e.Pos Then s, e = e, s
+
+      If e.Pos = self.CursorPos
+         e.x = cx
+         e.y = cy-self.gfx.RowHeight+3
+      EndIf
+      If s.Pos = self.CursorPos
+         s.x = cx
+         s.y = cy-self.gfx.RowHeight+3
+      EndIf
+
+      If s.Row <> e.Row
+         ; multiline
+         Local fr = s.Row - self.Gfx.RowFirst
+         Box(s.x, fr*self.gfx.RowHeight, self.Gfx.Area.w - s.x, self.gfx.RowHeight, self.Gfx.bgSelect)
+
+         Local er = e.Row - self.Gfx.RowFirst
+         Box(0, er*self.gfx.RowHeight, e.x+1, self.gfx.RowHeight, self.Gfx.bgSelect)
+
+         For i = (s.Row+1) To (e.Row-1)
+            Local ir = i - self.Gfx.RowFirst
+            Box(0, ir*self.gfx.RowHeight, self.Gfx.Area.w, self.gfx.RowHeight, self.Gfx.bgSelect)
+         Next
+      Else
+         ; single line
+         If TB.Item.Exists(s, "x") And e.x-s.x > 0 And e.y-s.y+self.gfx.RowHeight > 0 Then Box(s.x, s.y, e.x-s.x, e.y-s.y+self.gfx.RowHeight, self.Gfx.bgSelect)
+      EndIf
+
+      If self.InsertMode
+         Box(cx, cy-self.gfx.RowHeight, 2, self.gfx.RowHeight+3, self.gfx.bgcursor)
+         If self.pwdMode
+            If k <> "\n" Then k = "*"
+            TextOut(cx, cy-self.gfx.RowHeight+3, k, { encoding = self.Encoding, color = self.gfx.fgColor })
+         Else
+            TextOut(cx, cy-self.gfx.RowHeight+3, k, { encoding = self.Encoding, color = self.gfx.fgColor })
+         EndIf
+      Else
+         Box(cx, cy-self.gfx.RowHeight, charwidth, self.gfx.RowHeight+3, self.gfx.bgcursor)
+         If self.pwdMode
+            If k <> "\n" Then k = "*"
+            TextOut(cx, cy-self.gfx.RowHeight+3, k, { encoding = self.Encoding, color = self.gfx.fgColor })
+         Else
+            TextOut(cx, cy-self.gfx.RowHeight+3, k, { encoding = self.Encoding, color = self.gfx.fgCursor })
+         EndIf
+      EndIf
+   EndIf
+
+   Local y, y1 = 0, 0
+   
+   ; Cerca di centrare verticalmente il testo se le linee totali
+   ; non eccedono l'altezza dell'area grafica.
+   Local vSpace = ListItems(lines)*self.gfx.RowHeight
+   If vSpace < self.gfx.Area.h 
+    vSpace = (self.gfx.Area.h-vSpace)/2
+   Else
+    vSpace = 0
+   EndIf
+   
+   Local x = 0
+   For i = 0 To ListItems(buffer)-1
+      If self.pwdMode
+         If StrLen(buffer[i]) > 0 Then TextOut(x, y, RepeatStr("*", StrLen(buffer[i])), { encoding = self.Encoding, color = self.gfx.fgColor })
+      Else
+         TextOut(x, y, buffer[i], { encoding = self.Encoding, color = self.gfx.fgColor })
+      EndIf
+      y = y + self.gfx.RowHeight
+   Next
+
+   GFX.OutputDevice.EndSelect() ; EndSelect()
+
+   ; Crop area
+   
+   Local Crop = { x = 0, y = 0, w = self.gfx.area.w, h = self.gfx.area.h }
+   If Cx+CharWidth > self.gfx.area.w
+      Crop.x = Cx+CharWidth - self.gfx.area.w
+   EndIf
+   
+   ; Centratura brush
+   If vSpace <> 0 Then Crop.h = self.gfx.area.h - vSpace*2
+   CropBrush(bid, Crop.x, Crop.y, Crop.w, Crop.h)
+   
+   ; HGUI CHECK
+   If TB.Item.Exists(self, "_hguiobject")
+     self._HGuiObject.window:Activate()
+   EndIf
+;   SetFillStyle(#FILLCOLOR) Box(0, 0, 40, 40, #RED)
+;   DisplayBrush(bid, 0, 0)
+   DisplayBrush(bid, self.gfx.area.x, self.gfx.area.y+vSpace)
+   FreeBrush(bid)
+
+EndFunction
+
+Function TP:eRestoreText()
+   ; Restore the original text
+   self.Text = self.BackupText
+EndFunction
+
+Function TP:mCursorForward()
+   ; Avanza di un carattere
+
+   If self.CursorPos >= StrLen(self.Text);-1
+    Return(False)
+   EndIf
+
+   self.CursorPos = self.CursorPos + 1
+   Local r, s, e, w = self:CursorValidate()
+
+   If r And s < self.CursorPos
+      self.CursorPos = e+1
+   Else
+      self.CursorCol = self.CursorCol + 1
+   EndIf
+
+   If self.Flag_NextForwardIsNewLine
+      self.Flag_NextForwardIsNewLine = False
+      self.CursorCol = 0
+      self.CursorRow = self.CursorRow + 1
+   EndIf
+
+   If w = "\n\r" Or w = "\n" Or w = "\r"
+      self.Flag_NextForwardIsNewLine = True
+   EndIf
+
+   self:AdjustRange(1)
+
+   /*
+   ; Selected Area
+   If self.SelectActive
+      self.Select_End.Pos = self.CursorPos
+      self.Select_End.Col = self.CursorCol
+      self.Select_End.Row = self.CursorRow
+   Else
+      self.Select_Start.Pos = self.CursorPos
+      self.Select_Start.Col = self.CursorCol
+      self.Select_Start.Row = self.CursorRow
+      self.Select_End.Pos = self.CursorPos
+      self.Select_End.Col = self.CursorCol
+      self.Select_End.Row = self.CursorRow
+   EndIf
+   */
+   Return(True)
+
+EndFunction
+
+Function TP:GetText()
+   ; Return the actual text
+   Return(self.Text)
+EndFunction
+
+Function TP:GetCursor()
+   ; Return the cursor position (r, c), the char under the cursor and/or the tags
+   ; @ the cursor position
+   Local char = MidStr(self.Text, self.CursorPos, 1)
+   Local oldcursorpos = self.CursorPos
+   Local oldcursorcol = self.cursorCol
+   Local oldcursorrow = self.cursorrow
+   Local Loop = True
+   Local tags = ""
+
+   While char = "[" Or char = "]" And Loop
+      Local r, s, e, w = self:CursorValidate()
+      tags = tags..w
+      If Not(self:mCursorForward()) Then Loop = False
+      char = MidStr(self.Text, self.CursorPos, 1)
+   Wend
+
+   self.cursorpos = oldcursorpos
+   self.cursorcol = oldcursorcol
+   self.cursorrow = oldcursorrow
+
+   Return(self.CursorRow, self.CursorCol, char, tags)
+
+EndFunction
+
+Function TP:CountBackwardInvisibleChars(p)
+   ; Conta i caratteri invisibli dietro al cursore, fino a <p> e una stringa
+   ; con tutte le tokens incontrate
+   Local tokensLen = 0
+   Local tokens = ""
+   Local oldCursorPos = self.CursorPos
+
+   For k = p To self.CursorPos
+      self.CursorPos = k
+      Local r, s, e, w = self:CursorValidate()
+      If r And s <> e
+         tokensLen = tokensLen + e - s + 1
+         tokens = tokens .. w
+         k = e
+      EndIf
+   Next
+
+   self.CursorPos = oldCursorPos
+
+   Return(tokensLen, tokens)
+
+EndFunction
+
+Function TP:mCursorBackward()
+   ; Retrocede di un carattere
+   If self.CursorPos < 1 Then Return(False)
+
+   self.CursorPos = self.CursorPos - 1
+   Local r, s, e, w = self:CursorValidate()
+   If r
+      self.CursorPos = s
+   Else
+      self.CursorCol = self.CursorCol - 1
+   EndIf
+
+   self.Flag_NextForwardIsNewLine = False
+
+   If w = "\n\r" Or w = "\n" Or w = "\r"
+      self.Flag_NextForwardIsNewLine = True
+
+      Local r, p = self:FindBackward("\n\r")
+      If Not(r)
+         r, p = self:FindBackward("\n")
+         If Not(r)
+            r, p = self:FindBackward("\r")
+            If Not(r)
+               self.CursorCol = self.CursorPos
+               p = self.CursorPos
+            Else
+               self.CursorCol = self.CursorPos - p - 1
+            EndIf
+         Else
+            self.CursorCol = self.CursorPos - p - 1
+         EndIf
+      Else
+         self.CursorCol = self.CursorPos - p - 2
+      EndIf
+
+      Local tokensLen = self:CountBackwardInvisibleChars(p)
+      self.CursorCol = self.CursorCol - tokensLen
+
+      self.CursorRow = self.CursorRow - 1
+
+   EndIf
+
+   self:AdjustRange(-1)
+
+   /*
+   ; Selected Area
+   If self.SelectActive
+      self.Select_Start.Pos = self.CursorPos
+      self.Select_Start.Col = self.CursorCol
+      self.Select_Start.Row = self.CursorRow
+   Else
+      self.Select_Start.Pos = self.CursorPos
+      self.Select_Start.Col = self.CursorCol
+      self.Select_Start.Row = self.CursorRow
+      self.Select_End.Pos = self.CursorPos
+      self.Select_End.Col = self.CursorCol
+      self.Select_End.Row = self.CursorRow
+   EndIf
+   */
+
+   Return(True)
+
+EndFunction
+
+Function TP:mCursorForwardLimited(n)
+   ; Avanza di n posizioni ma senza superare un eventuale ritorno a capo.
+   self.Flag_NextForwardIsNewLine = False
+   Local nextChar = MidStr(self.Text, self.CursorPos, 1)
+   If nextChar = "\n" Or nextChar = "\r"
+      Return()
+   EndIf
+   For p = 1 To n
+      self:mCursorForward()
+      If self.Flag_NextForwardIsNewLine Then Break()
+   Next
+
+EndFunction
+
+Function TP:mCursorEnd()
+
+   ; Si sposta alla fine del testo
+   While self:mCursorForward()
+   Wend
+
+   ;self:AdjustRange(1)
+   ; Selected Area
+   /*
+   If self.SelectActive
+      self.Select_End.Pos = self.CursorPos
+      self.Select_End.Col = self.CursorCol
+      self.Select_End.Row = self.CursorRow
+   Else
+      self.Select_Start.Pos = self.CursorPos
+      self.Select_Start.Col = self.CursorCol
+      self.Select_Start.Row = self.CursorRow
+      self.Select_End.Pos = self.CursorPos
+      self.Select_End.Col = self.CursorCol
+      self.Select_End.Row = self.CursorRow
+   EndIf
+   */
+EndFunction
+
+Function TP:mCursorHome()
+   ; Si sposta alla fine del testo
+   While self:mCursorBackward()
+   Wend
+
+   ; Selected Area
+   ;self:AdjustRange(-1)
+   /*
+   If self.SelectActive
+      self.Select_Start.Pos = self.CursorPos
+      self.Select_Start.Col = self.CursorCol
+      self.Select_Start.Row = self.CursorRow
+   Else
+      self.Select_Start.Pos = self.CursorPos
+      self.Select_Start.Col = self.CursorCol
+      self.Select_Start.Row = self.CursorRow
+      self.Select_End.Pos = self.CursorPos
+      self.Select_End.Col = self.CursorCol
+      self.Select_End.Row = self.CursorRow
+   EndIf
+   */
+EndFunction
+
+Function TP:mCursorDown()
+   ; Si porta alla riga successiva (se esiste), possibilmente nella medesima
+   ; colonna.
+
+   Local oldCursorCol = self.CursorCol
+   Local result = True
+
+   ; Prova con Carriage Return (\r)
+   Local r, p = self:FindForward("\r")
+   While p = self.CursorPos
+      self.CursorPos = self.CursorPos+1
+      r, p = self:FindForward("\r")
+   Wend
+
+   If r
+      self.CursorPos = p+1
+      ; Verifica se dopo c'è anche un linefeed
+      Local r1, p1 = self:FindForward("\n")
+      While p1 = self.CursorPos
+         self.CursorPos = self.Cursorpos+1
+         r1, p1 = self:FindForward("\n")
+      Wend
+
+      If r1 Then self.CursorPos = p+1
+      self.cursorRow = self.cursorRow + 1
+      self:CursorValidate()
+      self.CursorCol = 0
+      self:mCursorForwardLimited(oldCursorCol)
+   Else
+      ; Prova con il solo linefeed
+      Local r, p = self:FindForward("\n")
+      Local r1, p1 = r, p
+      While p1 = self.CursorPos
+         self.CursorPos = self.CursorPos+1
+         r1, p1 = self:FindForward("\n")
+      Wend
+      If r
+         self.CursorPos = p+1
+         self.cursorRow = self.cursorRow + 1
+
+         self:CursorValidate()
+         self.CursorCol = 0
+         self:mCursorForwardLimited(oldCursorCol)
+         If MidStr(self.Text, self.CursorPos, 1) = "\n"
+            self.Flag_NextForwardIsNewLine = True
+         EndIf
+      Else
+         ; Non ci sono altre righe, vai in fondo al testo.
+         self:mCursorEnd()
+         result = False
+      EndIf
+   EndIf
+
+   ; Selected Area
+   self:AdjustRange(1)
+   /*
+   If self.SelectActive
+      self.Select_End.Pos = self.CursorPos
+      self.Select_End.Col = self.CursorCol
+      self.Select_End.Row = self.CursorRow
+   Else
+      self.Select_Start.Pos = self.CursorPos
+      self.Select_Start.Col = self.CursorCol
+      self.Select_Start.Row = self.CursorRow
+      self.Select_End.Pos = self.CursorPos
+      self.Select_End.Col = self.CursorCol
+      self.Select_End.Row = self.CursorRow
+   EndIf
+   */
+   Return(result)
+
+EndFunction
+
+Function TP:AdjustRange(direction)
+   Local s = { Pos = self.CursorPos, Col = self.CursorCol, Row = self.CursorRow }
+   ;If TB.Item.IsNil(s, "x") Then s.x = 0
+   ;If TB.Item.IsNil(s, "y") Then s.y = 0
+
+   If self.SelectActive
+      If s.Pos <= self.Select_Start.Pos And Direction = -1
+         TB.Set(self.Select_Start, s, False); = CopyTable(s)
+      ElseIf s.Pos < self.Select_End.Pos And  s.Pos > self.Select_Start.Pos And Direction = -1
+         TB.Set(self.Select_End, s, False);self.Select_End = CopyTable(s)
+      ElseIf s.Pos < self.Select_End.Pos And  s.Pos > self.Select_Start.Pos And Direction = 1
+         TB.Set(self.Select_Start, s, False);self.Select_Start = CopyTable(s)
+      ElseIf s.Pos >= self.Select_End.Pos And Direction = 1
+         TB.Set(self.Select_End, s, False);self.Select_End = CopyTable(s)
+      Else
+         ;DebugPrint("--- ??? --- Direction is ", Direction)
+      EndIf
+   Else
+      ;DebugPrint("SET BOTH")
+      self.Select_Start = TB.Set(self.Select_Start, s, False);CopyTable(s)
+      self.Select_End = TB.Set(self.Select_End, s, False);CopyTable(s)
+   EndIf
+
+EndFunction
+
+Function TP:mCursorUp()
+   ; Si porta alla riga precedente (se esiste), possibilmente nella medesima
+   ; colonna.
+
+   Local oldCursorCol = self.CursorCol
+   Local result = True
+
+   ; Prova con Carriage Return (\r)
+   Local r, p = self:FindBackward("\r")
+   If r
+      self.CursorPos = p-1
+      self.cursorRow = self.cursorRow - 1
+      self:CursorValidate()
+      self.CursorCol = 0
+      self:mCursorForwardLimited(oldCursorCol)
+   Else
+      Local r, p = self:FindBackward("\n")
+      If r
+         self.CursorPos = p
+         self.cursorRow = self.cursorRow - 1
+         ;Local r, s, e, w = self:CursorValidate()
+         ; Va all'inizio dell aprossima riga e scorre le colonne
+         Local r, p = self:FindBackward("\n")
+         ;If Not(r) Then r, p = self:FindBackward("\n")
+
+         If Not(r)
+            self:mCursorHome()
+         Else
+            self.CursorPos = p+1
+            ;self:mCursorForward()
+            ;self.CursorPos = p+1
+         EndIf
+
+         self.CursorCol = 0
+         self:mCursorForwardLimited(oldCursorCol)
+
+         If MidStr(self.Text, self.CursorPos, 1) = "\n"
+            self.Flag_NextForwardIsNewLine = True
+         EndIf
+
+         ; Selected Area
+         self:AdjustRange(-1)
+         Return(IIF(Not(r), False, True))
+      Else
+         ; Non ci sono altre righe, vai in fondo al testo.
+         self:mCursorHome()
+         self:AdjustRange(-1)
+         Return(False)
+         ;self:mCursorForwardLimited(oldCursorCol)
+      EndIf
+   EndIf
+
+   self:AdjustRange(-1)
+   Return(True)
+
+EndFunction
+
+Function TP:mCursorToEOL()
+   ; Goto end of line
+   Local r = self:mCursorDown()
+   If r
+      For i = 0 To self.CursorCol Do self:mCursorBackward()
+   EndIf
+EndFunction
+
+Function TP:mCursorToBOL()
+   ; Goto begin of line
+   For i = 1 To self.CursorCol Do self:mCursorBackward()
+
+EndFunction
+
+Function TP:FindForward(text)
+   ; Cerca una stringa dalla posizione del cursore in avanti
+   Local pos = FindStr(self.Text, text, True, self.CursorPos)
+   If pos <> -1
+      Return(True, pos)
+   Else
+      Return(False)
+   EndIf
+EndFunction
+
+Function TP:FindBackward(text)
+   ; Cerca una stringa dalla posizione del cursore all'indietro
+   Local source = LeftStr(self.Text, self.CursorPos)
+   For p = self.CursorPos-1 To 0 Step -1
+      Local pos = FindStr(source, text, True, p)
+      If pos <> -1
+         Return(True, pos)
+      EndIf
+   Next
+
+   Return(False)
+EndFunction
+
+Function TP:CursorValidate()
+  ; Questa funzione è un pochino lenta
+  ; Se necessario porta il cursore nei limiti
+   If self.CursorPos < 0
+      self.CursorPos = 0
+   ElseIf self.CursorPos > StrLen(self.Text);-1
+      self.CursorPos = StrLen(self.Text);-1
+   EndIf
+
+   ; Verifica se si trova in mezzo ad una Token
+   ; this is [b]an[/b] example
+   ;          ^
+   ;          [b]
+   ;         [b]
+   ;        [b]
+   Local found, tokenStart, tokenEnd, tp, tokenWord = False, self.CursorPos, self.CursorPos, -1, ""
+   For Local t = 0 To ListItems(self.Tokens)-1
+      Local Token = self.Tokens[t]
+      Local TokenLen = StrLen(Token)-1
+      For Local c = 0 To TokenLen
+         Local part = MidStr(self.Text, self.CursorPos-c, TokenLen+1)
+         If part = Token
+            found = True
+            tokenStart = self.CursorPos-c
+            tokenEnd = self.CursorPos-c+TokenLen
+            tokenWord = Token
+            tp = t
+            Break(2)
+         EndIf
+      Next
+   Next
+
+   ; Se qualcosa è stato trovato verifica se esiste un delimitatore
+   If found
+      If self.delTokens[tp] <> ""
+         Local delPos = FindStr(self.Text, self.delTokens[tp], True, tokenStart)
+         If delPos <> -1
+            tokenEnd = delPos
+         Else
+            tokenStart = self.CursorPos
+            tokenEnd = self.CursorPos
+            found = False
+         EndIf
+      EndIf
+   Else
+      ; niente... ma potrei trovarmi nella parte variabile di una token delimitata
+      ; cerca a sinistra la prima token delimitata
+      For Local t = 0 To ListItems(self.Tokens)-1
+         If self.delTokens[t] <> ""
+            Local Token = self.Tokens[t]
+            Local Delim = self.delTokens[t]
+            Local TokenLen = StrLen(Token)-1
+            For Local c = self.CursorPos To 0 Step -1
+               Local part = MidStr(self.Text, c, TokenLen+1)
+               If part = Token
+                  found = True
+                  tokenStart = c
+                  tokenEnd = c+TokenLen
+                  tokenWord = Token
+                  tp = t
+                  ; Adesso cerca la fine
+                  Local delPos = FindStr(self.Text, Delim, True, tokenStart)
+                  If delPos <> -1 And delPos >= self.CursorPos
+                     tokenEnd = delPos
+                  Else
+                     tokenStart = self.CursorPos
+                     tokenEnd = self.CursorPos
+                     found = False
+                  EndIf
+                  Break(2)
+               EndIf
+            Next
+         EndIf
+      Next
+
+   EndIf
+
+   Return(found, tokenStart, tokenEnd, tokenWord)
+
+EndFunction
+
+Function TP:CountOccurrenciesForward(text)
+   Local cursorOldPos = self.cursorPos
+   Local count = 0
+   Local r, p = self:FindForward(text)
+   While r
+      count = count + 1
+      self.cursorPos = p+StrLen(text)
+      r, p = self:FindForward(text)
+   Wend
+
+   self.cursorPos = cursorOldPos
+   Return(count)
+EndFunction
+
+Function TP:CountOccurrenciesBackward(text)
+   Local cursorOldPos = self.cursorPos
+   Local count = 0
+   Local r, p = self:FindBackward(text)
+   While r
+      count = count + 1
+      self.cursorPos = p
+      r, p = self:FindBackward(text)
+   Wend
+
+   self.cursorPos = cursorOldPos
+   Return(count)
+EndFunction
+
+Function TP:eBackspace()
+   If self.CursorPos < 1 Then Return(False)
+   Local oldCursorPos = self.CursorPos
+   Local oldFlagNL = self.Flag_NextForwardIsNewLine
+   self.Flag_NextForwardIsNewLine = False
+   self:mCursorBackward()
+   self:eDel()
+   self.Flag_NextForwardIsNewLine = oldFlagNL
+   Return(True)
+EndFunction
+
+Function TP:eDel()
+   If self.CursorPos >= StrLen(self.Text) Then Return(False)
+   Local r, s, e, w = self:CursorValidate()
+   self.Flag_NextForwardIsNewLine = False
+   self.Text = UnmidStr(self.Text, self.CursorPos, e-s+1)
+   Return(True)
+EndFunction
+
+Function TP:SelectStart()
+   self.SelectActive = True
+   self.Select_Start =
+      { Pos = self.CursorPos,
+        Col = self.CursorCol,
+        Row = self.CursorRow }
+   self.Select_End =
+      { Pos = self.CursorPos,
+        Col = self.CursorCol,
+        Row = self.CursorRow }
+EndFunction
+
+Function TP:SelectEnd()
+   self.SelectActive = False
+EndFunction
+
+Function TP:SelectClear()
+   self.Select_Start.Pos = self.CursorPos
+   self.Select_Start.Col = self.CursorCol
+   self.Select_Start.Row = self.CursorRow
+
+   self.Select_End.Pos = self.CursorPos
+   self.Select_End.Col = self.CursorCol
+   self.Select_End.Row = self.CursorRow
+EndFunction
+
+Function TP:SelectCopy()
+   self.copied = self:GetSelected()
+   SetClipboard(#CLIPBOARD_TEXT, self.copied)
+EndFunction
+
+Function TP:eSelectPaste()
+   If self.copied <> ""
+    self:eWrite(self.copied)
+   Else
+     Local type, data = GetClipboard()
+     If type = #CLIPBOARD_TEXT 
+      data = ReplaceStr(data, "\r\n", "\n")
+      data = ReplaceStr(data, "\r", "")
+      self:eWrite(data)
+     EndIf
+   EndIf
+EndFunction
+
+Function TP:eWrite_SetInsertMode()
+   self.insertMode = True
+EndFunction
+
+Function TP:eWrite_SetOverwriteMode()
+   self.insertMode = False
+EndFunction
+
+Function TP:eWrite(c)
+   Local l = StrLen(c)-1
+   For i = l To 0 Step -1
+      If self.AllowedChars <> ""
+        If FindStr(self.AllowedChars, MidStr(c, i, 1), True) = -1
+          c = UnmidStr(c, i, 1)
+        EndIf
+      EndIf
+   Next
+
+   If self.MaxLen > 0
+      If StrLen(self.Text) + StrLen(c) > self.MaxLen
+         Return(False)
+      EndIf
+   EndIf
+
+   If Not(self.allowNewLine)
+      c = ReplaceStr(c, "\n", "")
+      c = ReplaceStr(c, "\r", "")
+   EndIf
+
+   If self.Select_Start.Pos <> self.Select_End.Pos Then self:eSelectCut()
+
+   If self.insertMode
+      If c <> "" Then self:eWriteChar_Insert(c)
+   Else
+      If c <> "" Then self:eWriteChar_Overwrite(c)
+   EndIf
+
+   Return(True)
+
+EndFunction
+
+Function TP:eSelectCut()
+   self.copied = self:GetSelected()
+   Local l = StrLen(self.copied)
+   For i = 1 To l
+      If self.Select_End.Pos = self.CursorPos
+         self:eBackspace()
+      Else
+         self:eDel()
+      EndIf
+   Next
+   self:SelectClear()
+EndFunction
+
+Function TP:eTextClear()
+   self.Text = ""
+
+   n.cursorPos = 0
+   n.cursorRow = 0
+   n.cursorCol = 0
+
+EndFunction
+
+Function TP:GetSelected()
+   Local sa = self.SelectActive
+   Local ss = self.Select_Start.Pos
+   Local se = self.Select_End.Pos
+   If ss > se Then ss, se = se, ss
+   Return(MidStr(self.Text, ss, se-ss), ss, se)
+EndFunction
+
+Function TP:eWriteChar_Insert(c)
+   Local oldFlagNL = self.Flag_NextForwardIsNewLine
+   self.Flag_NextForwardIsNewLine = False
+   self.Text = InsertStr(self.Text, c, self.CursorPos, False)
+   For Local p = 1 To StrLen(c)
+    self:mCursorForward()
+   Next
+   self:SelectClear()
+
+   If c = "\n" Or c = "\r\n" Or c = "\r"
+      self.CursorRow = self.CursorRow+1
+      self.CursorCol = 0
+   Else
+      self.Flag_NextForwardIsNewLine = oldFlagNL
+   EndIf
+
+EndFunction
+
+Function TP:eWrite_ToggleInsertMode()
+   If self.insertMode
+      self.insertmode = False
+   Else
+      self.insertmode = True
+   EndIf
+
+   Return(self.insertMode)
+EndFunction
+
+Function TP:eWriteChar_Overwrite(c)
+
+   Local underCursor = MidStr(self.Text, self.CursorPos, StrLen(c))
+
+   self.Text = InsertStr(self.Text, c, self.CursorPos, True)
+
+   If underCursor = "\n" Or underCursor = "\r\n" Or uncerCursor = "\r"
+      Local oldCC = self.CursorCol
+      If self:mCursorUp()
+         oldCC = oldCC+1
+      EndIf
+      For p = 1 To StrLen(c) + oldCC Do self:mCursorForward()
+   Else
+      For p = 1 To StrLen(c) Do self:mCursorForward()
+   EndIf
+
+   self:SelectClear()
+
+   If c = "\n" Or c = "\r\n" Or c = "\r"
+      self.CursorRow = self.CursorRow+1
+      self.CursorCol = 0
+   EndIf
+
+
+EndFunction
+
+Function TP:SelectFXColor_Add(color)
+   Local selStart = self.Select_Start.Pos
+   Local selEnd   = self.Select_End.Pos
+   Local oldCursorPos = self.CursorPos
+   Local oldCursorCol = self.CursorCol
+   Local oldCursorRow = self.CursorRow
+
+   If SelStart > SelEnd Then SelStart, SelEnd = SelEnd, SelStart
+
+   self.CursorPos = selEnd
+   self:eWriteChar_Insert("[/color]")
+   self.CursorPos = selStart
+   Local cmd = "[color=" .. color .. "]"
+   self:eWriteChar_Insert(cmd)
+
+   self.CursorPos = oldCursorPos+StrLen(cmd)
+   self.CursorRow = oldCursorRow
+   self.CursorCol = oldCursorCol
+EndFunction
+
+Function TP:SelectFXShadow_Add(color, size, direction)
+   Local selStart = self.Select_Start.Pos
+   Local selEnd   = self.Select_End.Pos
+   Local oldCursorPos = self.CursorPos
+   Local oldCursorCol = self.CursorCol
+   Local oldCursorRow = self.CursorRow
+
+   If SelStart > SelEnd Then SelStart, SelEnd = SelEnd, SelStart
+
+   self.CursorPos = selEnd
+   self:eWriteChar_Insert("[/shadow]")
+   self.CursorPos = selStart
+   Local cmd = "[shadow=" .. color .. "," .. size .. "," .. direction .. "]"
+   self:eWriteChar_Insert(cmd)
+
+   self.CursorPos = oldCursorPos+StrLen(cmd)
+   self.CursorRow = oldCursorRow
+   self.CursorCol = oldCursorCol
+EndFunction
+
+Function TP:SelectFXEdge_Add(color, size)
+   Local selStart = self.Select_Start.Pos
+   Local selEnd   = self.Select_End.Pos
+   Local oldCursorPos = self.CursorPos
+   Local oldCursorCol = self.CursorCol
+   Local oldCursorRow = self.CursorRow
+
+   If SelStart > SelEnd Then SelStart, SelEnd = SelEnd, SelStart
+
+   self.CursorPos = selEnd
+   self:eWriteChar_Insert("[/edge]")
+   self.CursorPos = selStart
+   Local cmd = "[edge=" .. color .. "," .. size .. "]"
+   self:eWriteChar_Insert(cmd)
+
+   self.CursorPos = oldCursorPos+StrLen(cmd)
+   self.CursorRow = oldCursorRow
+   self.CursorCol = oldCursorCol
+EndFunction
+
+Function TP:SelectFXBold_Add()
+   Local selStart = self.Select_Start.Pos
+   Local selEnd   = self.Select_End.Pos
+   Local oldCursorPos = self.CursorPos
+   Local oldCursorCol = self.CursorCol
+   Local oldCursorRow = self.CursorRow
+
+   If SelStart > SelEnd Then SelStart, SelEnd = SelEnd, SelStart
+
+   self.CursorPos = selEnd
+   self:eWriteChar_Insert("[/b]")
+   self.CursorPos = selStart
+   self:eWriteChar_Insert("[b]")
+
+   self.CursorPos = oldCursorPos+3
+   self.CursorRow = oldCursorRow
+   self.CursorCol = oldCursorCol
+EndFunction
+
+Function TP:SelectFXItalic_Add()
+   Local selStart = self.Select_Start.Pos
+   Local selEnd   = self.Select_End.Pos
+   Local oldCursorPos = self.CursorPos
+   Local oldCursorCol = self.CursorCol
+   Local oldCursorRow = self.CursorRow
+
+   If SelStart > SelEnd Then SelStart, SelEnd = SelEnd, SelStart
+
+   self.CursorPos = selEnd
+   self:eWriteChar_Insert("[/i]")
+   self.CursorPos = selStart
+   self:eWriteChar_Insert("[i]")
+
+   self.CursorPos = oldCursorPos+3
+   self.CursorRow = oldCursorRow
+   self.CursorCol = oldCursorCol
+EndFunction
+
+Function TP:SelectFXUnderline_Add()
+   Local selStart = self.Select_Start.Pos
+   Local selEnd   = self.Select_End.Pos
+   Local oldCursorPos = self.CursorPos
+   Local oldCursorCol = self.CursorCol
+   Local oldCursorRow = self.CursorRow
+
+   If SelStart > SelEnd Then SelStart, SelEnd = SelEnd, SelStart
+
+   self.CursorPos = selEnd
+   self:eWriteChar_Insert("[/u]")
+   self.CursorPos = selStart
+   self:eWriteChar_Insert("[u]")
+
+   self.CursorPos = oldCursorPos+3
+   self.CursorRow = oldCursorRow
+   self.CursorCol = oldCursorCol
+EndFunction
+
+Function TP:SelectFXBold_Remove()
+   Local selStart = self.Select_Start.Pos
+   Local selEnd   = self.Select_End.Pos
+   Local oldCursorPos = self.CursorPos
+   Local oldCursorCol = self.CursorCol
+   Local oldCursorRow = self.CursorRow
+
+   If SelStart > SelEnd Then SelStart, SelEnd = SelEnd, SelStart
+
+   For p = selEnd To selStart Step -1
+      If MidStr(self.Text, p, 3) = "[b]"
+         self.Text = UnmidStr(self.Text, p, 3)
+         If p < self.CursorPos
+            self.CursorPos = self.CursorPos-3
+         EndIf
+      ElseIf MidStr(self.Text, p, 4) = "[/b]"
+         self.Text = UnmidStr(self.Text, p, 4)
+         If p < self.CursorPos
+            self.CursorPos = self.CursorPos-4
+         EndIf
+      EndIf
+   Next
+EndFunction
+
+Function TP:SelectFXItalic_Remove()
+   Local selStart = self.Select_Start.Pos
+   Local selEnd   = self.Select_End.Pos
+   Local oldCursorPos = self.CursorPos
+   Local oldCursorCol = self.CursorCol
+   Local oldCursorRow = self.CursorRow
+
+   If SelStart > SelEnd Then SelStart, SelEnd = SelEnd, SelStart
+
+   For p = selEnd To selStart Step -1
+      If MidStr(self.Text, p, 3) = "[i]"
+         self.Text = UnmidStr(self.Text, p, 3)
+         If p <= self.CursorPos
+            self.CursorPos = self.CursorPos-3
+         EndIf
+      ElseIf MidStr(self.Text, p, 4) = "[/i]"
+         self.Text = UnmidStr(self.Text, p, 4)
+         If p <= self.CursorPos
+            self.CursorPos = self.CursorPos-4
+         EndIf
+      EndIf
+   Next
+EndFunction
+
+Function TP:SelectFXUnderline_Remove()
+   Local selStart = self.Select_Start.Pos
+   Local selEnd   = self.Select_End.Pos
+   Local oldCursorPos = self.CursorPos
+   Local oldCursorCol = self.CursorCol
+   Local oldCursorRow = self.CursorRow
+
+   If SelStart > SelEnd Then SelStart, SelEnd = SelEnd, SelStart
+
+   For p = selEnd To selStart Step -1
+      If MidStr(self.Text, p, 3) = "[u]"
+         self.Text = UnmidStr(self.Text, p, 3)
+         If p <= self.CursorPos
+            self.CursorPos = self.CursorPos-3
+         EndIf
+      ElseIf MidStr(self.Text, p, 4) = "[/u]"
+         self.Text = UnmidStr(self.Text, p, 4)
+         If p <= self.CursorPos
+            self.CursorPos = self.CursorPos-4
+         EndIf
+      EndIf
+   Next
+EndFunction
+
+Function TP.HandleRawKeys(msg)
+  
+  Local obj     = msg.userdata
+  Local control = obj.Control
+
+  If TP._Verbose
+    DebugPrint("\n:: INPUT HANDLER / RAW KEYS ::")
+    DebugPrint("Action = " .. msg.Action, ", Key = " .. msg.Key)
+  EndIf
+   
+ 
+  ;---| EDITING |--------------------------------------------------------------
+
+  ; :: COPY ::
+  If msg.modifiers & control.Copy.q
+    If msg.key = control.Copy.k
+      obj:SelectCopy()
+      msg.key = ""
+      obj:Render()
+      Return()
+      
+    EndIf
+    
+  EndIf
+ 
+  ; :: CUT ::
+  If msg.modifiers & control.Cut.q
+    If msg.key = control.Cut.k
+      obj:eSelectCut()
+      obj.Actions.onChange(obj, obj:GetText())
+      msg.key = ""
+      obj:Render()
+      Return()
+      
+    EndIf
+  EndIf
+ 
+  ; :: PASTE ::
+  If msg.modifiers & control.Paste.q
+    If msg.key = control.Paste.k
+      obj:eSelectPaste()
+      obj.Actions.onChange(obj, obj:GetText())
+      msg.key = ""
+      obj:Render()
+      Return()
+      
+    EndIf
+    
+  EndIf
+ 
+EndFunction
+
+Function TP.HandleInput(msg)
+
+   Local obj     = msg.userdata
+   Local control = obj.Control
+
+   If TP._Verbose
+      DebugPrint("\n:: INPUT HANDLER / KEYS ::")
+      DebugPrint("Action = " .. msg.Action, ", Key = " .. msg.Key)
+   EndIf
+
+   ;---| SELECTION |------------------------------------------------------------
+
+   ; :: IMMEDIATE SELECT ::
+   If IsKeyDown(control.Selection.q1) Or IsKeyDown(control.Selection.q2)
+     obj.SelectActive = True
+   Else
+      obj.SelectActive = False
+   EndIf
+
+   ;---| ENTER KEY |------------------------------------------------------------
+   If msg.Key = Chr(10) Or msg.Key = Chr(13)
+     If obj.enterCloseInput
+       If Not(IsKeyDown("LSHIFT")) And Not(IsKeyDown("RSHIFT"))
+         ; DISATTIVAZIONE
+         obj:UnActivate()
+         obj.Actions.onChange(obj, obj:GetText())
+         Return()
+       EndIf
+     EndIf
+   EndIf
+   
+   ;---| CURSOR MOVEMENT |------------------------------------------------------
+
+   ; :: RIGHT ::
+   If msg.key = control.MoveRight.k
+      If control.MoveRight.q <> ""
+         If IsKeyDown(control.MoveRight.q)
+            obj:mCursorForward()
+            msg.key = ""
+         EndIf
+      Else
+         obj:mCursorForward()
+         msg.key = ""
+      EndIf
+   EndIf
+
+   ; :: LEFT ::
+   If  msg.key = control.MoveLeft.k
+      If control.MoveLeft.q <> ""
+         If IsKeyDown(control.MoveLeft.q)
+            obj:mCursorBackward()
+            msg.key = ""
+         EndIf
+      Else
+         obj:mCursorBackward()
+         msg.key = ""
+      EndIf
+   EndIf
+
+   ; :: DOWN ::
+   If  msg.key = control.MoveDown.k
+      If control.MoveDown.q <> ""
+         If IsKeyDown(control.MoveDown.q)
+            obj:mCursorDown()
+            msg.key = ""
+         EndIf
+      Else
+         obj:mCursorDown()
+         msg.key = ""
+      EndIf
+   EndIf
+
+   ; :: UP ::
+   If  msg.key = control.MoveUp.k
+      If control.MoveUp.q <> ""
+         If IsKeyDown(control.MoveUp.q)
+            obj:mCursorUp()
+            msg.key = ""
+         EndIf
+      Else
+         obj:mCursorUp()
+         msg.key = ""
+      EndIf
+   EndIf
+
+   ; :: END OF LINE ::
+   If  msg.key = control.MoveEOL.k
+      If control.MoveEOL.q <> ""
+         If IsKeyDown(control.MoveEOL.q)
+            obj:mCursorToEOL()
+            msg.key = ""
+         EndIf
+      Else
+         obj:mCursorToEOL()
+         msg.key = ""
+      EndIf
+   EndIf
+
+   ; :: BEGIN OF LINE ::
+   If  msg.key = control.MoveBOL.k
+      If control.MoveBOL.q <> ""
+         If IsKeyDown(control.MoveBOL.q)
+            obj:mCursorToBOL()
+            msg.key = ""
+         EndIf
+      Else
+         obj:mCursorToBOL()
+         msg.key = ""
+      EndIf
+   EndIf
+
+   ; :: END OF TEXT ::
+   If  msg.key = control.MoveEnd.k
+      If control.MoveEnd.q <> ""
+         If IsKeyDown(control.MoveEnd.q)
+            obj:mCursorEnd()
+            msg.key = ""
+         EndIf
+      Else
+         obj:mCursorEnd()
+         msg.key = ""
+      EndIf
+   EndIf
+
+   ; :: BEGIN OF TEXT ::
+   If  msg.key = control.MoveBegin.k
+      If control.MoveBegin.q <> ""
+         If IsKeyDown(control.MoveBegin.q)
+            obj:mCursorHome()
+            msg.key = ""
+         EndIf
+      Else
+         obj:mCursorHome()
+         msg.key = ""
+      EndIf
+   EndIf
+
+
+   ; :: PAGEUP ::
+   If  msg.key = control.PageUp.k Or Asc(msg.key) = control.PageUp.Alt
+      If control.PageUp.q <> ""
+         If IsKeyDown(control.PageUp.q)
+            obj:mCursorPageUp()
+            msg.key = ""
+         EndIf
+      Else
+         obj:mCursorPageUp()
+         msg.key = ""
+      EndIf
+   EndIf
+
+   ; :: PAGEDOWN ::
+   If  msg.key = control.PageDown.k Or Asc(msg.key) = control.PageDown.Alt
+      If control.PageDown.q <> ""
+         If IsKeyDown(control.PageDown.q)
+            obj:mCursorPageDown()
+            msg.key = ""
+         EndIf
+      Else
+         obj:mCursorPageDown()
+         msg.key = ""
+      EndIf
+   EndIf
+
+   ; :: DEL ::
+   If  msg.key = control.Del.k Or Asc(msg.key) = control.Del.Alt
+      If control.Del.q <> ""
+         If IsKeyDown(control.Del.q)
+            obj:eDel()
+            obj.Actions.onChange(obj, obj:GetText())
+            msg.key = ""
+         EndIf
+      Else
+         obj:eDel()
+         obj.Actions.onChange(obj, obj:GetText())
+         msg.key = ""
+      EndIf
+   EndIf
+
+   ; :: BACKSPACE ::
+   If  msg.key = control.Backspace.k Or Asc(msg.key) = control.Backspace.Alt
+      If control.Backspace.q <> ""
+         If IsKeyDown(control.Backspace.q)
+            obj:eBackspace()
+            obj.Actions.onChange(obj, obj:GetText())
+            msg.key = ""
+         EndIf
+      Else
+         obj:eBackspace()
+         obj.Actions.onChange(obj, obj:GetText())
+         msg.key = ""
+      EndIf
+   EndIf
+
+   ; :: INSERT ::
+   If  msg.key = control.Insert.k Or Asc(msg.key) = control.Insert.Alt
+      If control.Insert.q <> ""
+         If IsKeyDown(control.Insert.q)
+            obj:eWrite_ToggleInsertMode()
+            msg.key = ""
+         EndIf
+      Else
+         obj:eWrite_ToggleInsertMode()
+         msg.key = ""
+      EndIf
+   EndIf
+
+
+   ;---| ACTION KEYS |----------------------------------------------------------
+   If TB.Item.Exists(obj.actionKeys, msg.key)
+      If GetType(obj.actionKeys[msg.key]) = #FUNCTION
+         obj.actionKeys[msg.key](obj)
+      EndIf
+      msg.key = ""
+   EndIf
+
+   If msg.key <> ""
+      Obj:eWrite(msg.key)
+      obj.Actions.onChange(obj, obj:GetText())
+   EndIf
+
+   If TP._Verbose
+      DebugPrint("\nText Buffer:")
+      DebugPrint(ReplaceStr(msg.userdata.text, "\n", "&"))
+      If msg.userdata.CursorPos > 0
+         DebugPrint(RepeatStr(" ", msg.userdata.CursorPos) .. "^\n")
+      Else
+         DebugPrint("^\n")
+      EndIf
+
+      DebugPrint("---| CURSOR POS (ROW, COL) : CHAR | CODE -> " .. msg.userdata.cursorPos .. " (" .. msg.userdata.cursorRow .. ", " .. msg.userdata.cursorCol .. ") : " .. MidStr(msg.userdata.Text, msg.userdata.cursorPos, 1) .. " | " .. Asc(MidStr(msg.userdata.Text, msg.userdata.cursorPos, 1)))
+      DebugPrint("---| SELECTION " .. msg.userdata.SelectActive .. " : (" .. msg.userdata.Select_Start.Pos, msg.userdata.Select_Start.Row, msg.userdata.Select_Start.Col .. ")-(" .. msg.userdata.Select_End.Pos, msg.userdata.Select_End.Row, msg.userdata.Select_End.Col .. ")")
+
+      Local sa = msg.userdata.SelectActive
+      Local ss = msg.userdata.Select_Start.Pos
+      Local se = msg.userdata.Select_End.Pos
+      DebugPrint("---| SELECTED String : " .. IIF(sa, msg.userdata:GetSelected() , "") )
+
+   EndIf
+
+   obj.Actions.onChange(obj, obj:GetText())
+   msg.userdata:Render()
+
+EndFunction
+
+Function TP:Activate()
+   self._OldEventHandlerF = GetAttribute(#EVENTHANDLER, "OnKeyDown", #ATTRFUNCTION)
+   self._OldEventHandlerD = GetAttribute(#EVENTHANDLER, "OnKeyDown", #ATTRUSERDATA)
+   self.cursorOn = True
+   
+   InstallEventHandler({ OnKeyDown = self.HandleInput,
+                         OnRawKeyDown = self.HandleRawKeys }, self)
+   ;InstallEventHandler({ VanillaKey = self.HandleInput }, self)
+
+   self:render()
+
+EndFunction
+
+Function TP:UnActivate()
+
+   self.cursorOn = False
+
+   If TB.Item.Exists(self, "_oldeventhandlerf")
+      If GetType(self._OldEventHandlerF) = #FUNCTION
+         InstallEventHandler({ OnKeyDown = self._OldEventHandlerF }, self._OldEventHandlerD)
+      Else
+         InstallEventHandler({ OnKeyDown = self._OldEventHandlerF })
+      EndIf
+
+   Else
+      InstallEventHandler({ OnKeyDown = 0 })
+
+   EndIf
+
+   ;self:mCursorHome()
+   self.Actions.OnUnactivate(self, self:GetText())
+   self:Render()
+
+EndFunction
+
+/*
+CtrlCQuit(False)
+n = TP:NewObject( { Text = "Lollo\nGino\nPeppe\nGigio\n\nQuesta è  una prova senza tag.\nPer ora potrebbe essere già\ntanto riuscire a farlo funzionare così.",
+                    AllowNewLines = True,
+                    enterCloseInput = False })
+n:render()
+n:Activate()
+
+Repeat
+   WaitEvent()
+Forever
+*/
+
+

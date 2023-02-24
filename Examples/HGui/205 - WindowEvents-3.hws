@@ -1,0 +1,54 @@
+/*******************************************************************************
+HGUI : Tutorial 205 - Window's Events 2 - part 3             v1.2 : 09/02/2023 *
+********************************************************************************
+In this tutorial we will see how we can change callback functions at runtime,
+It's easy and the concepts explained here applies to almost all HGui objects.
+********************************************************************************/
+
+;::: INCLUDE THE LIBRARIES DEFINITIONS :::::::::::::::::::::::::::::::::::::::::
+@INCLUDE "../../+Includes.hws"          ; Path relative to this application
+@INCLUDE #INC_HGUI                      ; Include the HGui library
+
+; UNCOMMENT THE FOLLOWING TWO LINES IF YOU WANT TO SEE WHAT EXACTLY HAPPEN.
+; DBG.Console.Enable(True)
+; DBG.Console.AddChannel(HGui.DebugChannel)
+
+/*******************************************************************************
+What we are trying to do in this tutorial is to alternate two callback functions
+attached to the same window's event. Don't get confused :)
+********************************************************************************/
+
+;::: LET'S DEFINE SOME CALLBACK FUNCTIONS ::::::::::::::::::::::::::::::::::::::
+Function windowMoved1(msg, win)
+   ; This one will print some stuff an will assign the callback function to
+   ; 'windowMoved2()'.
+   DebugPrint("####### CALLBACK #1 #######################")
+   DebugPrint("#### ", GetTime(True), "The window was moved! -> " .. win.name)
+   win:set({ events = { OnMove = windowMoved2 }})
+EndFunction
+
+Function windowMoved2(msg, win)
+   ; This one will print some stuff an will assign the callback function to
+   ; '<windowMoved1()'.
+   DebugPrint("::::::: CALLBACK #2 :::::::::::::::::::::::")
+   DebugPrint(":::: ", GetTime(True), "The window was moved! -> " .. win.name)
+   win:set({ events = { OnMove = windowMoved1 }})
+EndFunction
+
+; Window creation
+Local myWin0 = HGui.Window:new(
+                 { title = "Move me around!",
+                   name  = "win0",
+                   position = { x = 20,  y = 20 },
+                   size     = { w = 400, h = 100 },
+                   Events   =
+                     { OnMove = windowMoved1 } ; Attach the first function callback
+                   })
+
+Repeat
+   WaitEvent()
+Forever
+
+/*******************************************************************************
+ -> Try to detect more events from the supported ones.
+********************************************************************************/

@@ -1,0 +1,99 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>Label gadget</h1>
+
+    <p>For common methods have a look <a href="../Common%20Methods.html">here</a>,</p>
+    <p>&nbsp;</p>
+    <p><span class="text-big"><strong>LABEL GADGET METHODS</strong></span>
+    </p>
+    <ul>
+      <li><span class="text-big"><code>gadObj:align(textAlignment, refresh)</code></span>
+        <br>Changes the label's text alignment.
+        <br>- <strong>textAlignment </strong>: alignment <a href="../../Constants.txt">constant(a)</a>
+        <br>- <strong>refresh </strong>: <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:appendLine(content, autoScroll, refresh)</code></span>
+        <br>Adds a line of text and optionally scroll to the latest added line.
+        <br>- <strong>content </strong>: text to add at the bottom of the current contents
+        <br>- <strong>autoScroll </strong>: <code>True</code> to auto scroll to the bottom
+        <br>- <strong>refresh </strong>: <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:clear(refresh)</code></span>
+        <br>Clears the label's contents.
+        <br>- <strong>refresh </strong>: <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:fontMargins(margins, refresh)</code></span>
+        <br>Sets the text margins (top, bottom, left, right).
+        <br>- <strong>margins </strong>: Table with the margins to set
+        <br>- <strong>refresh </strong>: <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:fontName(name, refresh)</code></span>
+        <br>Changes the current font.
+        <br>- <strong>name </strong>: font name to set or a font constants for the
+        inbuilt fonts
+        <br>- <strong>refresh </strong>: <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:fontSize(size, refresh)</code></span>
+        <br>Changes the font size.
+        <br>- <strong>size </strong>: Font size to set
+        <br>- <strong>refresh </strong>: <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:fontStyle(style, refresh)</code></span>
+        <br>Changes the font style.
+        <br>- <strong>style </strong>: Text style combination to set
+        <br>- <strong>refresh </strong>: <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>cont_table, cont_string = gadObj:get()</code></span>
+        <br>Returns the label's contents as a table of lines and as a whole string.
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:setCaption(caption, refresh)</code></span>
+        <br>Changes the label's contents.
+        <br>- <strong>caption</strong> : Text to set in the label (a stirng or a table
+        of strings)
+        <br>- <strong>refresh </strong>: <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:setColor(color, refresh)</code></span>
+        <br>Changes the text color.
+        <br>- <strong>color</strong> : color to set
+        <br>- <strong>refresh </strong>: <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:setWordwrap(enabled, refresh)</code></span>
+        <br>Enables/disables the text wordwrap.
+        <br>- <strong>enabled</strong> : True to enable wordwrap
+        <br>- <strong>refresh </strong>: <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:scrollDown(rows, refresh)</code></span>
+        <br>Scrolls down the text.
+        <br>- <strong>rows</strong> : Number of rows to scroll down
+        <br>- <strong>refresh </strong>: <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:scrollBottom(maximize,&nbsp;refresh)</code></span>
+        <br>Scrolls to the last line of text.
+        <br>- <strong>maximize</strong> : <code>True</code> to maximize the visible text
+        <br>- <strong>refresh </strong>: <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:scrollTop(refresh)</code></span>
+        <br>Scrolls to the first line of text.
+        <br>- <strong>refresh </strong>: <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:scrollUp(rows, refresh)</code></span>
+        <br>Scrolls up the text.
+        <br>- <strong>refresh </strong>: <code>True</code> to refresh the gadget
+        <br>&nbsp;</li>
+      <li><span class="text-big"><code>gadObj:scrollTo(row, refresh)</code></span>
+        <br>Scrolls to the given row.
+        <br>- <strong>row</strong> : scroll to the specified row
+        <br>- <strong>refresh </strong>: <code>True</code> to refresh the gadget</li>
+    </ul>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

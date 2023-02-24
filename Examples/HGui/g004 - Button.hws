@@ -1,0 +1,297 @@
+/************************************************
+ * HGui Test Script                             *
+ * Fabio Falcucci                               *
+ * Feb-2023                                     *
+ ************************************************
+
+BUTTON GADGET
+-------------
+  A button gadget is used to let the user interact
+  with your program, a button has four skins, one
+  for each possible state it can assume:
+  - normal
+  - hilighted (mouse over)
+  - pushed (left mouse click on the button)
+  - disabled (the button is visible but not clickable)
+  The special tags we have seen on the label example
+  are also available for the buttons.
+ ************************************************/
+ 
+; Includes the HGui module
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; Creates a window
+Local myWin = 
+  HGui.Window:new(
+    { title = "Button Gadgets",
+      name  = "myWindow",
+      position   = { x = #CENTER, y = #CENTER },
+      size = { w = 550, h = 550 }
+      })
+
+; Disable auto-rendering while we are creating gadgets
+HGui.SetAutoRendering(False)
+
+; Let's create two buttons for our experiments
+
+; To group these buttons we need a box we will use as a container
+Local gBox = HGui.Gadget:new(#HGUI_BOX_GADGET)
+
+; Here is the first button, note that caption field is mandatory
+Local gBtn1 = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { caption = "HELLO! I'm a useless button!" })
+
+; And here is the second button using the special tags
+Local gBtn2 = HGui.Gadget:new(
+                #HGUI_BUTTON_GADGET, 
+                { caption = { "{:font--:}[b]NOTICE[/b]", 
+                              "{:bbcolor=80FF00005:} This is a multiline ", 
+                              "{:bgcolor=80FF00FF5:}text inside a button", 
+                              "{:font++:}using special tags!" } })
+
+; We need a group gadget where we will group some buttons
+; to perform tests.
+Local gGroup = HGui.Gadget:new(#HGUI_GROUP_GADGET, 
+  { Caption = { "Actions" }, 
+    Group_LabelGap = 10, 
+    Group_LabelSide = #HGUI_ALIGN_LEFT })
+    
+; Now we are going to build some buttons for our tests and
+; examples.
+
+; Button gadgets supports the following methods
+;   :Aligns(table, refresh)           Changes the alignment(s)
+;   :SetCaptions(table, refresh)      Changes the text's caption(s)
+;   :Enable()                         Enables a disabled button
+;   :Disable()                        Disables an enabled button
+;   :Hide(refresh)                    Hides the button
+;   :Show(refresh)                    Shows a previously hidden button
+
+; NOTE:
+;   :Enable() / :Disable() and :Hide() / :Show()
+;   are common methods of every gadget and they are recursive,
+;   if you disable a gadget that has childs, all childs will
+;   be disabled too.
+
+; This button will change the theme of the first button
+gChangeBtn1Theme = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Change Top button theme" }, 
+    Caption = { "Change Top", "button's theme" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          ; Refer to the previous examples to see how themes are handled and which
+          ; functions/methods can be used to change them.
+          ; -------------------------------------
+          ; The button gadget has four skins for each possible states called
+          ; 'nskin', 'hskin', 'pskin' and 'dskin'.
+          ; and four for the text called 'ntext', 'htext', 'ptext', 'dtext'.
+          ; we will generate a simple skin using an helper function
+          Local color1 = GetRandomColor()
+          Local color2 = GetRandomColor()
+          Local fColor = GetRandomColor()
+          Local h = Rnd(5)+2
+          gBtn1:setTheme(
+            { nskin = HGui.Theme.Generate_SkinDoubleGradient(color1, color2, h),
+              hskin = HGui.Theme.Generate_SkinDoubleGradient(color1, color2, h-1),
+              pskin = HGui.Theme.Generate_SkinDoubleGradient(color2, color1, h),
+              dskin = HGui.Theme.Generate_SkinColor(color2),
+              ntext = HGui.Theme.Generate_Text(
+                24,                 ; Font size
+                #ANTIALIAS,         ; Font style(s)
+                fColor,             ; Font color
+                #HGUI_ALIGN_CENTER, ; Text Alignment
+                False,              ; Draw edges?
+                False,              ; Draw shadows?
+                { Top = 4, Botton = 4, Left = 4, Right = 4 }), ; text margins
+              htext = HGui.Theme.Generate_Text(
+                24,                 ; Font size
+                #ANTIALIAS+#BOLD,   ; Font style(s)
+                fColor,             ; Font color
+                #HGUI_ALIGN_CENTER, ; Text Alignment
+                False,              ; Draw edges?
+                False,              ; Draw shadows?
+                { Top = 4, Botton = 4, Left = 4, Right = 4 }), ; text margins
+              ptext = HGui.Theme.Generate_Text(
+                24,                 ; Font size
+                #ANTIALIAS+#BOLD,   ; Font style(s)
+                fColor,             ; Font color
+                #HGUI_ALIGN_CENTER, ; Text Alignment
+                True,               ; Draw edges?
+                False,              ; Draw shadows?
+                { Top = 4, Botton = 4, Left = 4, Right = 4 }), ; text margins
+              dtext = HGui.Theme.Generate_Text(
+                24,                 ; Font size
+                #ANTIALIAS,         ; Font style(s)
+                $00AAAAAA,          ; Font color
+                #HGUI_ALIGN_CENTER, ; Text Alignment
+                False,              ; Draw edges?
+                False,              ; Draw shadows?
+                { Top = 4, Botton = 4, Left = 4, Right = 4 }), ; text margins
+              },
+            True ;  <- Refresh the parent window
+            )
+          
+        EndFunction
+      } 
+    })
+
+; We are going to build a button for each method to test
+
+; :Aligns() method
+gBtn2_Align = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Sets buttons the same alignment for all states" }, 
+    Caption = { ":Align() all" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          ; Applies a random alignment to all available states
+          Local a = TB.PickRandom({ #HGUI_ALIGN_LEFT, #HGUI_ALIGN_RIGHT, #HGUI_ALIGN_CENTER, #HGUI_ALIGN_TOP, #HGUI_ALIGN_BOTTOM })
+          gBtn1:Aligns(a, True)
+          gBtn2:Aligns(a, True)
+        EndFunction
+      } 
+    })
+
+; :Aligns() method
+gBtn2_Align2 = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Sets top button random alignment for every state" }, 
+    Caption = { ":Align() states" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          ; Applies a random alignment for every available state
+          Local a1 = TB.PickRandom({ #HGUI_ALIGN_LEFT, #HGUI_ALIGN_RIGHT, #HGUI_ALIGN_CENTER, #HGUI_ALIGN_TOP, #HGUI_ALIGN_BOTTOM })
+          Local a2 = TB.PickRandom({ #HGUI_ALIGN_LEFT, #HGUI_ALIGN_RIGHT, #HGUI_ALIGN_CENTER, #HGUI_ALIGN_TOP, #HGUI_ALIGN_BOTTOM })
+          Local a3 = TB.PickRandom({ #HGUI_ALIGN_LEFT, #HGUI_ALIGN_RIGHT, #HGUI_ALIGN_CENTER, #HGUI_ALIGN_TOP, #HGUI_ALIGN_BOTTOM })
+          Local a4 = TB.PickRandom({ #HGUI_ALIGN_LEFT, #HGUI_ALIGN_RIGHT, #HGUI_ALIGN_CENTER, #HGUI_ALIGN_TOP, #HGUI_ALIGN_BOTTOM })
+          gBtn1:Aligns({ normal = a1, hilighted = a2, pushed = a3, disabled = a4 }, True)
+        EndFunction
+      } 
+    })
+
+; :SetCaptions() method
+gBtn2_SetCaption = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Change Button 2 caption" }, 
+    Caption = { ":SetCaptions()", "for all states" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          ; Changes button 2 caption
+          gBtn2:SetCaptions({ "[u]HELLO![/u]", "Text Changed", "{:font--:}" .. GetDate(True) }, True)
+          
+        EndFunction
+      } 
+    })
+
+; :SetCaptions() method
+gBtn2_SetCaption2 = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Change Button 2 caption" }, 
+    Caption = { ":SetCaptions()", "for single states" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          ; For every state set a different caption on the button 2
+          gBtn2:SetCaptions({ normal = { "NORMAL State" },
+                              hilighted = { "HILIGHTED State" },
+                              pushed = { "PUSHED State" },
+                              Disabled = { "DISABLED State" }
+                              }, True)
+          
+        EndFunction
+      } 
+    })
+    
+; :Enable() method
+gBtn2_Enable = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Enables button 2" }, 
+    Caption = { ":Enable()" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          ; Enables button 2
+          gBtn2:Enable()
+          
+        EndFunction
+      } 
+    })
+  
+; :Disable() method
+gBtn2_Disable = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Disables button 2" }, 
+    Caption = { ":Disable()" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          ; Disables button 2
+          gBtn2:Disable(True)
+        EndFunction
+      } 
+    })
+
+; :Hide()
+gBtn2_Hide = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Hides button 2" }, 
+    Caption = { ":Hide()" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          ; Hides button 2
+          gBtn2:Hide(True)
+          
+        EndFunction
+      } 
+    })
+
+; :Show()
+gBtn2_Show = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Shows button 2" }, 
+    Caption = { ":Show()" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          ; Shows button 2
+          gBtn2:Show(True)
+          
+        EndFunction
+      } 
+    })
+
+
+; Now let's build the layout
+; -- gBox and gGroup are inside the window's root gadget
+myWin.rootgadget:layoutSet(
+  { gadgets = { gBox, gGroup },
+    weights = { 0.70, -0.30 },
+    gap     = 1,
+    type    = #HGUI_VERTICAL_LAYOUT,
+    }, True)
+
+; -- gBox contains the two buttons
+gBox:layoutSet(
+  { gadgets = { gBtn1, gBtn2 },
+    weights = { 0.25, 0.75 },
+    gap     = 1,
+    type    = #HGUI_VERTICAL_LAYOUT,
+    }, True)
+
+; -- gChangeTheme button is inside the gGroup gadget
+gGroup:layoutSet(
+  { gadgets = { gChangeBtn1Theme, gBtn2_Align, gBtn2_Align2, gBtn2_SetCaption, gBtn2_SetCaption2, 
+                gBtn2_Enable, gBtn2_Disable, gBtn2_Hide, gBtn2_Show
+                },
+    gap     = 2,
+    type    = #HGUI_GRID_LAYOUT,
+    columns = 3,
+    borders = { left = 1, right = 1, top = 1, bottom = 1 }
+    }, True)
+
+; Restores the auto-rendering
+HGui.SetAutoRendering(True)
+
+; Finally renders the window and enters the event loop
+myWin:Render()
+
+Repeat
+  WaitEvent()
+Forever

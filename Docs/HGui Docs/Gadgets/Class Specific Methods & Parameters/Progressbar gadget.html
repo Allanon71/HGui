@@ -1,0 +1,40 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>Progressbar gadget</h1>
+
+    <p>For common methods have a look <a href="../Common%20Methods.html">here</a>,</p>
+    <p>&nbsp;</p>
+    <p><span class="text-big"><strong>Additional arguments accepted by :New() method</strong></span>
+    </p>
+    <ul>
+      <li><strong>Caption </strong>: Cursor text with support for the following
+        tags:
+        <br>&nbsp; <code>{value}</code> : Replaced with the current value
+        <br>&nbsp; <code>{value.##}</code> : Replaced with the current value with two
+        decimal places
+        <br>&nbsp; <code>{intvalue}</code> : Replaced with the current integer value
+        <br>&nbsp; <code>{rangestart}</code> : Replaced with the range start value
+        <br>&nbsp; <code>{rangeend}</code> : Replaced with the range end value
+        <br>&nbsp; <code>{perc}</code> : Current percentual value</li>
+      <li><strong>Range </strong>: A table to define the values range → <code>{ Minimum, Maximum }</code>
+      </li>
+      <li><strong>Value </strong>: Scrollbar initial value</li>
+      <li><strong>Outer_Box </strong>: Standard options for the outer box (which
+        is a Button)</li>
+      <li><strong>Cursor </strong>: Standard options for the cursor box (which is
+        a Button)</li>
+      <li><strong>BackText </strong>: Set it to True to render the caption in the
+        container instead of inside the current value indicator</li>
+    </ul>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

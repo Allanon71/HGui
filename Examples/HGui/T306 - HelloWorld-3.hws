@@ -1,0 +1,79 @@
+/*******************************************************************************
+HGUI : Tutorial 306 - Hello World 3                          v1.0 : 11/09/2017 *
+********************************************************************************
+We need more action! Let's see how events work using our little button :)
+*******************************************************************************/
+
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+Local myWin = HGui.Window:new(
+                { title = "Hello World!",
+                  name  = "myWindow",
+                  position   = { x = #CENTER, y = #CENTER }
+                  })
+                   
+Function eventOverHandler(gadget)
+  ; This function will be called when an event occurs, the function is
+  ; attached to the gadget during the creation process: see below.
+  ; The callback function is called with the gadget object as parameter.
+  
+  ; When an event occurs we want to change the description of the label.
+  ; We will use the :set() method for our purposes, but since we don't
+  ; now the label object because at this code point it's not yet defined
+  ; we must use the gadget name to retrieve it.
+  Local myLabel = HGui.gadgetFindByName("myLabel")
+  myLabel:set({ caption = { "The mouse is over the button!", GetDate(True) } }, True)
+  ; The last parameter (the one set to TRUE) means that the gadget must be
+  ; updated as soon as it is changed, so it literally means "Update it now".
+  ; We will see in details later.
+EndFunction
+
+Function eventOutHandler(gadget)
+  ; This callback function is called when the mouse pointer exits
+  ; the button area!
+  Local myLabel = HGui.gadgetFindByName("myLabel")
+  myLabel:set({ caption = { "The mouse is out of the button!", GetDate(True) } }, True)
+EndFunction
+
+Function eventPushedHandler(gadget)
+  ; This function is called when the mouse left button is relesead, after
+  ; the user has pressed it.
+  Local myLabel = HGui.gadgetFindByName("myLabel")
+  myLabel:set({ caption = { "The button has been released!", GetDate(True) } }, True)
+EndFunction
+
+Function eventDownHandler(gadget)
+  ; This one is detected and excuted when the left mouse button has beem
+  ; pressed (but not yet released).
+  Local myLabel = HGui.gadgetFindByName("myLabel")
+  myLabel:set({ caption = { "The button has been pressed!", GetDate(True) } }, True)
+EndFunction
+
+HGui.SetAutoRendering(True)
+
+; We only need to define a label with the Hello World text inside.
+Local myLabel  = HGui.Gadget:new(#HGUI_LABEL_GADGET, { name = "myLabel", caption = { "This is the classic", "Hello World program", "with the HGui library", "for Hollywood!", "", "Button events demonstration." } })
+; And a button where we are going to attach the callback functions we have
+; prepared above.
+Local myButton = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+                    { caption = { "Hello World!", "(Interact with me!)"},
+                      ; Let's attach callback function to the events
+                      actions = { onover   = eventOverHandler, 
+                                  onout    = eventOutHandler,
+                                  onpushed = eventPushedHandler,
+                                  ondown   = eventDownHandler }
+                      })
+
+; Now let's attach the label and the button to the window
+mywin.rootgadget:layoutSet({ gadgets = { myLabel, myButton },
+                             weights = { 0.70, 0.30 },
+                             gap     = 1
+                             }, True )
+                             
+HGui.SetAutoRendering(True)
+myWin:Render()
+                 
+Repeat
+   WaitEvent()
+Forever

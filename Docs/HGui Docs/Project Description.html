@@ -1,0 +1,170 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>Project Description</h1>
+
+    <p><span class="text-big"><strong>INTRODUCTION</strong></span>
+    </p>
+    <p>HGui is one of the biggest project I worked on and its development started
+      back in the 2011.</p>
+    <p>The very first attempt was called scuiLib but after a few years I realized
+      how to properly code such a project using OOP to simplify the code required
+      to build user interfaces.</p>
+    <p>I've to admit that MUI inspired me a lot in this adventure and now, even
+      if the project it's still incomplete, I can say that it's very robust,
+      flexible and very usable. I cannot say this was easy… but I enjoyed (and
+      still enjoying) the development of HGui.&nbsp;</p>
+    <p>I've used it to produce many applications, even very heavy ones in terms
+      of interface complexity, without major issues.</p>
+    <p>Of course all can be made better and I will do it as soon as me or users
+      will need new features that will make HGui even better.</p>
+    <p>I've to be honest: I'm very proud of this work :D</p>
+    <p>&nbsp;</p>
+    <p><span class="text-big"><strong>FEATURES</strong></span>
+    </p>
+    <ul style="list-style-type:disc;">
+      <li><strong>Object Oriented Programming</strong>, you will code your app GUIs
+        using objects and methods</li>
+      <li>Flexible and multi-layered <strong>skin system</strong>, you can create
+        even complex themes or very simple (and light) ones, the skin system offers
+        you a fully featured subsystem.</li>
+      <li><strong>Easy of use</strong>, at least for me :)</li>
+      <li><strong>Fast</strong>, especially when using light skins and/or using
+        the cache system (enabled by default)</li>
+      <li><strong>Scalable</strong> (tuning the cache system and the theme you can
+        balance the cpu consumption and the memory usage)</li>
+      <li><strong>Pure Hollywood code</strong> : this means that HGui does not depend
+        on any system specific command/library, all developed apps using HGui can
+        be compiled for any system supported by Hollywood (Android needs some attention).
+        <br>Your app GUI will be the same on every platform, exactly the same.
+        <br>The only requirements are a few support includes (written in pure Hollywood
+        by me) available with HGui.</li>
+      <li><strong>WINDOWS</strong>
+        <ul>
+          <li>Every HGui window supports the following events:
+            <br>OnClose, OnMove, OnActivate, OnDeactivate, OnHide, OnShow, OnSize</li>
+          <li>A lot of customization is available when creating new windows</li>
+          <li>Automatic control of the window’s order (window's stack)</li>
+          <li>Methods to control/edit on the fly the created windows</li>
+          <li>Various window's background types supported</li>
+          <li>Special methods to quickly build:
+            <ul>
+              <li>Progress indicators</li>
+              <li>System requesters</li>
+              <li>Text boxes</li>
+              <li>Wait windows</li>
+              <li>Soft Keypads</li>
+              <li>Soft Keyboards</li>
+              <li>Input boxes</li>
+              <li>Message boxes</li>
+            </ul>
+          </li>
+          <li>Custom window’s menu (not the ones available with Hollywood but a custom
+            one that allow you to include any gadget type in it).</li>
+          <li>Utility functions to find window objects by name, by Hollywood ID, and
+            to check if a window exists or not.</li>
+          <li>Ability to attach hotkeys to any window to execute specific tasks when
+            a key press occurs.</li>
+        </ul>
+      </li>
+      <li><strong>GADGET CLASSES</strong>
+        <ul>
+          <li>Box</li>
+          <li>Vertical Divider</li>
+          <li>Horizontal Divider</li>
+          <li>Label</li>
+          <li>Group (Generic, Radio, Check)</li>
+          <li>Button</li>
+          <li>Switch</li>
+          <li>Scrollbar (Vertical/Horizontal)</li>
+          <li>Slider (Vertical/Horizontal)</li>
+          <li>Progress Bar</li>
+          <li>Knob</li>
+          <li>Text (for user input)</li>
+          <li>Listview</li>
+          <li>Treeview</li>
+          <li>Drop down</li>
+          <li>Image</li>
+          <li>Virtual Area</li>
+          <li>Canvas</li>
+        </ul>
+      </li>
+      <li><strong>GADGET SYSTEM</strong>
+        <ul>
+          <li>Ability to switch the cache system on or off, &nbsp;when enabled each
+            gadget state will be cached, a lot faster but more memory is required.
+            When disabled each gadget state will be rendered on the fly, slower but
+            with a much lower memory footprint.</li>
+          <li>Each gadget can have its own skin.</li>
+          <li>Each gadget class can have its own skin.</li>
+          <li>Support for icons inside gadgets with custom alignment and text adjustment</li>
+          <li>Flying tips for active gadgets</li>
+          <li>Hotkeys can be defined for each active gadget</li>
+          <li>You can attach sounds to some actions (OnOver, OnOut, OnPushed, OnDown)</li>
+          <li>Supported actions (some gadget classes may have additional actions):
+            <ul
+            style="list-style-type:circle;">
+              <li>OnPushed : Triggered when the left mouse button released (always after
+                an OnDown event)</li>
+              <li>OnDown : Triggered when the left mouse button is pressed</li>
+              <li>OnOver : Triggered when the mouse enters a gadget's area</li>
+              <li>OnOut : Triggered when the mouse exits a gadget's area</li>
+              <li>OnDrop : Triggere when something is dropped inside a gadget's area</li>
+        </ul>
+        </li>
+        <li>Functions to search buttons by their names</li>
+        <li>Methods to control and modify on the fly existing gadgets</li>
+        <li>Ability to attach a right-mouse action or a pop up menu on each active
+          gadget</li>
+    </ul>
+    </li>
+    <li><strong>LAYOUT SYSTEM</strong>
+      <br>Gadgets can be arranged using the famous <a href="http://www.sasg.com/mui/"><u>MUI</u></a> library
+      concept: you define some gadgets that will be grouped inside another gadget,
+      this way your GUI is represented by a tree where the tree root is a special
+      gadget called rootGadget, this special gadget is created for you automatically
+      when a window is created.
+      <br>This system supports 3 layouts:
+      <ul>
+        <li>Vertical</li>
+        <li>Horizontal</li>
+        <li>Grid</li>
+      </ul>
+    </li>
+    <li>When you define child gadgets you can define the following properties:
+      <ul>
+        <li>Gadget weights (percentual variable, percentual fixed, pixel variable,
+          pixel fixed)</li>
+        <li>Borders (top, bottom, left, right) from the parent gadget</li>
+        <li>Gap between gadget childs in pixel</li>
+      </ul>
+    </li>
+    </ul>
+    <p>&nbsp;</p>
+    <p><span class="text-big"><strong>WHAT’S MISSING/NEEDS MORE LOVE</strong></span>
+    </p>
+    <p>As I said HGui is still missing some core features like the ones listed
+      below:</p>
+    <ul style="list-style-type:disc;">
+      <li>Keyboard navigation system (very high priority)</li>
+      <li>Gadget’s drag &amp; drop (drag one or more gadgets over another one) (low
+        priority)</li>
+      <li>Tabs class (high priority)</li>
+      <li>Spin class (normal priority)</li>
+      <li>Better documentation (yes… this one isn't enough, I will improve it if
+        there is enough interest from users)</li>
+      <li>Tutorials (Some basic examples are provided but they do not cover everything
+        HGui can offer)</li>
+      <li>Global theme management functions are not complete (high priority)</li>
+      <li>Support for a way to separate Gui definitions from the code (low priority)</li>
+    </ul>
+  </body>
+
+</html>

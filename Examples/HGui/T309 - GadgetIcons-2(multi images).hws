@@ -1,0 +1,106 @@
+/*******************************************************************************
+HGUI : Tutorial 308 - Gadget's icons                         v1.0 : 11/09/2017 *
+********************************************************************************
+Here is a basic example on how you can include icons in your gadgets, we will
+use again the previous example as a starting point.
+*******************************************************************************/
+
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; The first thing you have to do is to preload the icons you need, you have to 
+; use a GFX library function that's included in the HGui distribution.
+Local icon1 = GFX.Image:Add("Icon1", "Resources/icon.png", { w = 32, h = 32 })
+; Please referes to the GFX library  documentation for more details about this
+; class/method.
+
+; You have the possibility to add a single icon for all gadget's states or
+; one icon for each available state (normal, hilighted, pressed, disabled,...)
+
+; Since we want a brighter icon associated with the 'hilighted' state we will
+; clone the previous one and we will apply a tint effect. You may also load
+; a completely different image if you want.
+Local icon2 = icon1:Clone("Icon2", { Color = $FF0000, Strenght = 128 })
+; In the example above we have used a method to clone the previously loaded
+; image, please have a look at the GFX library documentation for more details.
+
+; Window creation
+Local myWin = HGui.Window:new(
+                { title = "Hello World!",
+                  name  = "myWindow",
+                  position   = { x = #CENTER, y = #CENTER }
+                  })
+                   
+; Interface creation
+HGui.SetAutoRendering(True)
+
+Local myLabel  = HGui.Gadget:new(#HGUI_LABEL_GADGET, 
+  { name = "myLabel", 
+    caption = { "This an evolution of the classic", "Hello World program.", "", "[color=#RED]Buttons with icons[/color] demonstration." } })
+
+; Let's create some dummy buttons to show how to set the icons
+Local b1 = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { caption = { "Icon on the left"},
+    look = 
+      ; Icon's details are part of the look table
+      { icons = 
+        ; possible icon fields are:
+        ;   iName     : Icon name -> set the specified icon for ALL gadget's states
+        ;   nName     : Normal state icon
+        ;   hName     : Hilighted state icon
+        ;   pName     : Pushed state icon
+        ;   dName     : Disabled state icon
+        ;   npName    : Normal+Pushed state icon (for the switch gadgets)
+        ;   hpName    : Hilighted+Pushed state icon (for the switch gadgets)
+        ;   dpName    : Disabled+Pushed state icon (for the switch gadgets)
+        
+        ; In this example we will set the Icon1 for alla available states and
+        ; we will change only the hilighted stated assigning to it the Icon2
+        { iname = "Icon1", 
+          hname = "Icon2", 
+          Alignment = #HGUI_ALIGN_LEFT + #HGUI_ALIGN_VCENTER }}
+    })
+
+Local b2 = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { caption = { "Icon on the right"},
+    look = 
+      ; Icon's details are part of the look table
+      { icons = 
+        { iname = "Icon1", 
+          hname = "Icon2", 
+          Alignment = #HGUI_ALIGN_RIGHT + #HGUI_ALIGN_VCENTER }}
+    })
+    
+Local b3 = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { caption = { "Icon on the center"},
+    look = 
+      ; Icon's details are part of the look table
+      { icons = 
+        { iname = "Icon1", 
+          hname = "Icon2", 
+          Alignment = #HGUI_ALIGN_HCENTER + #HGUI_ALIGN_VCENTER }}
+    })
+    
+Local b4 = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { caption = { "Icon on the center / top"},
+    look = 
+      ; Icon's details are part of the look table
+      { icons = 
+        { iname = "Icon1", 
+          hname = "Icon2", 
+          Alignment = #HGUI_ALIGN_HCENTER + #HGUI_ALIGN_TOP }}
+    })
+    
+
+; Attach the label and the button to the window
+mywin.rootgadget:layoutSet({ gadgets = { myLabel, b1, b2, b3, b4 },
+                             weights = { 0.30, 0.15, 0.15, 0.20, 0.20 },
+                             gap     = 1
+                             }, True )
+                             
+HGui.SetAutoRendering(True)
+myWin:Render()
+                 
+Repeat
+   WaitEvent()
+Forever

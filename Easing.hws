@@ -1,0 +1,686 @@
+/**************************************************************************
+ * EASING LIBRARY                                                         *
+ * Author : Fabio Falcucci (Allanon)                                      *
+ * License : Donationware                                                 *
+ * PayPal Support : hijoe@tin.it                                          *
+ * Patreon Support : https://www.patreon.com/Allanon71                    *
+ * Version : 1.4                                                          *
+ * Release : 02.05.2020                                                   *
+ * IMPORTANT : This library is based on the library 'tween.lua' v1.0.1    *
+ *             (2012-02) by Enrique García Cota. I've ported the original *
+ *             code to Hollywood in September 2013 and I've added some    *
+ *             functions as well.                                         *
+ *             ORIGINAL SOURCE CODE:                                      *
+ *             https://github.com/kikito/tween.lua                        *
+ *-------------------------------------------------------------------------
+ *
+ *   Easing library is an include file for Hollywood able to create very
+ * smooth transitions between values so you can use it to animate almost
+ * anything like: graphical objects, colors, values, and any value you 
+ * need to be smoothly changed into another value.
+ *   Please note that this library is based on the library "tween.lua" 
+ * v1.0.1 (2012-02) by Enrique Garcia Cota.
+ *  I've started the port of the original code to Hollywood in 2013 and
+ * I've added some new features during time.
+ *   You can get the original code here -> https://github.com/kikito/tween.lua
+ *   
+ * Easing Functions
+ *   All Easing related functions are mapped on the tween table.
+ * 
+ 
+ CONTENTS
+ ========
+ 
+ *********************************************************************/
+
+Global tween = {}
+       tween.Version = "1.4"
+       tween.Build   = "02/05/2020"
+
+Local  pi    = 3.14159
+
+/************************************************************************
+ * PRIVATE STUFF                                                        *
+ ************************************************************************/
+Local tweens ;                  Initialized by calling to tween.stopAll()
+
+Local Function isCallable(f)
+  Local tf = type(f)
+  If tf = "function" Then Return(True)
+  If tf = "table"
+    Local mt = GetMetaTable(f)
+    Return(GetType(mt) = #TABLE And GetType(mt.__call) = #FUNCTION)
+  EndIf
+  Return(False)
+EndFunction
+
+Local Function copyTables(destination, keysTable, valuesTable)
+  valuesTable = valuesTable Or keysTable
+  Local mt = getmetatable(keysTable)
+  If mt and GetMetaTable(destination) = Nil
+    SetMetaTable(destination, mt)
+  EndIf
+  For k,v In Pairs(keysTable)
+    If GetType(v) = #TABLE
+      destination[k] = copyTables({}, v, valuesTable[k])
+    Else
+      destination[k] = valuesTable[k]
+    EndIf
+  Next
+  Return(destination)
+EndFunction
+
+Local Function checkSubjectAndTargetRecursively(subject, target, path)
+  path = path Or {}
+  Local targetType, newPath
+  For k,targetValue In Pairs(target)
+    targetType, newPath = GetType(targetValue), copyTables({}, path)
+    InsertItem(newPath, tostring(k))
+    If targetType = #NUMBER
+      ;-- Assert(GetType(subject[k]) = #NUMBER, "Parameter '" .. Concat(newPath,"/") .. "' is missing from subject or isn't a number")
+    ElseIf targetType = #TABLE
+      checkSubjectAndTargetRecursively(subject[k], targetValue, newPath)
+    Else
+      ;-- Assert(targetType = #NUMBER, "Parameter '" .. Concat(newPath,"/") .. "' must be a number or table of numbers")
+    EndIf
+  Next
+EndFunction
+
+Local Function checkStartParams(time, subject, target, easing, callback)
+  ;-- Assert(GetType(time) = #NUMBER And time > 0, "time must be a positive number. Was " .. ToString(time))
+  Local tsubject = GetType(subject)
+  ;-- Assert(tsubject = #TABLE Or tsubject = #USERDATA, "subject must be a table or userdata. Was " .. ToString(subject))
+  ;-- Assert(GetType(target)= #TABLE, "target must be a table. Was " .. ToString(target))
+  ;-- Assert(isCallable(easing), "easing must be a function or functable. Was " .. ToString(easing))
+  ;-- Assert(callback = Nil Or isCallable(callback), "callback must be nil, a function or functable. Was " .. ToString(time))
+  checkSubjectAndTargetRecursively(subject, target)
+EndFunction
+
+Function getEasingFunction(easing)
+  easing = easing Or "linear"
+  If GetType(easing) = #STRING
+    Local name = easing
+    easing = tween.easing[name]
+    ;-- Assert(GetType(easing) = #FUNCTION, "The easing function name '" .. name .. "' is invalid")
+  EndIf
+  Return(easing)
+EndFunction
+
+Local Function newTween(time, subject, target, easing, callback, args)
+  Local self = {
+    time = time,
+    subject = subject,
+    target = copyTables({},target),
+    easing = easing,
+    callback = callback,
+    args = args,
+    initial = copyTables({}, target, subject),
+    running = 0
+  }
+  tweens[self] = self
+  Return(self)
+EndFunction
+
+Local Function easeWithTween(self, subject, target, initial)
+  Local t,b,c,d
+  For k, v In Pairs(target)
+    If GetType(v) = #TABLE
+      easeWithTween(self, subject[k], v, initial[k])
+    Else
+      t, b, c, d = self.running, initial[k], v - initial[k], self.time
+      subject[k] = self.easing(t, b, c, d)
+    EndIf
+  Next
+EndFunction
+
+Local Function hasExpiredTween(self)
+  Return( self.running >= self.time)
+EndFunction
+
+Local Function updateTween(self, dt)
+  self.running = self.running + dt
+  easeWithTween(self, self.subject, self.target, self.initial)
+EndFunction
+
+Local Function itemExists(table, index)
+   If GetType(table) = #NIL Then Return(False)
+   If GetType(RawGet(table, index)) = #NIL Then Return(False) Else Return(True)
+EndFunction
+
+Local Function finishTween(self)
+  copyTables(self.subject, self.target)
+  If itemExists(self, "callback") Then self.callback(Unpack(self.args))
+  tween.stop(self)
+EndFunction
+
+Local Function resetTween(self)
+  copyTables(self.subject, self.initial)
+EndFunction
+
+;-------------------------------------------------------------------------------
+;-- easing                                                                    --
+;--                                                                           --
+;-- Adapted from https://github.com/EmmanuelOga/easing. See LICENSE.txt for   --
+;-- credits.                                                                  --
+;-- For all easing functions:                                                 --
+;-- t = time     ==> how much time has to pass for the tweening to complete   --
+;-- b = begin    ==> starting property value                                  --
+;-- c = change   ==> ending - beginning                                       --
+;-- d = duration ==> running time. How much time has passed *right now*       --
+;-------------------------------------------------------------------------------
+
+;::: LINEAR :::
+Local Function linear(t, b, c, d) Return(c * t / d + b) EndFunction
+
+;::: QUAD :::
+Local Function inQuad(t, b, c, d) Return(c * pow(t / d, 2) + b) EndFunction
+
+;::: OUTQUAD :::
+Local Function outQuad(t, b, c, d)
+  t = t / d
+  Return(-c * t * (t - 2) + b)
+EndFunction
+
+;::: INOUTQUAD :::
+Local Function inOutQuad(t, b, c, d)
+  t = t / d * 2
+  If t < 1 Then Return(c / 2 * pow(t, 2) + b)
+  Return(-c / 2 * ((t - 1) * (t - 3) - 1) + b)
+EndFunction
+
+;::: OUTINQUAD :::
+Local Function outInQuad(t, b, c, d)
+  If t < d / 2 Then Return(outQuad(t * 2, b, c / 2, d))
+  Return(inQuad((t * 2) - d, b + c / 2, c / 2, d))
+EndFunction
+
+;::: INCUBIC :::
+Local Function inCubic (t, b, c, d) Return(c * pow(t / d, 3) + b) EndFunction
+
+;::: OUTCUBIC :::
+Local Function outCubic(t, b, c, d) Return(c * (pow(t / d - 1, 3) + 1) + b) EndFunction
+
+;::: INOUTCUBIC :::
+Local Function inOutCubic(t, b, c, d)
+  t = t / d * 2
+  If t < 1 Then Return(c / 2 * t * t * t + b)
+  t = t - 2
+  Return(c / 2 * (t * t * t + 2) + b)
+EndFunction
+
+;:::OUTINCUBIC :::
+Local Function outInCubic(t, b, c, d)
+  If t < d / 2 Then Return(outCubic(t * 2, b, c / 2, d))
+  Return(inCubic((t * 2) - d, b + c / 2, c / 2, d))
+EndFunction
+
+;::: INQUART :::
+Local Function inQuart(t, b, c, d) Return(c * pow(t / d, 4) + b) EndFunction
+
+;::: OUTQUART :::
+Local Function outQuart(t, b, c, d) Return(-c * (pow(t / d - 1, 4) - 1) + b) EndFunction
+
+;::: INOUTQUART :::
+Local Function inOutQuart(t, b, c, d)
+  t = t / d * 2
+  If t < 1 Then Return(c / 2 * pow(t, 4) + b)
+  Return(-c / 2 * (pow(t - 2, 4) - 2) + b)
+EndFunction
+
+;::: OUTINQUART :::
+Local Function outInQuart(t, b, c, d)
+  If t < d / 2 Then Return(outQuart(t * 2, b, c / 2, d))
+  Return(inQuart((t * 2) - d, b + c / 2, c / 2, d))
+EndFunction
+
+;::: INQUINT :::
+Local Function inQuint(t, b, c, d) Return(c * pow(t / d, 5) + b) EndFunction
+
+;::: OUTQUINT :::
+Local Function outQuint(t, b, c, d) Return(c * (pow(t / d - 1, 5) + 1) + b) EndFunction
+
+;::: INOUTQUINT :::
+Local Function inOutQuint(t, b, c, d)
+  t = t / d * 2
+  If t < 1 Then Return(c / 2 * pow(t, 5) + b)
+  Return(c / 2 * (pow(t - 2, 5) + 2) + b)
+EndFunction
+
+;OUTINQUINT :::
+Local Function outInQuint(t, b, c, d)
+  If t < d / 2 Then Return(outQuint(t * 2, b, c / 2, d))
+  Return(inQuint((t * 2) - d, b + c / 2, c / 2, d))
+EndFunction
+
+;::: INSINE :::
+Local Function inSine(t, b, c, d) Return(-c * cos(t / d * (pi / 2)) + c + b) EndFunction
+
+;::: OUTSINE :::
+Local Function outSine(t, b, c, d) Return(c * sin(t / d * (pi / 2)) + b) EndFunction
+
+;::: INOUTSINE :::
+Local Function inOutSine(t, b, c, d) Return(-c / 2 * (cos(pi * t / d) - 1) + b) EndFunction
+
+;::: OUTINSINE :::
+Local Function outInSine(t, b, c, d)
+  If t < d / 2 Then Return(outSine(t * 2, b, c / 2, d))
+  Return(inSine((t * 2) -d, b + c / 2, c / 2, d))
+EndFunction
+
+;::: INEXPO :::
+Local Function inExpo(t, b, c, d)
+  If t = 0 Then Return(b)
+  Return(c * pow(2, 10 * (t / d - 1)) + b - c * 0.001)
+EndFunction
+
+;::: OUTEXPO :::
+Local Function outExpo(t, b, c, d)
+  If t = d Then Return(b + c)
+  Return(c * 1.001 * (-pow(2, -10 * t / d) + 1) + b)
+EndFunction
+
+;::: INOUTEXPO :::
+Local Function inOutExpo(t, b, c, d)
+  If t = 0 Then Return(b)
+  If t = d Then Return(b + c)
+  t = t / d * 2
+  If t < 1 Then Return(c / 2 * pow(2, 10 * (t - 1)) + b - c * 0.0005)
+  Return(c / 2 * 1.0005 * (-pow(2, -10 * (t - 1)) + 2) + b)
+EndFunction
+
+;::: OUTINEXPO :::
+Local Function outInExpo(t, b, c, d)
+  If t < d / 2 Then Return(outExpo(t * 2, b, c / 2, d))
+  Return(inExpo((t * 2) - d, b + c / 2, c / 2, d))
+EndFunction
+
+;::: INCIRC :::
+Local Function inCirc(t, b, c, d) Return((-c * (sqrt(1 - pow(t / d, 2)) - 1) + b)) EndFunction
+
+;::: OUTCIRC :::
+Local Function outCirc(t, b, c, d)  Return((c * sqrt(1 - pow(t / d - 1, 2)) + b)) EndFunction
+
+;::: INOUTCIRC :::
+Local Function inOutCirc(t, b, c, d)
+  t = t / d * 2
+  If t < 1 Then Return(-c / 2 * (Sqrt(1 - t * t) - 1) + b)
+  t = t - 2
+  Return(c / 2 * (sqrt(1 - t * t) + 1) + b)
+EndFunction
+
+;::: OUTINCIRC :::
+Local Function outInCirc(t, b, c, d)
+  If t < d / 2 Then Return(outCirc(t * 2, b, c / 2, d))
+  Return(inCirc((t * 2) - d, b + c / 2, c / 2, d))
+EndFunction
+
+;::: ELASTIC :::
+Local Function calculatePAS(p,a,c,d)
+  p, a = p Or d * 0.3, a Or 0
+  If a < Abs(c) Then Return(p, c, p / 4) ;-- p, a, s
+  /*
+  Local ca = 0
+  If Not(IsNil(a)) And a <> 0
+    ca = c/a
+  EndIf
+  */
+  Return(p, a, p / (2 * pi) * ASin(ca)) ;-- p, a, s
+EndFunction
+
+;::: INELANSTIC :::
+Local Function inElastic(t, b, c, d, a, p)
+  Local s
+  If t = 0 Then Return(b)
+  t = t / d
+  If t = 1 Then Return(b + c)
+  p, a, s = calculatePAS(p,a,c,d)
+  t = t - 1
+  Return(-(a * pow(2, 10 * t) * sin((t * d - s) * (2 * pi) / p)) + b)
+EndFunction
+
+;::: OUTELASTIC :::
+Local Function outElastic(t, b, c, d, a, p)
+  Local s
+  If t = 0 Then Return(b)
+  t = t / d
+  If t = 1 Then Return(b + c)
+  p, a, s = calculatePAS(p,a,c,d)
+  Return(a * pow(2, -10 * t) * sin((t * d - s) * (2 * pi) / p) + c + b)
+EndFunction
+
+;::: INOUTELASTIC :::
+Local Function inOutElastic(t, b, c, d, a, p)
+  Local s
+  If t = 0 Then Return(b)
+  t = t / d * 2
+  If t = 2 Then Return(b + c)
+  p, a, s = calculatePAS(p,a,c,d)
+  t = t - 1
+  If t < 0 Then Return(-0.5 * (a * pow(2, 10 * t) * sin((t * d - s) * (2 * pi) / p)) + b)
+  Return(a * pow(2, -10 * t) * sin((t * d - s) * (2 * pi) / p ) * 0.5 + c + b)
+EndFunction
+
+;:::OUTINELASTIC :::
+Local Function outInElastic(t, b, c, d, a, p)
+  If t < d / 2 Then Return(outElastic(t * 2, b, c / 2, d, a, p))
+  Return(inElastic((t * 2) - d, b + c / 2, c / 2, d, a, p))
+EndFunction
+
+;::: INBACK :::
+Local Function inBack(t, b, c, d, s)
+  s = s Or 1.70158
+  t = t / d
+  Return(c * t * t * ((s + 1) * t - s) + b)
+EndFunction
+
+;::: OUTBACK :::
+Local Function outBack(t, b, c, d, s)
+  s = s Or 1.70158
+  t = t / d - 1
+  Return(c * (t * t * ((s + 1) * t + s) + 1) + b)
+EndFunction
+
+;:::INOUTBACK :::
+Local Function inOutBack(t, b, c, d, s)
+  s = (s Or 1.70158) * 1.525
+  t = t / d * 2
+  If t < 1 Then Return(c / 2 * (t * t * ((s + 1) * t - s)) + b)
+  t = t - 2
+  Return(c / 2 * (t * t * ((s + 1) * t + s) + 2) + b)
+EndFunction
+
+;::: OUTINBACK :::
+Local Function outInBack(t, b, c, d, s)
+  If t < d / 2 Then Return(outBack(t * 2, b, c / 2, d, s))
+  Return(inBack((t * 2) - d, b + c / 2, c / 2, d, s))
+EndFunction
+
+;::: OUTBOUNCE :::
+Local Function outBounce(t, b, c, d)
+  t = t / d
+  If t < 1 / 2.75 Then Return(c * (7.5625 * t * t) + b)
+  If t < 2 / 2.75
+    t = t - (1.5 / 2.75)
+    Return(c * (7.5625 * t * t + 0.75) + b)
+  ElseIf t < 2.5 / 2.75
+    t = t - (2.25 / 2.75)
+    Return(c * (7.5625 * t * t + 0.9375) + b)
+  EndIf
+  t = t - (2.625 / 2.75)
+  Return(c * (7.5625 * t * t + 0.984375) + b)
+EndFunction
+
+;::: INBOUNCE :::
+Local Function inBounce(t, b, c, d) Return(c - outBounce(d - t, 0, c, d) + b) EndFunction
+
+;::: INOUTBOUNCE :::
+Local Function inOutBounce(t, b, c, d)
+  If t < d / 2 Then Return(inBounce(t * 2, 0, c, d) * 0.5 + b)
+  Return(outBounce(t * 2 - d, 0, c, d) * 0.5 + c * .5 + b)
+EndFunction
+
+;::: OUTINBOUNCE :::
+Local Function outInBounce(t, b, c, d)
+  If t < d / 2 Then Return(outBounce(t * 2, b, c / 2, d))
+  Return(inBounce((t * 2) - d, b + c / 2, c / 2, d))
+EndFunction
+
+tween.easing =
+{ 
+  linear    = linear,
+  inQuad    = inQuad,    outQuad    = outQuad,    inOutQuad    = inOutQuad,    outInQuad    = outInQuad,
+  inCubic   = inCubic,   outCubic   = outCubic,   inOutCubic   = inOutCubic,   outInCubic   = outInCubic,
+  inQuart   = inQuart,   outQuart   = outQuart,   inOutQuart   = inOutQuart,   outInQuart   = outInQuart,
+  inQuint   = inQuint,   outQuint   = outQuint,   inOutQuint   = inOutQuint,   outInQuint   = outInQuint,
+  inSine    = inSine,    outSine    = outSine,    inOutSine    = inOutSine,    outInSine    = outInSine,
+  inExpo    = inExpo,    outExpo    = outExpo,    inOutExpo    = inOutExpo,    outInExpo    = outInExpo,
+  inCirc    = inCirc,    outCirc    = outCirc,    inOutCirc    = inOutCirc,    outInCirc    = outInCirc,
+  inElastic = inElastic, outElastic = outElastic, inOutElastic = inOutElastic, outInElastic = outInElastic,
+  inBack    = inBack,    outBack    = outBack,    inOutBack    = inOutBack,    outInBack    = outInBack,
+  inBounce  = inBounce,  outBounce  = outBounce,  inOutBounce  = inOutBounce,  outInBounce  = outInBounce,
+}
+
+/********************************************************************
+ * PUBLIC FUNCTIONS                                                 *
+ ********************************************************************/
+
+Function tween.start(time, subject, target, easing, callback, ...)
+/******************************************************************************
+| tweenId = tween.start(time, subject, target, easing, callback, ...)
+|
+| Start a new tween and returns its id.
+|
+| INPUT
+|   time     : Transition time in milliseconds
+|   subject  : Table where the transition target(s) are defined
+|   target   : A table with one or more targets and their final values
+|   easing   : String with the easing formula name
+|   callback : Function to call when the transition ends
+|   ...      : Additional variables to pass to the callback function at
+|              the end of the transition
+| OUTPUT
+|   tweenId  : Id of the initialized tween
+| 
+| NOTES
+|   Possible string values for the parameter <easing> are:
+|    - linear      - inquad       - outquad      - inoutquad     - outinquad
+|    - incubic     - outcubic     - inoutcubic   - outincubic    - inquart
+|    - outquart    - inoutquart   - outinquart   - inquint       - outquint
+|    - inoutquint  - outinquint   - insine       - outsine       - inoutsine
+|    - outinsine   - inexpo       - outexpo      - inoutexpo     - outinexpo
+|    - incirc      - outcirc      - inoutcirc    - outincirc     - inelastic
+|    - outelastic  - inoutelastic - outinelastic - inback        - outback
+|    - inoutback   - outinback    - inbounce     - outbounce     - inoutbounce
+|    - outinbounce.
+******************************************************************************/
+  easing = getEasingFunction(easing)
+  checkStartParams(time, subject, target, easing, callback)
+  arg.n = Nil
+  Return(newTween(time, subject, target, easing, callback, arg))
+EndFunction
+
+SetMetaTable(tween, { __call = Function(t, ...) arg.n = Nil Return(tween.start(arg)) EndFunction })
+
+Function tween.reset(id)
+/******************************************************************************
+| tween.reset(tweenId)
+| 
+| Reset, and stop, the specified running tween.
+| 
+| INPUT
+|  id : The id of the tween we want to reset
+******************************************************************************/
+  Local tw = tweens[id]
+  If tw
+    resetTween(tw)
+    tween.stop(tw)
+  EndIf
+EndFunction
+
+Function tween.resetAll()
+/******************************************************************************
+| tween.resetAll()
+| 
+| Reset, and stop, all running tweens.
+******************************************************************************/
+  For _,tw In Pairs(tweens)
+   copyTables(tw.subject, tw.initial)
+  Next
+  tween.stopAll()
+EndFunction
+
+Function tween.update(dt)
+/******************************************************************************
+| tween.update(dt)
+| 
+| Update all running tweens evaluating the given 'dt' delta time.
+| 
+| INPUT
+|   dt : Delta time in milliseconds, it is the time passed between the last
+|        update and this exact moment.
+******************************************************************************/
+  ;-- Assert(GetType(dt) = #NUMBER And dt > 0, "dt must be a positive number")
+  Local expired = {}
+  For _,t In Pairs(tweens)
+    updateTween(t, dt)
+    If hasExpiredTween(t) Then InsertItem(expired, t)
+  Next
+  For i = 0, ListItems(expired) - 1
+    finishTween(expired[i])
+  Next
+EndFunction
+
+Function tween.stop(id, callback)
+/******************************************************************************
+| tween.stop(id, callback)
+| 
+| Stops the given running tween.
+| 
+| INPUT
+|   id       : Id of the tween we want to stop
+|   callback : Set this argument to TRUE if you want to execute the associated
+|              callback function like if the tween was naturally ended.
+******************************************************************************/
+  If callback Then finishTween(id)
+  If Not(IsNil(id)) Then tweens[id] = Nil
+EndFunction
+
+Function tween.stopAll(callback)
+/******************************************************************************
+| tween.stopAll(callback)
+| 
+| Stops all running tweens
+|
+| INPUT
+|   callback : Set this argument to TRUE if you want to execute the associated
+|              callback function like if the tween was naturally ended.
+******************************************************************************/
+  If tweens
+    For _,t In Pairs(tweens)
+      tween.stop(t, callback)
+    Next
+  EndIf
+  tweens = {}
+EndFunction
+
+Function tween.count()
+/******************************************************************************
+| count = tween.count()
+| 
+| Returns how many tweens are running.
+| 
+| OUTPUT
+|   count : Number of running tweens
+******************************************************************************/
+  Local c = 0
+  For i, v In Pairs(tweens)
+    c = c + 1
+  Next
+  Return(c)
+EndFunction
+
+Function tween.TEST()
+/******************************************************************************
+This program shows how to use tweens and will test all tween functions
+It also uses recursive callback functions to build tween chains.
+******************************************************************************/
+
+  EscapeQuit(True)
+  
+  ; All available easing functions
+  Local easing =
+  { "linear",
+    "inquad", "outquad", "inoutquad", "outinquad",
+    "incubic", "outcubic", "inoutcubic", "outincubic",
+    "inquart", "outquart", "inoutquart", "outinquart",
+    "inquint", "outquint", "inoutquint", "outinquint",
+    "insine", "outsine", "inoutsine", "outinsine",
+    "inexpo", "outexpo", "inoutexpo", "outinexpo",
+    "incirc", "outcirc", "inoutcirc", "outincirc",
+    "inelastic", "outelastic", "inoutelastic", "outinelastic",
+    "inback", "outback", "inoutback", "outinback",
+    "inbounce", "outbounce", "inoutbounce", "outinbounce" }
+  
+  Local Items   = {}                  ; Stores all items usend in our test
+  Local StartE  = 0                   ; First easing
+  Local EndE    = ListItems(easing)-1 ; Last easing
+  Local Timer   = StartTimer(Nil)     ; Start a timer to track delta times
+  Local rate    = 10                  ; Update every 10ms
+
+  Local UpdateScreen = Function()
+    ; This routine will update the screen, tween functions needs the delta time
+    ; to be updated correctly so the first thing to do is calculate this value
+    ; each time the screen is updated.
+    Local cTime = GetTimer(Timer)   ; Current time
+    Local dTime = cTime - OldTime   ; Delta time
+
+    ; Updates all active tweens
+    Tween.Update(dTime)
+
+    ; Clear the screen
+    SetFillStyle(#FILLCOLOR)
+    Box(0, 0, 640, 480, $A4000000)
+
+    ; Display the objects, one for each defined tween
+    For Local i = StartE To EndE
+      TextOut(Items[i].x, Items[i].y, easing[i], { Color = Items[i].Color })
+    Next
+
+    ; Message in the top-left screen corner
+    TextOut(10, 10, "(ESC to quit) - DT:" .. dTime, { Color = #RED })
+
+    OldTime = cTime
+
+    ; Swap buffers without waiting for the vertical blank
+    Flip(True)
+  EndFunction
+  
+  ;*** CALLBACK FUNCTION used to restart the tween animations
+  ;*** once they have ended.
+  Local fRepeat = {} ; Needed to make recursive callbacks
+  fRepeat = Function(id)
+    ; Callback function used initialize and restart every item tween
+    Local id = id.id
+    Items[id].x = 0
+    Items[id].color = GetRandomColor()
+    tween.start(10000, Items[id], { x = 560 }, easing[id], fRepeat, { id = id })
+  EndFunction
+
+  ; Initialize the tweens, one for each animation available
+  ; Every tween get the callback function 'fRepeat()' that will
+  ; be executed when the tween ends.
+  For Local i = StartE To EndE
+    Local b = i
+    Items[i] = { x = 0, y = 50 + i*8 }
+    Items[i].fun = Function(a)
+                     Local a = b
+                     Items[a].x = 0
+                     tween.start(10000, Items[a], { x = 560 }, easing[a], fRepeat, { id = a })
+                   EndFunction
+  Next
+  
+  ; Setup the renderer at the specified refresh rate
+  Local Renderer = SetInterval(Nil, UpdateScreen, rate)
+  
+  ; Initialize the previous time for the first delta time
+  ; calculation
+  Local OldTime  = GetTimer(Timer) 
+
+  ; Create text colors and start all defined tweens
+  For Local i = StartE To EndE
+    Items[i].color = GetRandomColor()
+    Items[i].fun(i)
+  Next
+
+  BeginDoubleBuffer()
+  
+  ; Infinite loop
+  Repeat
+    WaitEvent()
+  Forever
+  
+EndFunction
+
+tween.stopAll() ; Nedeed to initialize the tween system
+
+; tween.TEST()

@@ -1,0 +1,1221 @@
+/*****************************************************************************
+* DEBUG LIBRARY                                                              *
+* Author  : Fabio Falcucci (Allanon)                                         *
+* License : Shareware                                                        *
+* Dependancies : HELPERS, TABLES, ANSI                                       *
+* Version : 2.0                                                              *
+******************************************************************************
+Debug lib is a library developed to help debugging session, it can be used to
+generate debug output to the console or to one or more files.
+Debug lib can manage one or more debug channel, in this way you are able to
+switch channels on or off, to tune the amount of output to analyze.
+If you have an ANSI capable terminal debug messages can be colored to help
+you identify errors and warnings in no time.
+Debug lib have the ability to show nested messages, this is incredibly useful
+when you have recursive functions and external library calls: without a proper
+output formatting a standard debug session could become a pain.
+You can output tables too, and they are formatted and idented properly to let
+you look easily at the contents.
+
+CONTENTS
+========
+:: CONSOLE DEBUG ::
+DBG.Console.AddChannel()
+DBG.Console.Disable()
+DBG.Console.Enable()
+DBG.Console.Out()
+DBG.Console.RemoveChannel()
+DBG.Console.SkipNormalLevel()          OBSOLETE
+DBG.Console.setIgnoreNormalMsg(value)
+
+:: FILE DEBUG ::
+DBG.Log.Disable()
+DBG.Log.Enable()
+DBG.Log.Out()
+ 
+:: MISC ::
+DBG.DumpTable()
+ 
+--- CHANGE LOG -----------------------
+22/09/2022 : Fixed a bug in DBG.Console.Out() and DBG.Log.Out() caused by the
+  formatting of the timers (if enabled).
+__/04/2022 : Added a new bump mode : DBG.OutMode_String to be able to dump
+  tables into formatted strings. The result is available inside the variable
+  'DBG.OutString'.
+02/06/2021 : Fixed a bug in the time padding, now when the timer exceed the 
+  padding the timer will be resetted.        
+09/01/2021 : Changed how memory informations are logged using #SYSINFO# tag
+  Added DBG.Console.ignoreNormalMsg(value), this will replace
+  DBG.Console.SkipNormalLevel(value), still available but obsolete changed
+  because of the misleading func name.
+27/12/2017 : FIX ident on DBG.Console.Out()
+01/07/2017 : Many optimizations and bug fixing.
+30/12/2015 : Added DBG.Hilight message type.
+ */
+ 
+@INCLUDE "+Includes.hws"
+@INCLUDE #INC_HELPERS
+@INCLUDE #INC_TABLES
+@INCLUDE #INC_ANSI
+
+Global  DBG = {}
+        DBG.Console = {}
+        DBG.Log     = {}
+        DBG.Version = "2.0"
+        DBG.Build   = "22.09.2022" 
+DBG.Console.Enabled    = False   ; Stores the console output state
+DBG.Console.Timing     = False   ; Enable or disable timings in console output
+DBG.Console.TimePadding= 6       ; Time padding for console time field (ms)
+DBG.Console.TimerID    = 0       ; Console Timer for time output
+DBG.Console.Channels   = { standard = True } ; Enabled channels list
+DBG.Console.Colors     = { standard = Ansi.Code.FgWhite }
+DBG.Console.SkipNormal = False   ; True : skip normal messages
+DBG.Console.Ansi       = True    ; Enable/disable ANSI support
+DBG.Log.Enabled        = False   ; Stores the log output state
+DBG.Log.FileID         = -1      ; Stores the opened log file ID
+DBG.Log.Filename       = ""      ; Stores the opened log file name
+DBG.Log.Timing         = False   ; Enable or disable timings in console output
+DBG.Log.TimePadding    = 6       ; Time padding for console time field (ms)
+DBG.Log.TimerID        = 0       ; Console Timer for time output
+DBG.Log.Channels       = {}      ; Enabled channels list
+DBG.DumpTableIdentSize = 3       ; Used to hilight nested tables by DumpTable
+DBG.DumpTableMaxRecursion = 8    ; TableDump maximum recursion level
+DBG.DumpTableHideEmpty = False   ; TableDump, hide empty tables
+DBG.DumpTableHideFunctions = False;TableDump, hide functions
+
+DBG.OutMode_Straight = 1         ; Output mode to the console always
+DBG.OutMode_Console  = 2         ; Output mode to the console if enabled
+DBG.OutMode_Log      = 3         ; Output to the log file if enabled
+DBG.OutMode_String   = 4         ; Output to a string & return it
+
+DBG.Console_Ident    = 0         ; Current Ident level for the Console output
+DBG.Console_Ident2   = 0         ; Current Ident level for the Log file output
+DBG.Console_IdentStep= 3         ; Ident step
+
+DBG.OpenFunc         = 1         ; Valiable used to classify the message and to
+DBG.CloseFunc        = 2         ; use a proper ANSI color if it was enabled
+DBG.Warning          = 3
+DBG.Error            = 4
+DBG.Hilight          = 5
+
+
+Function DBG.DTS(tbl, outfunc) ; :: INTERNAL ::
+/*****************************
+DBG.DTS(tbl, outfunc)
+
+This is an internal function used by DBG.DumpTable() to print sorted tables.
+---------------------------------------
+INPUT
+  tbl : [TBL] Table to sort
+  outfunc : [FNC] Output function
+****************************************/
+  TB.Sort(tbl, True, "k")
+  Local c = TB.Count(tbl) - 1
+  For Local i = 0 To c
+    If GetType(tbl[i].v) <> #TABLE
+      outfunc(tbl[i].v)
+      
+    Else
+      TB.Sort(tbl[i].v, True, { "k" })
+      DBG.DTS(tbl[i].v, outfunc)
+      
+    EndIf
+    
+  Next
+  
+EndFunction
+
+
+Function DBG.Console.Enable(timing, ansi)
+/****************************************
+result = DBG.Console.Enable(timing)
+
+Enable the debug output to the console. If <timing> is set to TRUE a
+timestamp will be added to the beggining of the data we are logging, 
+defaults to FALSE.
+---------------------------------------
+INPUT
+  timing : [BLN] Set this switch to TRUE to add a timestamp at the beggining
+    of each data row.
+  ansi : [BLN] TRUE to enable ANSI support (default)
+
+OUTPUT
+  result : [BLN] TRUE if the debug was enabled without errors.
+
+EXAMPLE
+  ; Enable the timestamp and the ANSI colors
+  DBG.Console.Enable(True, True)
+****************************************/
+  If DBG.Console.Enabled = True Then Return(False)
+  DBG.Console.Enabled = True
+   
+  If IsNil(timing)
+    DBG.Console.Timing = False
+    
+  Else
+    DBG.Console.Timing = Timing
+    If DBG.Console.Timing Then DBG.Console.TimerID = StartTimer(Nil)
+    
+  EndIf
+   
+  If IsNil(ansi)
+    DBG.Console.Ansi = True
+    Term.AnsiMode = True
+    
+  Else
+    DBG.Console.Ansi = Ansi
+    Term.AnsiMode = Ansi
+    
+  EndIf
+   
+  Return(True)
+  
+EndFunction
+
+Function DBG.Console.ignoreNormalMsg(value)
+/******************************************
+result = DBG.Console.ignoreNormalMsg(value)
+  
+This function is used to skip all debug messages that are not
+classified and are considered as normal/info logging messages.
+The message classification is determined by the 'Mode' parameter
+in both DBG.Console.Out() and DBG.Log.Out() funcs, when you set
+Mode=Nil you are logging a normal message.
+---------------------------------------
+INPUT
+  value : [BLN] Set to True if you want to skip all 'normal' debug
+    messages.
+    
+OUTPUT
+  result : [BLN] True if all is fine, False if there was an error.
+  msg : [STR] If result=False msg will hold an error message.
+
+EXAMPLE
+  DBG.Console.ignoreNormalMsg(True)
+****************************************/
+  If DBG.Console.SkipNormal = Value
+    Return(False, "Already set")
+
+  Else
+    DBG.Console.SkipNormal = value
+    Return(True)
+
+  EndIf
+  
+EndFunction
+
+Function DBG.Console.SkipNormalLevel(value) ; :: OBSOLETE ::
+/******************************************
+result = DBG.Console.SkipNormalLevel(value)
+
+Switch On or Off the normal-level-messages logging. 
+Set <value> to TRUE to skip normal-level-messages, otherwise set it
+to FALSE (default).
+---------------------------------------
+INPUT
+  value : [BLN] TRUE to enable all level-normal messages
+  
+OUTPUT
+  result : [BLN] TRUE if the action was successfull
+  
+EXAMPLE
+  ; Switch off all normal-level messages
+  DBG.Console.Out.SkipNormalLevel(True)
+  
+NOTES
+  Normal-level-messages are the messages without a message type
+  specified, have a look at the DBG.Console.Out() function for more
+  details.
+****************************************/
+  If DBG.Console.SkipNormal = Value
+    Return(False)
+    
+  Else
+    DBG.Console.SkipNormal = value
+    Return(True)
+    
+  EndIf
+
+EndFunction
+
+
+Function DBG.Console.AddChannel(ChannelName, ChannelColor)
+/*********************************************************
+result = DBG.Console.AddChannel(ChName, ChColor)
+
+Defines and enables a new console debug channel named <ChName>.
+The optional <ChColor> defines the color for ANSI capable consoles
+that will be used to hilight the channel name.
+---------------------------------------------------------------------
+INPUT
+  ChName : [STR] Add and enable the given channel to the output stream
+  ChColor : [STR] Optional channel color (ANSI CODE/SEQUENCE), default
+    Yellow+Bold
+OUTPUT
+  result : [BLN] TRUE if the channel was added without errors
+  
+EXAMPLE
+  ; The following code enables the debug output to the console,
+  ; add a debug channel and output some debug text.
+  DBG.Console.Enable(True, True)
+  DBG.Console.AddChannel("MAIN PRG", Ansi.Code.FgYellow)
+  DBG.Console.Out("This is just a test!", Nil, "MAIN PRG")
+
+NOTES
+  The channel color is defined by an ANSI sequence you can input
+  directly or using the inbuilt sequences defined in the Ansi Lib, 
+  like in the above example.
+  Channel name is not case sensitive.
+  Here is a list of colors defined in the ANSI library, you can mix
+  them using the concatenation operator like 
+  ANSI.Code.FgRed .. ANSI.Code.BgWhite:
+
+    ANSI.Code.
+      BoldOn            BoldOff
+      DimOn             DimOff
+      ItalicsOn         ItalicsOff
+      UnderlineOn       UnderlineOff
+      BlinkOn           BlinkOff
+      InverseOn         InverseOff
+      HiddenOn          HiddenOff
+      StrikethroughOn   StrikethroughOff
+      FgBlack           BgBlack
+      FgRed             BgRed
+      FgGreen           BgGreen
+      FgYellow          BgYellow
+      FgBlue            BgBlue
+      FgMagenta         BgMagenta
+      FgCyan            BgCyan
+      FgWhite           BgWhite
+      FgDefault         BgDefault
+****************************************/
+  Local chname = LowerStr(ChannelName)
+  If IsNil(ChannelColor)
+    ; If not specified set a default color
+    ChannelColor = Ansi.Code.FgYellow .. Ansi.Code.BoldOn
+  EndIf
+   
+  If TB.Item.Exists(DBG.Console.Channels, chname)
+    ; If the channel is already defined exits
+    Return(False)
+    
+  Else
+    DBG.Console.Channels[chname] = True
+    DBG.Console.Colors[chname] = ChannelColor
+    Return(True)
+    
+  EndIf
+
+EndFunction
+
+
+Function DBG.Console.RemoveChannel(ChannelName)
+/**********************************************
+result = DBG.Console.RemoveChannel(ChName)
+
+Removes the existing console debug channel named <ChName>.
+---------------------------------------
+INPUT
+  ChName : [STR] Removes the given channel from the output stream
+  
+OUTPUT
+  result : [BLN] TRUE if the channel was removed without errors
+  
+EXAMPLE
+  ; Remove a defined debug channel so that the debug output for this
+  ; channel will be stopped.
+  DBG.Console.RemoveChannel("MAIN PRG")
+
+NOTES
+  As soon as you have removed a channel its output requests will be 
+  ignored.
+****************************************/
+  Local chname = LowerStr(ChannelName)
+  If TB.Item.Exists(DBG.Console.Channels, chname)
+    DBG.Console.Channels[chname] = Nil
+    Return(True)
+    
+  Else
+    ; The channel does not exists
+    Return(False)
+    
+  EndIf
+  
+EndFunction
+
+
+Function DBG.Console.Out(Message, Mode, Channel)
+/***********************************************
+result = DBG.Console.Out(Message, Mode, Channel)
+
+If the console debug has been activated with <DBG.Console.Enable>
+and the channel has been added to the enabled channels list the
+<message> will be printed to the console using the specified <Mode>. 
+---------------------------------------
+INPUT
+  message : [STR] Message to log, can be a STRING, NUMBER, NIL, TABLE.
+  Mode : [NUM] Can be one of the following predefined values:
+    DBG.OpenFunc : Set the message as an open function message, must
+      be paired with a DBG.CloseFunc message.
+    DBG.CloseFunc : Set the message as a close function message, must
+      be paired with a DBG.OpenFunc message for correct  identation.
+    DBG.Warning : Hilight the message as a warning message.
+    DBG.Hilight : Hilight the message to make it more visibile.
+    DBG.Error : Hilight the message as an error message.
+    Nil : Do not specify a value to log a normal/info message.
+  channel : [STR] Is the channel name where this message should be
+    logged to. Defaults to 'standard'.
+    
+OUTPUT
+  result : [BLN] TRUE if the message was logged without errors.
+  
+EXAMPLE
+  ; Brief example to print en error message
+  DBG.Console.Out("ERROR! File not found!", DBG.Error, "myProg")
+  
+  ; Here is another example that shows how to use messages whitin
+  ; functions:
+  Function checkFile(filename)
+    DBG.Console.Out("Calling checkFile()", DBG.OpenFunc, "myProg")
+    If Exists(filename)
+      DBG.Console.Out("File has been detected.", Nil, "myProg")
+    Else
+      DBG.Console.Out("File not found -> " .. filename, DBG.Warning, "myProg")
+    EndIf
+  
+    DBG.Console.Out(Nil, DBG.CloseFunc, "myProg")
+  EndFunction
+
+NOTES
+  It's important to pair messages with mode DBG.OpenFunc and 
+  DBG.CloseFunc to mantain a correct identation.
+  If more .CloseFunc than .OpenFunc are detected, a warning message
+  will be printed to the console.
+****************************************/
+  If DBG.Console.Enabled
+    Local Ident   = ""
+    Local result  = False
+    Local chname  = IIf(IsNil(channel), "standard", channel)
+    Local chcolor = ""
+    
+    ; Check the specified channel exists
+    If TB.Item.IsNil(DBG.Console.Channels, LowerStr(chname))
+      Return(result)
+      
+    Else
+      chcolor = DBG.Console.Colors[LowerStr(chname)]
+      
+    EndIf
+
+    ; Build the identation prefix
+    If DBG.Console_Ident > 0
+      Ident = RepeatStr(" ", DBG.Console_Ident - 1)
+    
+    EndIf
+
+    If DBG.Console.Timing
+      Local t1 = Wrap(GetTimer(DBG.Console.TimerID), 0, 2147483647)
+      Local t = PadNum(t1, DBG.Console.TimePadding)
+      If Mode = DBG.OpenFunc
+        Ident = t .. ident .. " +"
+        
+      Else
+        Ident = t .. ident .. "| "
+        
+      EndIf
+      
+    Else
+      If Mode = DBG.OpenFunc
+        Ident = ident .. " +"
+        
+      Else
+        Ident = ident .. "| "
+        
+      EndIf
+      
+    EndIf
+
+    Local dash = "-"
+
+    If Mode = DBG.OpenFunc
+      If DBG.Console.Ansi
+        Message = dash .. "+" .. "[" .. chcolor .. ChName .. "~{NORM}]~{BLD+}" .. Message .. "~{BLD-}"
+        
+      Else
+        Message = dash .. "+" .. "[" .. ChName .. "] " .. Message
+        
+      EndIf
+      
+    ElseIf Mode = DBG.Warning
+      If DBG.Console.Ansi
+        Message = "~{ERRO}WARNING " .. "[" .. ChName .. "] " .. Message .. "~{NORM}"
+        
+      Else
+        Message = "*** WARNING: " .. "[" .. ChName .. "] " .. Message .. " ***"
+        
+      EndIf
+      
+    ElseIf Mode = DBG.Error
+      If DBG.Console.Ansi
+        Message = "~{ERRO}ERROR " .. "[" .. ChName .. "] " .. Message .. "~{NORM}"
+        
+      Else
+        Message = "### ERROR! " .. "[" .. ChName .. "] " .. Message .. " ###"
+        
+      EndIf
+    ElseIf Mode = DBG.Hilight
+      If DBG.Console.Ansi
+        Message = "~{NOTI}" .. Message .. "~{NORM}"
+        
+      Else
+        Message = ">>> " .. Message .. " <<<"
+        
+      EndIf
+      
+    Else
+    
+      If (DBG.Console.SkipNormal And Mode <> DBG.CloseFunc) 
+        Return()
+      
+      EndIf
+      
+    EndIf
+
+    If (GetType(Message) = #STRING) Or (GetType(Message) = #NUMBER)
+      Term.Print(Ident .. Message)
+      result = True
+      
+    ElseIf GetType(Message) = #TABLE
+      DBG.DumpTable(Message, DBG.OutMode_Console, Nil, DBG.Console_Ident - 1, Nil, Nil, Channel)
+      result = True
+      
+    ElseIf GetType(Message) = #NIL
+      ; DebugPrint(Ident .. "NIL")
+      
+    EndIf
+
+    If Not(IsNil(Mode))
+      If Mode = DBG.OpenFunc
+        DBG.Console_Ident = DBG.Console_Ident + DBG.Console_IdentStep
+        
+      ElseIf Mode = DBG.CloseFunc
+        DBG.Console_Ident = DBG.Console_Ident - DBG.Console_IdentStep
+        
+        If DBG.Console_Ident < 0
+          DebugPrint("### DETECTED TOO MUCH <DBG.CloseFunc> calls!! ### :: " .. DBG.Console_Ident/DBG.Console_IdentStep, Message, Mode, Channel)
+          
+        EndIf
+        
+      EndIf
+      
+    EndIf
+
+  EndIf
+   
+  Return(result)
+  
+EndFunction
+
+
+Function DBG.Console.Disable()
+/*****************************
+result = DBG.Console.Disable()
+
+Disables the debug output to the console.
+---------------------------------------
+OUTPUT
+  result : [BLN] TRUE if the debug was disabled without errors.
+  
+EXAMPLE
+  ; Disable the debug output for all messages
+  DBG.Console.Disable()
+****************************************/
+  If DBG.Console.Enabled = False Then Return(False)
+  DBG.Console.Enabled = False
+   
+  Return(True)
+  
+EndFunction
+
+
+
+Function DBG.Log.Enable(LogFile, Preserve, Timings, ChannelName)
+/***************************************************************
+result = DBG.Log.Enable(LogFile, Preserve, Timings, ChannelName)
+
+Enable the debug output messages to a log file named <LogFile>.
+The channel will be attached to the given file name so that all
+subsequent debug messages will be written on that log file.
+---------------------------------------------------------------------
+INPUT
+  LogFile : [STR] The file name where to write the log messages
+  Preserve : [BLN] TRUE to preserve the previous log file (if present),
+    it will be renamed adding the .backup extention. If a file with the
+    same name still exists, it will be deleted.
+  Timings : [BLN] TRUE to log the messages timestamp.
+  ChannelName : [STR] Specify the channel name (optional, 
+    default = "standard")
+
+OUTPUT
+  result : [BLN] TRUE if the logging have been enabled correctly.
+  
+EXAMPLE
+  ; Enable the logging of all messages coming from the give channel to the
+  ; specified log file.
+  DBG.Log.Enable("log.txt", False, True, "myProg")
+  DBG.Log.Out("Just a test!", DBG.Hilight, "myProg")
+  
+NOTES
+  You can easily redirect messages to several files to separate
+  channels and have a better reading of the generated messages.
+****************************************/
+  If IsNil(LogFile) Then Return(False)
+  If IsNil(ChannelName) Then ChannelName = "Standard"
+  If TB.Item.Exists(DBG.Log.Channels, ChannelName) Then Return(False)
+
+  If Exists(LogFile)
+    If preserve
+      If Exists(LogFile .. ".backup") Then DeleteFile(LogFile .. ".backup")
+      Rename(LogFile, LogFile .. ".backup")
+      
+    Else
+      DeleteFile(LogFile)
+      
+    EndIf
+    
+  EndIf
+
+  If IsNil(Timings) Then Timings = False
+   
+  If Timings
+    DBG.Log.TimerID = StartTimer(Nil)
+    
+  EndIf
+
+  ExitOnError(False)
+  DBG.Log.FileID = OpenFile(Nil, LogFile, #MODE_WRITE)
+  Local error = GetLastError()
+  ExitOnError(True)
+   
+  If error <> 0
+    Return(False)
+    
+  EndIf
+
+  DBG.Log.Channels[ChannelName] = 
+    { FileID      = DBG.Log.FileID, 
+      Timing      = Timings, 
+      IdentValue  = 0,
+      IdentValue2 = 0,
+      Ident       = "",
+      Enabled     = True }
+   
+  DBG.Log.Filename = LogFile
+  DBG.Log.Enabled = True
+   
+  Return(True)
+  
+EndFunction
+
+Function DBG.Log.Out(Message, Mode, Channel)
+/*******************************************
+result = DBG.Log.Out(Message, Mode, Channel)
+
+If the debug output has been activated with <DBG.Log.Enable> then the
+<message> will be written to the log file.
+---------------------------------------
+INPUT
+  Message : [STR] The message to log, can be a STRING, NUMBER, NIL, TABLE.
+    The following special strings are also supported:
+      #SYSINFO# : Will log current system informations
+      #VERSION# : Will log informations about the player version & host machine
+      #COMMANDLINE# : Will log the command line used to execute the current program.
+  Mode : [NUM] Can be one of the following predefined values:
+      DBG.OpenFunc : Set the message as an open function message, must
+        be paired with a DBG.CloseFunc message.
+      DBG.CloseFunc : Set the message as a close function message, must
+        be paired with a DBG.OpenFunc message.
+      DBG.Warning : Hilight the message as a warning message.
+      DBG.Error : Hilight the message as an error message.
+      Nil : Do not specify a value to log a normal/info message.
+  Channel : [STR] Channel name where the log must be written.
+  
+OUTPUT
+  result : [BLN] TRUE if the message was logged without errors.
+  
+EXAMPLE
+  ; Brief example to print en error message
+  DBG.Log.Out("ERROR! File not found!", DBG.Error, "myProg")
+  
+  ; Here is another example that shows how to use messages whitin
+  ; functions:
+  Function checkFile(filename)
+    DBG.Log.Out("Calling checkFile()", DBG.OpenFunc, "myProg")
+    If Exists(filename)
+      DBG.Log.Out("File has been detected.", Nil, "myProg")
+    Else
+      DBG.Log.Out("File not found -> " .. filename, DBG.Warning, "myProg")
+    EndIf
+
+    DBG.Log.Out(Nil, DBG.CloseFunc, "myProg")
+  EndFunction
+  
+NOTES
+  It's important to pair messages with mode DBG.OpenFunc and 
+  DBG.CloseFunc to mantain a correct identation.
+****************************************/
+  Local Ident = ""
+  Local result = False
+
+  If IsNil(Channel) Then Channel = "STD"
+  
+  If TB.Item.IsNil(DBG.Log.Channels, Channel) Then Return(False)
+  
+  Local ch = DBG.Log.Channels[Channel]
+  
+  If ch.Enabled
+    If GetType(Message) = #STRING
+      If Message = "#SYSINFO#"
+        Message = GetVersion()
+        Message.Kernel = Nil
+        Message.Kernel_Date = Nil
+        Message.Version_Date = Nil
+        Message.Demo = Nil
+        Message.Beta = Nil
+        Message.Memory = "C:" .. Int(GetMemoryInfo(#CHIPMEMORY)/1024/1024) .. "Mb, F:" .. Int(GetMemoryInfo(#FASTMEMORY)/1024/1024) .. "Mb"
+        
+        If TB.Item.Exists(Message, "plugins")
+          For i, v In Pairs(Message.Plugins)
+            v.capabilities = Nil
+            v.filetypes = Nil
+            v.url = Nil
+            v.author = Nil
+            v.description = Nil
+            v.copyright = Nil
+            v.path = Nil
+            v.settings = Nil
+            v.modulename = Nil
+            v.helpfile = Nil        
+          Next
+        EndIf
+      ElseIf Message = "#COMMANDLINE#"
+        Message = GetCommandLine()
+      EndIf
+    EndIf
+
+    If ch.IdentValue2 > 0 Then ident = RepeatStr(" ", ch.IdentValue2)
+
+  EndIf
+
+  
+  Local tp = GetType(Message)
+  Switch tp
+    Case #TABLE
+    DBG.DumpTable(Message, DBG.OutMode_Log, Nil, Nil, Nil, Nil, Channel)
+    Message = "--- end table ---"
+
+    Case #FUNCTION
+    Message = "#FUNCTION"
+
+    Case #USERDATA
+    Message = "#USERDATA"
+
+    Case #LIGHTUSERDATA
+    Message = "#LIGHTUSERDATA"
+
+  EndSwitch
+
+  If Mode = DBG.OpenFunc
+    Message = ":: " .. Message
+  ElseIf Mode = DBG.Warning
+    Message = "** WARNING ** -> " .. Message
+  ElseIf Mode = DBG.Error
+    Message = "##  ERROR  ## -> " .. Message
+  EndIf
+
+  Local t = ""
+  If ch.Timing
+    Local t1 = Wrap(GetTimer(DBG.Log.TimerID), 0, 2147483647)
+    t = " " .. PadNum(GetTimer(DBG.Log.TimerID), DBG.Log.TimePadding)
+  EndIf
+  
+  If Not(IsNil(Message))
+    WriteLine(ch.FileID, GetDate(True) .. t .. " : " .. Ident .. Message)
+  EndIf           
+  
+  If Not(HL.IsNil(Mode))
+    If Mode = DBG.OpenFunc
+      ch.IdentValue2 = ch.IdentValue2 + DBG.Console_IdentStep
+    ElseIf Mode = DBG.CloseFunc
+      ch.IdentValue2 = ch.IdentValue2 - DBG.Console_IdentStep
+    EndIf
+    FlushFile(ch.FileID)
+  EndIf
+        
+  Return(True)
+   
+EndFunction
+
+
+Function DBG.Log.Disable(Channel)
+/********************************
+result = DBG.Log.Disable()
+
+Disable the debug output to the file.
+---------------------------------------
+INPUT
+  Channel : [STR] Channel to disable (optional)
+  
+OUTPUT
+  result : [BLN] TRUE if the debug was disabled without errors.
+  
+EXAMPLE
+  ; Disable the debug output for the standard channel
+  DBG.Log.Disable()
+  
+  ; Or you can disable also a single channel if needed:
+  DBG.Log.Disable("myProg")
+****************************************/
+  DBG.Log.Enabled = False
+   
+  If IsNil(Channel) Then Channel = "Standard"
+   
+  If TB.Item.Exists(DBG.Log.Channels, Channel)
+    CloseFile(DBG.Log.Channels[Channel].FileID)
+    DBG.Log.Channels[Channel] = Nil
+    
+  Else
+    If GetType(DBG.Log.FileID)<>#NUMBER
+      CloseFile(DBG.Log.FileID)
+      
+    EndIf
+    
+  EndIf
+   
+   Return(True)
+   
+EndFunction
+
+
+Function DebugPrint3(a, b, c) ; :: INTERNAL ::
+/****************************
+DebugPrint3(a, b, c)
+
+This is an internal function to easily track exceptions.
+****************************************/
+DebugPrint(a)
+  
+EndFunction
+
+Function DBG.DumpTable(table, mode, sorted, ident, check, rec_count, channel, ccheck)
+/************************************************************************************
+result = DBG.DumpTable(table, mode, sorted, ident, check, rec_count, channel, ccheck)
+
+Dump the <table> contents according to the <mode> specified, <ident> 
+is a private variable used in recursive dumping and should not be used
+directly.
+---------------------------------------
+INPUT
+  table : [TBL] Table to dump
+  mode : [NUM] Output mode to use, can be:
+    DBG.OutMode_Straight : Dump directly to the console even if the debug is disabled.
+    DBG.OutMode_Console : Dump to the console (if active)
+    DBG.OutMode_Log : Dump to the log file (if active)
+    DBG.OutMode_String : Dump a table into a formatted string
+    Defaults to <DBG.OutMode_Straight> if nothing is specified.
+  sorted : [BLN] Set to TRUE if you want the func output sorted
+  ident : [NUM][PRIVATE] Starting identation level
+  check : [BLN][PRIVATE] Used to recognize the first call from the
+    recursive calls.
+  channel : [STR] Channel name where to output the table content,
+    valid only for the console debug channels.
+  ccheck => [PRIVATE] check for circular recursion detection
+  
+OUTPUT
+  result : [BLN] TRUE if the table was dumped correctly
+  
+EXAMPLE
+  ; Force the dump of a table to the console
+  Local myTable = 
+    { a = 1, 
+      b = { 1, 2, 3 }, 
+      c = { name = "Joe", surname = "Meona" }
+      }
+  
+  DBG.DumpTable(myTable, Nil, True)
+  
+NOTES
+  There are several internal variables to tune up this function's
+  output (the same used in DBG.Log.Out and DBG.Console.Out when
+  you specify a table as a message to log).
+  
+  Here they are:
+    DBG.DumpTableIdentSize = 3         ; Used to hilight nested tables by DumpTable
+    DBG.DumpTableMaxRecursion = 8      ; Maximum recursion level
+    DBG.DumpTableHideEmpty = False     ; Hide empty tables
+    DBG.DumpTableHideFunctions = False ; Hide functions
+
+  When the maximum recursion level is reached a message will be
+  printed.
+  
+  Sorting the output will mess up warning messages about reached
+  maximum recursion level.
+****************************************/
+  Local space = ""
+  Local stbl  = {}
+  Local sidx  = -1
+  If check = Nil
+    DBG.OutString = ""
+    
+  EndIf
+  
+  If IsNil(rec_count) Then rec_count = 1 Else rec_count = rec_count + 1
+  If IsNil(mode) Then mode = DBG.OutMode_Straight
+  If IsNil(ccheck) Then ccheck = {}
+  If IsNil(sorted) Then sorted = False
+   
+  Local outfunc = -1
+  If mode = DBG.OutMode_Console
+    outfunc = DBG.Console.Out
+    
+  ElseIf mode = DBG.OutMode_Log
+    outfunc = DBG.Log.Out
+    
+  ElseIf mode = DBG.OutMode_String
+    outfunc = Function(s) DBG.OutString = DBG.OutString .. s .. "\n" EndFunction
+    
+  Else
+    outfunc = DebugPrint3
+    
+  EndIf
+
+  If rec_count > DBG.DumpTableMaxRecursion
+    outfunc(RepeatStr(" ", ident) .. "--- Maximum recursion level! ---", Nil, Channel)
+    Return(False, DBG.OutString)
+    
+  EndIf
+
+  If IsNil(ident) Then ident = 0
+  If IsNil(table)
+    outfunc("! [DBG.DumpTable]: NIL Table!", Nil, Channel)
+    Return(False, DBG.OutString)
+    
+  EndIf
+
+  ; Build the identation string
+  If ident > 0 Then space = RepeatStr(" ", ident)
+
+  ; Process the table recursively...
+  Local a, b = NextItem(table)
+  While GetType(a) <> #NIL
+    If GetType(b) = #TABLE
+      Local entries = 0
+      If DBG.DumpTableHideEmpty Then entries = TB.Count(b)
+      If Not(DBG.DumpTableHideEmpty And entries = 0)
+        If TB.Item.IsNil(ccheck, b)
+          ccheck[b] = 1
+          If sorted
+            sidx = sidx + 1
+            stbl[sidx] = { k = a, v = DBG.DumpTable(b, mode, True, ident + DBG.DumpTableIdentSize, True, rec_count, Channel, ccheck) }
+            sidx = sidx + 1
+            stbl[sidx] = { k = a, v = space .. "[" .. ToString(a) .. "]: " .. ToString(b) }                  
+          Else
+            outfunc(space .. "[" .. ToString(a) .. "]: " .. ToString(b), Nil, Channel)
+            DBG.DumpTable(b, mode, False, ident + DBG.DumpTableIdentSize, True, rec_count, Channel, ccheck)
+          EndIf
+          ccheck[b] = Nil
+        Else
+          outfunc(space .. "[" .. ToString(a) .. "]: " .. ToString(b) .. " (circular recursion)", Nil, Channel)
+        EndIf
+      EndIf
+    ElseIf GetType(b) = #FUNCTION
+      If Not(DBG.DumpTableHideFunctions)
+        If sorted
+          sidx = sidx + 1
+          stbl[sidx] = { k = a, v = space .. "[" .. ToString(a) .. "]: Function" }
+        Else
+          outfunc(space .. "[" .. ToString(a) .. "]: Function", Nil, Channel)
+        EndIf
+      EndIf
+
+    ElseIf GetType(b) = #USERDATA
+      If sorted
+        sidx = sidx + 1
+        stbl[sidx] = { k = a, v = space .. "[" .. ToString(a) .. "]: UserData" }
+      Else
+        outfunc(space .. "[" .. ToString(a) .. "]: UserData", Nil, Channel)
+      EndIf
+         
+    ElseIf GetType(b) = #LIGHTUSERDATA
+      If sorted
+        sidx = sidx + 1
+        stbl[sidx] = { k = a, v = space .. "[" .. ToString(a) .. "]: LightUserData"}
+      Else
+        outfunc(space .. "[" .. ToString(a) .. "]: LightUserData", Nil, Channel)
+      EndIf
+         
+    Else
+      Local tp = ""
+      Switch GetType(b)
+        Case #STRING
+          tp = "(STR) "
+        Case #NUMBER
+          tp = "(NUM) "
+        Default
+          tp = "(???) "
+      EndSwitch
+         
+      If sorted
+        sidx = sidx + 1
+        stbl[sidx] = { k = a, v = space .. "[" .. ToString(a) .. "] = " .. tp .. HL.Safe(b) }
+      Else
+        ;DebugPrint(space .. "[" .. ToString(a) .. "] = " .. tp .. HL.Safe(b))
+        outfunc(space .. "[" .. ToString(a) .. "] = " .. tp .. HL.Safe(b), Nil, Channel)
+      EndIf
+         
+    EndIf
+    a, b = NextItem(table, a)
+      
+  Wend
+   
+  If sorted
+    If Not(Check) Then DBG.DTS(stbl, outfunc)
+    Return(stbl, DBG.OutString)
+    
+  Else
+    Return(True, DBG.OutString)
+    
+  EndIf
+   
+EndFunction
+
+Function TEST_DumpTable() ; :: TEST ::
+/************************
+TEST_DumpTable()
+
+Simple program to test the DBG.DumpTable() function
+****************************************/
+  ; Test the DBG.DumpTable() function
+  DebugPrint("****************************")
+  DebugPrint("*** DBG.DumpTable() TEST ***")
+  DebugPrint("****************************")
+  DebugPrint("Building a table for our test...")
+  
+  Local table1 = 
+    { first = "First string item",
+      second = "Second string item",
+      third = 3,
+      func = Function() DebugPrint("Simple function") EndFunction,
+      empty_table = {},
+      subtable = 
+        { sub1 = "Sub-item 1",
+          sub2 = "Sub-item 2",
+          nested = 
+            { another = "0",
+              level   = 123,
+              here    = "Ok." }
+          }
+      }
+
+  DebugPrint("\nDUMPING THE TABLE CONTENTS:")
+  DebugPrint("---------------------------")
+  DBG.DumpTable(table1)
+  
+  DebugPrint("\nDUMPING TO A STRING:")
+  DebugPrint("---------------------------")
+  Local r, s = DBG.DumpTable(table1, DBG.Outmode_String)
+  DebugPrint(s)
+
+  DebugPrint("\nDUMPING THE SORTED TABLE CONTENTS:")
+  DebugPrint("----------------------------------")
+  DBG.DumpTable(table1, Nil, True)
+  
+  DebugPrint("\nDUMPING THE SORTED TABLE CONTENTS FORCING IDENTATION = 10:")
+  DebugPrint("----------------------------------------------------------")
+  DBG.DumpTable(table1, Nil, True, 10)
+  
+  DebugPrint("\nDUMPING THE SORTED TABLE WITH MAXIMUM RECUSION = 2:")
+  DebugPrint("---------------------------------------------------")
+  DBG.DumpTableMaxRecursion = 2
+  DBG.DumpTable(table1, Nil)
+  
+  DebugPrint("\nDUMPING THE SORTED TABLE HIDING FUNCTIONS AND EMPTY TABLES:")
+  DebugPrint("-----------------------------------------------------------")
+  DBG.DumpTableHideEmpty = True
+  DBG.DumpTableHideFunctions = True
+  DBG.DumpTable(table1, Nil)
+
+  DebugPrompt("\n\n*** HIT ENTER TO QUIT ***")
+EndFunction
+
+Function TEST_ConsoleOutput() ; :: TEST ::
+/****************************
+TEST_ConsoleOutput()
+
+Tests the debug to the console functionalities.
+Also shows how to setup and use more channels to track functions.
+****************************************/
+  ; Test the console output functions
+  DebugPrint("***************************")
+  DebugPrint("*** CONSOLE OUTPUT TEST ***")
+  DebugPrint("***************************")
+  Local a = DebugPrompt("Your terminal supports ANSI sequences? (y/n) :")
+  Local b = DebugPrompt("Do you want to print timestamp with messages? (y/n) :")
+  
+  DebugPrint("\nEnabling debug output for two channels...")
+  Local tim = False
+  Local ans = False
+  If LowerStr(a) = "y" Then ans = True  ; ANSI codes
+  If LowerStr(b) = "y" Then tim = True  ; Timestamp
+  
+  DBG.Console.Enable(tim, ans)
+  DBG.Console.AddChannel("FACTORIAL", Ansi.Code.FgYellow .. Ansi.Code.BoldOn)
+  DBG.Console.AddChannel("FORMATTER", Ansi.Code.FgBlue .. Ansi.Code.BoldOn .. Ansi.Code.BgWhite)
+  
+  ; Simple factorial function to test Console output
+  Local fact = Function() EndFunction
+  Local form = Function() EndFunction
+  fact = Function(n)
+           DBG.Console.Out("Entering factorial function...", DBG.OpenFunc, "FACTORIAL")
+           Local v = 0
+           If n=1
+             DBG.Console.Out("Returning 1!", DBG.Warning, "FACTORIAL")
+             v = 1
+           Else
+             DBG.Console.Out("Going deeper...", Nil, "FACTORIAL")
+             v = fact(n-1)*n
+           EndIf
+           DBG.Console.Out("Back from the deep.", DBG.CloseFunc, "FACTORIAL")
+           Return(v)
+         EndFunction
+         
+  form = Function(n, v)
+           DBG.Console.Out("Formatting the result...", DBG.OpenFunc, "FORMATTER")
+           DebugPrint("Factorial of " .. n .. " is " .. v)
+           DBG.Console.Out(Nil, DBG.CloseFunc, "FORMATTER")
+         EndFunction
+  
+  Local v = fact(7)
+  form(7, v)
+  
+  DebugPrompt("\n\n*** HIT ENTER TO QUIT ***")  
+  
+EndFunction
+
+Function TEST_LogOutput_2Channels() ; :: TEST ::
+/**********************************
+TEST_LogOutput_2Channels()
+
+Tests file log functionalities.
+Also shows how to use 2 channels to split log messages in 2 log files.
+****************************************/
+  ; Test the log output functions
+  DebugPrint("***************************")
+  DebugPrint("*** LOGFILE OUTPUT TEST ***")
+  DebugPrint("***************************")
+  DebugPrint("--- Creating two log files ---")
+  Local f1 = FileRequest("Select the log file 1", Nil, #REQ_SAVEMODE)
+  Local f2 = FileRequest("Select the second log file", Nil, #REQ_SAVEMODE)
+  If f1 = f2
+    DebugPrint("\n*** PLEASE SELECT TWO DIFFERENT FILES NEXT TIME! ***")
+    DebugPrompt("\nHit Enter to QUIT.")
+    End
+  EndIf
+  
+  Local a = DebugPrompt("Do you want to preserve old file contents? (y/n) :")
+  Local b = DebugPrompt("Do you want to print timestamp with messages? (y/n) :")
+  
+  DebugPrint("\nEnabling debug output for two channels...")
+  Local tim = False
+  Local pre = False
+  If LowerStr(a) = "y" Then pre = True  ; Preserve
+  If LowerStr(b) = "y" Then tim = True  ; Timestamp
+  
+  DBG.Log.Enable(f1, pre, tim, "FACTORIAL")
+  DBG.Log.Enable(f2, pre, tim, "FORMATTER")
+  
+  ; Simple factorial function to test Console output
+  Local fact = Function() EndFunction
+  Local form = Function() EndFunction
+  fact = Function(n)
+           DBG.Log.Out("Entering factorial function...", DBG.OpenFunc, "FACTORIAL")
+           Local v = 0
+           If n=1
+             DBG.Log.Out("Returning 1!", DBG.Warning, "FACTORIAL")
+             v = 1
+           Else
+             DBG.Log.Out("Going deeper...", Nil, "FACTORIAL")
+             v = fact(n-1)*n
+           EndIf
+           DBG.Log.Out("Back from the deep.", DBG.CloseFunc, "FACTORIAL")
+           Return(v)
+         EndFunction
+         
+  form = Function(n, v)
+           DBG.Log.Out("Formatting the result...", DBG.OpenFunc, "FORMATTER")
+           DebugPrint("Factorial of " .. n .. " is " .. v)
+           DBG.Log.Out(Nil, DBG.CloseFunc, "FORMATTER")
+         EndFunction
+  
+  Local v = fact(7)
+  form(7, v)
+  
+  DebugPrompt("\n\n*** HIT ENTER TO QUIT ***")
+  
+  DBG.Log.Disable("FACTORIAL")
+  DBG.Log.Disable("FORMATTER")
+  
+EndFunction
+
+Function TEST_LogOutput_Anonym() ; :: TEST ::
+/*******************************
+TEST_LogOutput_Anonym()
+
+Little test to check if output is logged even if no channels are specified.
+****************************************/
+  ; Test the log output functions
+  DebugPrint("***************************")
+  DebugPrint("*** LOGFILE OUTPUT TEST ***")
+  DebugPrint("***************************")
+  DebugPrint("--- Creating one log file ---")
+  Local f1 = FileRequest("Select the log file", Nil, #REQ_SAVEMODE)
+  
+  DBG.Log.Enable(f1, True, True)
+  
+  ; Simple factorial function to test Console output
+  Local fact = Function() EndFunction
+  Local form = Function() EndFunction
+  fact = Function(n)
+           DBG.Log.Out("Entering factorial function...", DBG.OpenFunc)
+           Local v = 0
+           If n=1
+             DBG.Log.Out("Returning 1!", DBG.Warning)
+             v = 1
+           Else
+             DBG.Log.Out("Going deeper...", Nil)
+             v = fact(n-1)*n
+           EndIf
+           DBG.Log.Out("Back from the deep.", DBG.CloseFunc)
+           Return(v)
+         EndFunction
+         
+  form = Function(n, v)
+           DBG.Log.Out("*** RESULT : factorial of " .. n .. " is " .. v .. " ***", DBG.OpenFunc)
+           DebugPrint("Factorial of " .. n .. " is " .. v)
+           DBG.Log.Out(Nil, DBG.CloseFunc)
+         EndFunction
+  
+  Local v = fact(7)
+  form(7, v)
+  
+  DebugPrompt("\n\n*** HIT ENTER TO QUIT ***")
+  
+  DBG.Log.Disable()
+  
+EndFunction
+
+; Uncomment the lines below to run the available test(s)
+;TEST_DumpTable()
+;TEST_ConsoleOutput()
+;TEST_LogOutput_2Channels()
+;TEST_LogOutput_Anonym()

@@ -1,0 +1,47 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>gadObj:Render()</h1>
+
+    <p><span class="text-big"><code>result = gadObj:Render(partial, skipChilds, Quiet)</code></span>
+    </p>
+    <p>Render the gadget and its children depending on its current state.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>partial </strong>: Switch used with text gadgets for the final
+        rendering. Default = <code>False</code>
+      </li>
+      <li><strong>skipChilds </strong>: Switch used to avoid the rendering of children
+        gadgets. Default = <code>False</code>
+      </li>
+      <li><strong>Quiet </strong>: <code>True</code> to do not activate the rendering
+        target window.</li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <ul>
+      <li><strong>result</strong> : <code>True</code> if the rendering has been completed.</li>
+    </ul>
+    <p><u>NOTES</u>
+    </p>
+    <p style="margin-left:40px;">Note that if <code>AutoRendering</code> is switched off with <code>HGui.SetAutoRendering()</code>,
+      the rendering will be skipped completely. Also Hidden gadgets will be skipped
+      completely.
+      <br>&nbsp;This function is fully recursive, children gadgets will be rendered
+      as well.</p>
+    <p><u>EXAMPLES</u>&nbsp;</p>
+    <p><u>SEE ALSO</u>
+    </p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

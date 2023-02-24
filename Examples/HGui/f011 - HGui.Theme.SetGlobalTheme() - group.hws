@@ -1,0 +1,76 @@
+/*
+********************
+* HGui Test Script *
+* Fabio Falcucci   *
+*    Feb-2023      *
+********************
+  This script is used as a test and to show how it's possible to use the
+helper function 
+  HGui.Theme.SetGlobalTheme()
+to globally change the theme for a specific gadget class, in this case for
+GROUP gadgets.
+-------------------
+
+Gui.Theme.SetGlobalTheme(GadgetType, Theme)
+  Set the specified theme to the given gadget class
+*/
+
+; INCLUDE THE LIBRARIES DEFINITIONS
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; Creates a new HGui window
+Local myWin = HGui.Window:new(
+                { title = "HGui.Theme.SetGlobalTheme()",
+                  name  = "myWindow",
+                  position = { x = #CENTER, y = #CENTER }
+                  })
+                   
+; Disable auto-rendering to avoid flickering
+HGui.SetAutoRendering(False)
+
+; Let's create 3 skins that we will use with our GROUP gadget
+Local current, skins = 0, {}
+skins = { [0] = { nSkin  = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 2, $EE00EE, $880088, $CC00CC, { Top = 1, Bottom = 1, Left = 1, Right = 1 }),
+                  obSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EE4444, $880000, $DD2222),
+                  ibSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Sunken, GFX.BevelFx_Recessed, 2, $00EEEE, $008888, $00DDDD),
+                  nText  = HGui.Theme.Generate_Text(20, #ANTIALIAS, $FFFFFF, #HGUI_ALIGN_CENTER, False, False) },
+          [1] = { nSkin  = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Flat, 3, $EE0000, $880088, $CC0000, { Top = 1, Bottom = 1, Left = 1, Right = 1 }),
+                  obSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Sunken, GFX.BevelFx_Raised, 2, $EE0044, $880000, $DD0022),
+                  ibSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Sunken, GFX.BevelFx_Recessed, 1, $00EE00, $008888, $00DD00),
+                  nText  = HGui.Theme.Generate_Text(15, #BOLD, $FF00FF, #HGUI_ALIGN_LEFT, True, False) },
+          [2] = { nSkin  = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $0000EE, $880088, $0000CC, { Top = 1, Bottom = 1, Left = 1, Right = 1 }),
+                  obSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Sunken, GFX.BevelFx_Recessed, 4, $EE4400, $880000, $DD2200),
+                  ibSkin = HGui.Theme.Generate_SkinGradient($0000EE, $008888),
+                  nText  = HGui.Theme.Generate_Text(12, #NORMAL, $FFFF00, #HGUI_ALIGN_RIGHT, False, True) }
+          }
+
+; We are going to create a GROUP for our test and a button we will use
+; to rotate the skins we have defined above.
+Local myGrp    = HGui.Gadget:new(#HGUI_GROUP_GADGET, { Caption = "GROUP GADGET"})
+Local myButton = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { caption = { "Click me", "to change the GROUP skin"},
+    actions = {
+      onpushed =
+        Function(gadObj)
+          ; Change the group skin everytime the button is pushed
+          HGui.Theme.SetGlobalTheme(#HGUI_GROUP_GADGET, skins[current])
+          current = current+1
+          If current > 2 Then current = 0
+        EndFunction }
+      })
+
+
+; Let's arrange the gadgets into the window
+mywin.rootgadget:layoutSet({ gadgets = { myGrp, myButton },
+                             weights = { 0.70, 0.30 },
+                             gap     = 1
+                             }, True )
+                             
+; Finally enable the auto-rendering and refresh the window
+HGui.SetAutoRendering(True)
+myWin:Render()
+                 
+Repeat
+   WaitEvent()
+Forever

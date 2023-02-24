@@ -1,0 +1,29 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>Experimental Features (IMPORTANT)</h1>
+
+    <p>In some circumstances, especially with quick redraws, you may experience
+      a lot of flickering.</p>
+    <p>I'm working on a solution using the <code>BeginRefresh()</code> / <code>EndRefresh()</code> commands
+      entirely handled by <code>HGui</code> which will keep tracks of the windows
+      where it is active and where is not.</p>
+    <p>This is necessary because HGui and its layout system are heavily recursive
+      so a handler for those mentioned function is necessary.</p>
+    <p>Right now this feature is implemented only on the <code>gadget:set()</code> method,
+      since it is experimental you may experience malfunctions so you have the
+      possibility to switch this feature OFF simply typing this code in your
+      source:</p><pre><code class="language-text-plain">HGui.RefreshBlockEnabled = False</code></pre>
+    <p>&nbsp;</p>
+    <p>Please report any issue you may find because with this feature a very
+      smooth UI is really possible even with very complex interface.</p>
+  </body>
+
+</html>

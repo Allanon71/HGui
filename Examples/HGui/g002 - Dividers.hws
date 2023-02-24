@@ -1,0 +1,158 @@
+/************************************************
+ * HGui Test Script                             *
+ * Fabio Falcucci                               *
+ * Feb-2023                                     *
+ ************************************************
+
+DIVIDER GADGET
+--------------
+  The divider gadget is used to separate other gadgets,
+  it is used to visually make interfaces more clear and clean.
+  It is a passive gadget meaning that no actions or events
+  can be attached to it. It is composed by a single skin.
+  There are two gadget classes that can be used to create
+  dividers: 
+    HDIVIDER for horizontal dividers
+    VDIVIDER for vertical dividers
+ ************************************************/
+ 
+; Includes the HGui module
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; Creates a window
+Local myWin = 
+  HGui.Window:new(
+    { title = "Divider Gadgets",
+      name  = "myWindow",
+      position   = { x = #CENTER, y = #CENTER },
+      size = { w = 400, h = 500 }
+      })
+
+; Disable auto-rendering to avoid flickering
+HGui.SetAutoRendering(False)
+
+; For this example we are going to create two dividers
+; horizontally arranged, the left one is an horizontal divider
+; while the right one is a vertical divider.
+
+; To group these dividers we need a box we will use as a container
+Local gBox = HGui.Gadget:new(#HGUI_BOX_GADGET)
+
+; Here is the horizontal divider gadget
+Local gHDiv = HGui.Gadget:new(#HGUI_HDIVIDER_GADGET)
+
+; And here is the vertical divider gadget
+Local gVDiv = HGui.Gadget:new(#HGUI_VDIVIDER_GADGET)
+
+; We need a group gadget where we will group some buttons
+; to perform tests.
+Local gGroup = HGui.Gadget:new(#HGUI_GROUP_GADGET, 
+  { Caption = { "Actions" }, 
+    Group_LabelGap = 10, 
+    Group_LabelSide = #HGUI_ALIGN_LEFT })
+    
+; Now we are going to build some buttons for our tests and
+; examples.
+
+; The dividers gadget does not have many options or things that
+; can be changed at runtime except the theme. Basically they are
+; boxes with a vertical or horizontal lines used to indicate
+; a separator. We are going to define some buttons to change the dividers
+; theme when clicked.
+gChangeHDivTheme = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Change HDivider theme" }, 
+    Caption = { "Change HDivider", "theme" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          ; You can change the theme using several methods, for example you can
+          ; change the skin using one of the following options:
+          ;   :set() method
+          ;     Only this gadget will be changed but if in the future you will
+          ;     use the HGui.Theme.SetGlobalTheme() function to set/change a theme
+          ;     current settings will be overwritten.
+          ;   :setTheme() method
+          ;     Changing the theme with this method will protect this gadget from global
+          ;     changes.
+          ;   HGui.Theme.SetGlobalTheme() function
+          ;     Change the theme to all gadgets excluding the ones that have been
+          ;     changed usinfg the :setTheme() method.
+          ; -------------------------------------
+          ; We are going to use the :setTheme() method
+          ; The HDivider gadget has only one skin for the normal states called 'nskin',
+          ; we will generate a simple skin using an helper function
+          gHDiv:setTheme(
+            { nskin = HGui.Theme.Generate_SkinColor(GetRandomColor()),
+              colors =
+              { color1 = GetRandomColor(), ; Bright edges
+                color2 = GetRandomColor()  ; Dark edges
+                },
+              size    = Rnd(3)+1,          ; Line thikness
+              padding = Rnd(20)+5          ; Distance from the borders
+              },
+            True ;  <- Refresh the parent window
+            )
+          
+        EndFunction
+      } 
+    })
+
+; Here is a button to change the Vertical Divider's theme
+gChangeVDivTheme = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { Tip = { "Change VDivider theme" }, 
+    Caption = { "Change VDivider", "theme" }, 
+    Actions = 
+    { onPushed = 
+        Function(gadObj)
+          gVDiv:setTheme(
+            { nskin = HGui.Theme.Generate_SkinColor(GetRandomColor()),
+              colors =
+              { color1 = GetRandomColor(), ; Bright edges
+                color2 = GetRandomColor()  ; Dark edges
+                },
+              size    = Rnd(3)+1,          ; Line thikness
+              padding = Rnd(20)+5          ; Distance from the borders
+              },
+            True ;  <- Refresh the parent window
+            )
+          
+        EndFunction
+      } 
+    })
+
+; Now let's build the layout
+; -- gBox and gGroup are inside the window's root gadget
+myWin.rootgadget:layoutSet(
+  { gadgets = { gBox, gGroup },
+    weights = { 0.80, -0.20 },
+    gap     = 1,
+    type    = #HGUI_VERTICAL_LAYOUT,
+    }, True)
+
+; -- gBox contains the dividers
+gBox:layoutSet(
+  { gadgets = { gHDiv, gVDiv },
+    weights = { 0.50, 0.50 },
+    gap     = 1,
+    type    = #HGUI_HORIZONTAL_LAYOUT,
+    }, True)
+
+; -- Button used to change the theme are inside the gGroup gadget
+gGroup:layoutSet(
+  { gadgets = { gChangeHDivTheme, gChangeVDivTheme },
+    gap     = 1,
+    type    = #HGUI_GRID_LAYOUT,
+    rows    = 1,
+    borders = { left = 1, right = 1, top = 1, bottom = 1 }
+    }, True)
+
+; Restores the auto-rendering
+HGui.SetAutoRendering(True)
+
+; Finally renders the window and enters the event loop
+myWin:Render()
+
+Repeat
+  WaitEvent()
+Forever

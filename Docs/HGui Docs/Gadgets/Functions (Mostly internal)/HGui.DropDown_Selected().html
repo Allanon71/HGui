@@ -1,0 +1,46 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>HGui.DropDown_Selected()</h1>
+
+    <p><span class="text-big"><code>HGui.DropDown_Selected(father, items, selected, lastItem)</code></span>
+    </p>
+    <p>Close and release any opened drop-down window/menu.
+      <br>It calls the <code>Father.Father.OnSelect</code> action passing a table
+      with the following informations:</p>
+    <ul>
+      <li><strong>DropDown </strong>: Father.Father item</li>
+      <li><strong>ListView </strong>: Father item</li>
+      <li><strong>Items </strong>: The list of Items</li>
+      <li><strong>selectedId </strong>: The selected item index</li>
+      <li><strong>selectedItem </strong>: The selected item value</li>
+    </ul>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>father </strong>: Father object (the DropDown menu owner)</li>
+      <li><strong>items </strong>: All items listed in the DropDown menu</li>
+      <li><strong>selected &nbsp;</strong>: The selected item list</li>
+      <li><strong>lastitems </strong>: The selected item</li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <p><u>NOTES</u>
+    </p>
+    <p style="margin-left:40px;"><span style="background-color:hsl(0,75%,60%);">Please note that this function is used <strong>INTERNALLY</strong> by HGui to handle DropDown menus but you still can use it for your own purposes.</span>
+    </p>
+    <p><u>EXAMPLES</u>&nbsp;</p>
+    <p><u>SEE ALSO</u>
+    </p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

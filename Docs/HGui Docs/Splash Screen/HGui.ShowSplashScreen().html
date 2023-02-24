@@ -1,0 +1,57 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>HGui.ShowSplashScreen()</h1>
+
+    <p><span class="text-big"><code>HGui.ShowSplashScreen(imageFile, size, setDisplaySize)</code></span>
+    </p>
+    <p>Open a window on display 1 to show the loading progress of an application.</p>
+    <p><strong>You have to use it before any HGui window!</strong>
+    </p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>imageFile </strong>: [STR] Image file to show in the splash screen</li>
+      <li><strong>size</strong> : [VAR] Can be a string or a table with the following
+        meanings:
+        <ul>
+          <li>String : Set to <code>image</code> to use the original image's size</li>
+          <li>Table : Pass a table with the fields <code>w</code> and <code>h</code> to
+            specify the splash image's width and height</li>
+        </ul>
+      </li>
+      <li><strong>setDisplaySize</strong> : [BLN] If <code>TRUE</code> the display's
+        size will get the image's size</li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <p><u>NOTES</u>
+      <br>This function is used to show a splash screen during the startup of your
+      applications, the image will fade in and you can also print a text and
+      show a progress bar while loading your app.
+      <br>The animation is a moving bar on the bottom of the image with an optional
+      text message.</p>
+    <p><strong>&nbsp;</strong><i><strong>-- internal notes ---</strong></i>
+      <br>&nbsp;All informations about the splash screen are stored in the table <code>HGui.Splash</code>,
+      it has the following fields:</p><pre><code class="language-text-plain">   .w          Splash screen width
+   .h          Splash screen height
+   .image      Splash screen image brush (removed as soon as it is displayed)</code></pre>
+    <p>The following fields, instead, are hardcoded</p><pre><code class="language-text-plain">   .animWidth  Animation width
+   .animStep   Animation step
+   .animColor  Animation color
+   .animX      Animation negative width (for left entering fx)</code></pre>
+    <p><u>EXAMPLES</u>&nbsp;</p>
+    <p><u>SEE ALSO</u>
+    </p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

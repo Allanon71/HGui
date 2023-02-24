@@ -1,0 +1,124 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>Data Structure</h1>
+
+    <p>Here is the class template with all window's fields listed with a brief
+      explanation.</p><pre><code class="language-text-plain">Title      		[String] Window's title, default to empty string.
+Name            [String] Unique window's name, optional.
+Position        [Table] Window's position table
+  x             [Number] Horizontal coordinate (pixels)
+  y             [Number] Vertical coordinate (pixels)
+Size            [Table] Window's size table
+  w             [Number] Width (pixels)
+  h             [Number] Height (pixels)
+NativeSize      [Table] PRIVATE. Native GUI resolution.
+  w             [Number] Width (pixels)
+  h             [Number] Height (pixels)
+SizeMax         [Table] Maximum window's size
+  w             [Number] Width (pixels)
+  h             [Number] Height (pixels)
+SizeMin         [Table] Minimum window's size
+  w             [Number] Width (pixels)
+  h             [Number] Height (pixels)
+DontOpen        [Boolean] Don't open the window after creation?
+RootGadget      [Obj:Gadget] Root window's gadget
+Focus           [Obj:Gadget] Gadget that own the focus
+Flags           [Table] Window's flags
+  Resizeable    [Boolean] Can be resized?
+  Closeable     [Boolean] Can be closed?
+  Moveable      [Boolean] Can be moved?
+  Borderless    [Boolean] Borderless window?
+  Modal         [Boolean] Modal window?
+  Hideable      [Boolean] Can hide/iconify?
+  AutoClose     [Boolean] Close the window immediatly after have sent the close event?
+Events          [Table] Callback functions
+  OnClose       [Function] On close event callback function
+  OnMove        [Function] On move event callback function
+  OnActivate    [Function] On activate event callback function
+  OnDeactivate  [Function] On deactivate event callback function
+  OnHide        [Function] On hide/iconify event callback function
+  OnShow        [Function] On show/deiconify event callback function
+  OnSize        [Function] On size event callback function
+Private         [Table] PRIVATE.
+  HWId          [Handle] Hollywood display ID
+  Hidden        [Boolean] Is this window hidden?
+  Closed        [Boolean] Is this window closed?
+  BGFile        [String] Background image file name
+  BGId          [Handle] Hollywood background picture ID
+  Events        [Boolean] Is event detection enabled?
+  ActGadList    [Table] Active gadgets list for keyboard navigation
+  IgnoreNxRes   [Boolean] Used to avoid double resize events</code></pre>
+    <p>&nbsp;</p>
+    <p>DEFAULT VALUES</p><pre><code class="language-text-plain">HGui.Window = {}
+HGui.Window.Title = ""
+HGui.Window.Name  = Nil
+HGui.Window.Position = {}
+HGui.Window.Position.x = #CENTER
+HGui.Window.Position.y = #CENTER
+HGui.Window.Size = {}
+HGui.Window.Size.w = 320
+HGui.Window.Size.h = 320
+HGui.Window.NativeSize = {}
+HGui.Window.NativeSize.w = 320
+HGui.Window.NativeSize.h = 240
+HGui.Window.SizeMax = {}
+HGui.Window.SizeMax.w = 320
+HGui.Window.SizeMax.h = 240
+HGui.Window.SizeMin = {}
+HGui.Window.SizeMin.w = 320
+HGui.Window.SizeMin.h = 240
+HGui.Window.DontOpen = False
+HGui.Window.CacheRoot = False
+HGui.Window.Root = {}
+HGui.Window.RootGadget = {}
+HGui.Window.Focus = Nil
+HGui.Window.Menu = {}
+HGui.Window.TopMenu = {}
+HGui.Window.Contextual = {}
+HGui.Window.Flags = {}
+HGui.Window.Flags.Resizeable = True
+HGui.Window.Flags.Closeable = True
+HGui.Window.Flags.Moveable = True
+HGui.Window.Flags.Borderless = False
+HGui.Window.Flags.Modal = False
+HGui.Window.Flags.Hideable = True
+HGui.Window.Flags.AutoClose = True
+HGui.Window.Flags.HideFromTaskBar = False
+HGui.Window.Events = {}
+HGui.Window.Events.OnClose = Function() Return EndFunction
+HGui.Window.Events.OnMove  = Function() Return EndFunction
+HGui.Window.Events.OnActivate = Function() Return EndFunction
+HGui.Window.Events.OnDeactivate = Function() Return EndFunction 
+HGui.Window.Events.OnHide = Function() Return EndFunction 
+HGui.Window.Events.OnShow = Function() Return EndFunction
+HGui.Window.Events.OnSize = Function() Return EndFunction
+HGui.Window.IgnoreRMBUp = False
+HGui.Window.Private = {}
+HGui.Window.Private.HWId = Nil
+HGui.Window.Private.Hidden = False
+HGui.Window.Private.Closed = False
+HGui.Window.Private.BGFile = ""
+HGui.Window.Private.BGId = Nil
+HGui.Window.Private.Events = True
+HGui.Window.Private.ActGadList = {}
+HGui.Window.Private.IgnoreNxRes = False
+HGui.Window.Private.HotKeys = {}
+HGui.Window.Private.HotKeys.hide = Nil
+HGui.Window.Private.HotKeys.show = Nil
+HGui.Window.Private.HotKeys.activate = Nil
+HGui.Window.Private.HotKeys.close = Nil
+HGui.Window.Private.HotKeys.open = Nil
+HGui.Window.Private.CustomHotKeys = {}
+</code></pre>
+
+  </body>
+
+</html>

@@ -1,0 +1,93 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>HGui.Window:textBoxNew()</h1>
+
+    <p><span class="text-big"><code>winObj= HGui.Window:textBoxNew(params)</code></span>
+    </p>
+    <p>Creates a new text box window to allow user to read a text and optionally
+      make choices.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>params </strong>: A table with the standard window options and
+        the textBox specific ones. Below there is a list of the additional fields
+        supported by this method.
+        <ul>
+          <li><strong>caption </strong>: Optional string to preload the text box with
+            some text caption can also be a file, you can specify the text file name
+            using this format:
+            <br><code>&nbsp; &nbsp;::file::&lt;filename&gt; &nbsp;</code>
+          </li>
+          <li><strong>captions_tags</strong> : it's an optional table with pairs (tag,
+            replacer). You can use it to replace custom tags with the given text in
+            the specified caption, it works also with text files.
+            <br>Example :&nbsp;
+            <br><code>&nbsp; &nbsp;{ { "$name", "Jhon" }, { "$surname", "Doe" } } &nbsp;</code>
+          </li>
+          <li><strong>ok </strong>: Text to put into the <code>ok</code> button</li>
+          <li><strong>cancel </strong>: Text to put into the <code>cancel</code> button</li>
+          <li><strong>callbackOk </strong>: Callback function called when the <code>ok</code> button
+            is pressed</li>
+          <li><strong>callbackCancel </strong>: Callback function called when the <code>cancel</code> button
+            is pressed</li>
+          <li><strong>callbackClose :</strong> Callback function called when the window
+            is closed</li>
+          <li><strong>buttonWeights :</strong> A table with the button weights (optional)</li>
+          <li><strong>groupWeights :</strong> A table with the body &amp; button weights
+            (optional)</li>
+          <li><strong>labelLook </strong>: Optional field you can use to override the
+            label(s) look.</li>
+        </ul>
+      </li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <ul>
+      <li><strong>winObj </strong>: The created window object</li>
+    </ul>
+    <p><u>NOTES</u>
+      <br>The callback functions will receive a table with the button object that
+      has &nbsp;been pressed, the button will have thhese additional fields:</p><pre><code class="language-text-plain">result = {
+ ok     = True if the OK button has been pressed
+ cancel = True if the CANCEL button has been pressed
+ window = textBox window's structure
+ }</code></pre>
+    <p>If the window is closed the <code>result</code> field is missing, however
+      you will get the window's structure as the second parameter so you can
+      close the window by yourself.
+      <br>&nbsp;
+      <br>If callback functions are not specified the window will be closed automatically
+      otherwise you have to include the <code>:free()</code> method in your callback
+      function to close and free the window's requester.
+      <br>&nbsp;
+      <br><code>OnClose</code> event is not supported because it is used internally.</p>
+    <p><u>INTERNAL NOTES</u>
+    </p><pre><code class="language-text-plain"> win.boxLabel     : The label gadget used to display the text
+ win.pwGrpButtons : Box to group 'ok' and 'cancel' buttons
+ win.pwGrpTop     : Box to group label gadget and the scrollbar
+ win.scrollBar    : The text scrollbar
+ win._isTextBox   : Marker to recognize the TextBox window
+ win._sourceText  : The non-processed/wrapped text</code></pre>
+    <p><u>METHODS</u>
+    </p>
+    <ul>
+      <li><strong>:AppendLine(text)</strong>
+        <br>Used to append text to the <code>TextBox </code>and to automatically scroll
+        down the contents.</li>
+    </ul>
+    <p><u>EXAMPLES</u>&nbsp;</p>
+    <p><u>SEE ALSO</u>
+      <br>&nbsp;</p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

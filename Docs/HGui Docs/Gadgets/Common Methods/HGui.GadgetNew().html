@@ -1,0 +1,167 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>HGui.Gadget:New()</h1>
+
+    <p><span class="text-big"><code>gadObj = HGui.Gadget:New(class, options, parent)</code></span>
+    </p>
+    <p>Build a new gadget of the given <code>class</code>, with the given <code>options</code> and
+      the&nbsp;optional <code>parent</code> gadget.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>type</strong> : Specify the gadget class, you have to use one of
+        the available <a href="../../Constants.txt">gadget constants</a>.</li>
+      <li><strong>options</strong> : Table with all gadget's options we want to set,
+        here are all common supported fields, for specific gadget's arguments please
+        their related documentation. <strong>All options are optional</strong>.
+        <ul>
+          <li><strong>name</strong> : Set the gadget name instead of a random generated
+            one. If you try to assign an already assigned name the creation will fail.</li>
+          <li><strong>caption</strong> : Gadget caption text (a string or a table of
+            strings)</li>
+          <li><strong>tip</strong> : Gadget's floating tip text (a string or a table
+            of strings)</li>
+          <li><strong>contextual</strong> : Contextual menu (table)</li>
+          <li><strong>status</strong> : Create the gadget with the given initial state,
+            <a
+            href="../../Constants.txt">available states</a>
+          </li>
+          <li><strong>flags</strong> : Gadget flags, a table with one or more of the
+            following fields:
+            <br>- visible : Is this gadget visible? <code>True</code>/<code>False</code> or <code>#HGUI_ENABLED</code>/<code>#HGUI_DISABLED</code>
+            <br>- enabled : Is this gadget enabled? <code>True</code>/<code>False</code> or <code>#HGUI_VISIBLE</code>/<code>#HGUI_HIDDEN</code>
+            <br>- draggable : Is this gadget draggable? <code>True</code>/<code>False</code> (dragging
+            is not yet implemented)</li>
+          <li><strong>userdata</strong> : Custom data you want to be returned when an
+            event raises a callback function.</li>
+          <li><strong>position</strong> : Defines the gadget position. This option is
+            useless if you are using the automatic layout system.
+            <ul>
+              <li><strong>x</strong> : Horizontal position in pixels</li>
+              <li><strong>y</strong> : Vertical position in pixels</li>
+            </ul>
+          </li>
+          <li><strong>size</strong> : Defines the gadget size. This option is useless
+            if you are using the automatic layout system.
+            <ul>
+              <li><strong>w</strong> : Gadget's width in pixels</li>
+              <li><strong>h</strong> : Gadget's height in &nbsp;pixels</li>
+            </ul>
+          </li>
+          <li><strong>shortcut</strong> : Shortcut combo to simulate an <code>OnPushed</code> event:
+            <ul>
+              <li><strong>qualifier</strong> : Qualifier key, can be an empty string or :
+                <br>LSHIFT, RSHIFT, LCONTROL, RCONTROL, LALT, RALT, LCOMMAND, RCOMMAND</li>
+              <li><strong>key</strong> : Character to be pressed</li>
+              <li><strong>altcode</strong> : Alternative character (for example for CONTROL+char)</li>
+            </ul>
+          </li>
+          <li><strong>sounds</strong> : Table to associate sounds to events so that when
+            an event is raised a sound is played
+            <ul>
+              <li><strong>onover</strong> : Sound for the <code>onOver</code> event</li>
+              <li><strong>onout</strong> : Sound for the <code>onOut</code> event</li>
+              <li><strong>onpushed</strong> : Sound for the <code>onPushed</code> event</li>
+              <li><strong>ondown</strong> : Sound for the <code>onDown</code> event</li>
+            </ul>
+          </li>
+          <li><strong>actions</strong> : Actions callback functions, these functions
+            will be called when the vent is detected:
+            <ul>
+              <li><strong>onover</strong> : OnOver callback (mouse pointer enters the gadget
+                area)</li>
+              <li><strong>onout</strong> : OnOut callback (mouse pointer exits the gadget
+                area)</li>
+              <li><strong>onpushed</strong> : OnPushed callback (left mouse release over
+                the gadget area)</li>
+              <li><strong>ondown</strong> : OnDown callback (left mouse oush over the gadget
+                area)</li>
+              <li><strong>ondrop</strong> : OnDrop callback (Something dropped inside the
+                gagdet)</li>
+              <li><strong>ondropout</strong> : OnDropOut callback (This gadget has been dropped
+                after a drag operation, <i><strong>not yet implemented</strong></i>
+              </li>
+            </ul>
+          </li>
+          <li><strong>look</strong> : Customize the gadget look overriding the current
+            theme, it can have the following fields:
+            <ul>
+              <li><strong>borders</strong> : Defines the skin borders and have the following
+                fields:
+                <ul>
+                  <li><strong>top </strong>: Top border in pixels</li>
+                  <li><strong>bottom </strong>: Bottom border in pixels</li>
+                  <li><strong>left </strong>: Left border in pixels</li>
+                  <li><strong>right </strong>: RIght border in pixels</li>
+                </ul>
+              </li>
+              <li><strong>nskin </strong>: Background skin for normal state</li>
+              <li><strong>hskin </strong>: Background skin for hilighted state</li>
+              <li><strong>pskin </strong>: Background skin for pushed state</li>
+              <li><strong>dskin </strong>: Background skin for disabled state</li>
+              <li><strong>npskin </strong>: Background skin for normal-pushed state</li>
+              <li><strong>hpskin </strong>: Background skin for hilighted-pushed state</li>
+              <li><strong>dpskin </strong>: Background skin for disabled-pushed state</li>
+              <li><strong>ntext </strong>: cText object for normal state text</li>
+              <li><strong>htext </strong>: cText object for hilighted state text</li>
+              <li><strong>ptext </strong>: cText object for pushed state text</li>
+              <li><strong>dtext </strong>: cText object for disabled state text</li>
+              <li><strong>nptext </strong>: cText object for normal-pushed state text</li>
+              <li><strong>hptext </strong>: cText object for hilighted-pushed state text</li>
+              <li><strong>dptext </strong>: cText object for disabled-pushed state text</li>
+              <li><strong>icons </strong>: Icon definitions for all possible states
+                <ul>
+                  <li><strong>iname </strong>: Icon name for all supported states</li>
+                  <li><strong>nname </strong>: Icon name for normal state</li>
+                  <li><strong>hname </strong>: Icon name for hilighted state</li>
+                  <li><strong>pname </strong>: Icon name for pushed state</li>
+                  <li><strong>dname </strong>: Icon name for disabled state</li>
+                  <li><strong>npname </strong>: Icon name for normal-pushed state</li>
+                  <li><strong>hpname </strong>: Icon name for hilighted-pushed state</li>
+                  <li><strong>dpname </strong>: Icon name for disabled-pushed state</li>
+                  <li><strong>alignment </strong>: Icon Alignment, see <a href="../../Constants.txt">alignment constants</a>
+                  </li>
+                  <li><strong>gap </strong>: Icon gap in pixels</li>
+                  <li><strong>adjtext </strong>: Text adjustment (True or False)</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li><strong>usecache </strong>: True to activate the cache system (default
+            True)</li>
+          <li><strong>window </strong>: Window father, object or name (default = current
+            window), if omitted the current one will be used</li>
+        </ul>
+      </li>
+      <li><strong>parent </strong>: Optional parent gadget object, mostly used internally
+        to build composed and complex gadgets.
+        <br>&nbsp;</li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <ul>
+      <li><strong>gadgetObj</strong> : A new gadget object or <code>False</code> if
+        the creation failed</li>
+    </ul>
+    <p><u>NOTES</u>
+    </p>
+    <p>Please have a look at the specific gadgets section to have an in-dept
+      description and to see class-specific methods.
+      <br>Also note that some of the listed options are available only for active
+      gadgets.</p>
+    <p><u>EXAMPLES</u>&nbsp;</p>
+    <p><u>SEE ALSO</u>
+    </p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

@@ -1,0 +1,39 @@
+<html>
+  
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="../../../style.css">
+    <base target="_parent">
+  </head>
+  
+  <body class="ck-content">
+     <h1>HGui.gadgetSetSkinCache()</h1>
+
+    <p><span class="text-big"><code>HGui.gadgetSetSkinCache(value)</code></span>
+    </p>
+    <p>Set the global gadget cache ON or OFF, all new gadgets created will respect
+      the new setting.</p>
+    <hr>
+    <p><u>INPUT</u>
+    </p>
+    <ul>
+      <li><strong>value </strong>: <code>TRUE</code> to activate the cache system, <code>FALSE</code> to
+        deactivate it.</li>
+    </ul>
+    <p><u>OUTPUT</u>
+    </p>
+    <p><u>NOTES</u>
+    </p>
+    <p>If you want to switch the cache for all existing gadgets just re-apply
+      the theme.</p>
+    <p>Note that the cache system consumes more memory but the rendering is faster.</p>
+    <p>Only the gadget graphics (not the text) is affected by this setting.</p>
+    <p><u>EXAMPLES</u>&nbsp;</p><pre><code class="language-text-plain"> ; Enable the cache system
+ HGui.gadgetSetSkinCache(True)</code></pre>
+    <p><u>SEE ALSO</u>
+    </p>
+    <p>&nbsp;</p>
+  </body>
+
+</html>

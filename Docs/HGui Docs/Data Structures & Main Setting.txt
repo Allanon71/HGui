@@ -1,0 +1,47 @@
+You may find useful to know how HGui stores its data, both to do not interfere with it and to hack it if you want.
+
+HGui                                  The main table where all the framework has been mapped to.
+HGui.Areas                            Container for all defined Area objects
+HGui.Windows                          Container for all defined Window objects
+HGui.WinOrder                         Container to store Window objects visibility order
+HGui.Gadgets                          Container for all defined Gadget objects
+HGui.MenuWindows                      Container to store all opened menu-windows stack
+HGui.CTexts                           Container for all defined CText objects
+HGui.Shortcuts                        Container for all defined keyboard shortcuts
+HGui.Theme                            Used to store the currently defined theme
+HGui.Tip                              Stores the opened window-tip object
+HGui.DropDown                         Stores the opened window-dropdown object
+HGui.WindowsHotKeys                   Used to store the window's object actions hot keys
+HGui.CurrentMachine                   Holds the current host platform informations
+HGui.QuitOnLastWindow                 True|False : If True  closes the application automatically when the last opened window is closed (deafult: True)
+
+HGui.AutoRendering                    True|False : Automatic rendering (deafult: True)
+HGui.CacheGadtext                     True|False : Cache text gadget with the its skin (deafult: True)
+HGui.EventHandling                    True|False : Gadget's events handling enabled or disabled (deafult: True)
+
+HGui.DragKey                          Defines the key qualifier for dragging operations, this function is not yet completed (default: "LSHIFT")
+HGui.Key_MoveFocusFFW                 Table used to define the key used to move the focus to the next gadget, this function is not yet active (default: { Qualifier = "", Key = "TAB" })
+HGui.Key_MoveFocusRWD                 Table used to define the key used to move the focus to the previous gadget, this function is not yet active (default: { Qualifier = "LSHIFT", Key = "TAB" })
+HGui.Key_SetFocus                     Table used to define the key to activate the gadget that has the focus.this function is not yet active (default: { Qualifier = "", Key = "ENTER" })
+
+HGui.ActiveWindow                     Pointer to the currently active Window object
+HGui.PushedOut_Gadget                 Pointer to the currently Gadget object in Pushed-Out state
+HGui.ScrollBarDragging                True|False : it says if there is a dragging operation active on a scrollbar's cursor
+HGui.MouseInsideCursor                True|False :  it says if the mouse pointer is inside a scrollbar's cursor
+
+HGui.ModalWindow                      Pointer to the Modal Window object currently active, if any
+
+HGui.ActiveText                       Pointer to the active CText object, if any
+HGui.ActiveGadget                     Pointer to the Active Gadget object, if any
+HGui.MinSBCursorSize                  Minimum scrollbar cursor's size (default: 8 pixels)
+HGui.LVResizeColumnOffset             Listview/Treeview: Resize columns offset (default: 4)
+HGui.LVResizeColumnMode               Listview/Treeview: True|False, it says if a resize is active
+
+HGui.Version                          A table that describes the current HGui version, it has 3 numeric entries to indicate the version, subversion and the build date like this :  { 1, 3, "02/01/2020" }
+                                                 
+HGui.DebugChannel                     Main debug channel name (default: "HGui")
+HGui.WChannel                         Window handler debug channel name (default: "Window")
+HGui.AreaChannel                      Area handler debug channel name (default: "Area")
+HGui.CTextChannel                     CText handler debug channel name (default: "CText")
+       
+HGui.TextEncoding                     Default text encoding (default:  #ENCODING_UTF8)

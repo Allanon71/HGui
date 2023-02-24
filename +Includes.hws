@@ -1,0 +1,66 @@
+/* ****************************************************************************
+   * MASTER INCLUDES FILE: Here are defined all library dependancies, use     *
+   * and modify this file to adjust paths in you system!                      *
+   ****************************************************************************/
+
+/**** PATCH TO FIX THE CURRENT RUN BUG ON AMIGAOS4 & MOS SYSTEMS ****/
+; THIS BUG IS ON HOLLYWOOD 6.1 ONLY
+Local v = GetVersion()
+If v.platform = "MorphOS" Or v.platform = "AmigaOS4"
+  Global _RunEventHandler = InstallEventHandler({ RunFinished = Function(msg) EndFunction })
+EndIf
+
+;*** SET THE BELOW CONSTANT WITH YOUR PATH ***
+Const #INC_PATH     = "C:/Users/Fabio.NB-FABIO/Desktop/HGui/"
+
+Const #INC_DATETIME = #INC_PATH .. "DateTime.hws"
+Const #INC_DEBUG    = #INC_PATH .. "Debug.hws"
+Const #INC_FILESYS  = #INC_PATH .. "FileSystem.hws"
+Const #INC_G2D      = #INC_PATH .. "G2D.hws"
+Const #INC_G3D      = #INC_PATH .. "G3D.hws"
+Const #INC_GFX      = #INC_PATH .. "Gfx.hws"
+Const #INC_HELPERS  = #INC_PATH .. "Helpers.hws"
+Const #INC_TABLES   = #INC_PATH .. "Tables.hws"
+Const #INC_EASING   = #INC_PATH .. "Easing.hws"
+Const #INC_HGUI     = #INC_PATH .. "HGui.hws"
+Const #INC_CFLOW    = #INC_PATH .. "CoverFlow.hws"
+Const #INC_AFX      = #INC_PATH .. "ASyncFX.hws"
+Const #INC_AFL      = #INC_PATH .. "ASyncFX_AFL.hws"
+Const #INC_SMPGUI   = #INC_PATH .. "SimpleGUI.hws"
+Const #INC_SECUR    = #INC_PATH .. "Security.hws"
+Const #INC_SECUR2   = #INC_PATH .. "SecurityNew.hws"
+Const #INC_JSON     = #INC_PATH .. "JSON.hws"
+Const #INC_FXBBS    = #INC_PATH .. "Fx_bbs.hws"
+Const #INC_ANSI     = #INC_PATH .. "Ansi.hws"
+Const #INC_NETWORK  = #INC_PATH .. "Network.hws"
+Const #INC_TEXTPROC = #INC_PATH .. "TextProcessing.hws"
+Const #INC_FIPC     = #INC_PATH .. "FIPC.hws"
+Const #INC_BASE64   = #INC_PATH .. "Base64.hws"
+Const #INC_SNDHELP  = #INC_PATH .. "SoundHelper.hws"
+Const #INC_PARTICLE = #INC_PATH .. "Particle.hws"
+Const #INC_LPARTICLE= #INC_PATH .. "LParticle.hws"
+Const #INC_PLANAR   = #INC_PATH .. "Planar.hws"
+Const #INC_DEMOENG  = #INC_PATH .. "/DEng/Main.hws"
+Const #INC_SVGANIM  = #INC_PATH .. "svgAnim.hws"
+Const #INC_HGAMEFW  = #INC_PATH .. "HWGF.hws"
+Const #INC_GLFX     = #INC_PATH .. "GLFX.hws"
+Const #INC_JOYSTICK = #INC_PATH .. "Joystick.hws"
+Const #INC_RRH      = #INC_PATH .. "ResourceHandler.hws"
+Const #INC_SQLITE3  = #INC_PATH .. "SQLite3.hws"
+Const #INC_SLIDTEXT = #INC_PATH .. "SlidingText.hws"
+Const #INC_ACTLAYER = #INC_PATH .. "ActiveLayers.hws"
+Const #INC_EXTLAYER = #INC_PATH .. "ExtLayers.hws"
+Const #INC_SLTBOX   = #INC_PATH .. "SLTBox.hws"
+Const #INC_LIMBOX   = #INC_PATH .. "LIMBox.hws"
+Const #INC_LIMAGE   = #INC_PATH .. "LImage.hws"
+Const #INC_ID3TAG   = #INC_PATH .. "ID3Tag.hws"
+Const #INC_SLIMUI   = #INC_PATH .. "SlimUI.hws"
+Const #INC_MAIL     = #INC_PATH .. "hurl_mails.hws"
+Const #INC_QRCODE   = #INC_PATH .. "qrcode.hws"
+Const #INC_ISO3166_1_A2 = #INC_PATH .. "ISO 3166-1 Alpha-2.hws"
+Const #INC_ISO639_1 = #INC_PATH .. "ISO 639-1.hws"
+Const #INC_SHA      = #INC_PATH .. "lib_sha.hws"
+
+Const #INC_VECTOR_CLASS   = #INC_PATH .. "classVector.hws"
+Const #INC_PARTICLE_CLASS = #INC_PATH .. "classParticle.hws"
+

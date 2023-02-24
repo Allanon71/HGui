@@ -1,0 +1,80 @@
+/*
+********************
+* HGui Test Script *
+* Fabio Falcucci   *
+*    Feb-2023      *
+********************
+  This script is used as a test and to show how it's possible to use the
+helper function 
+  HGui.Theme.Generate_SkinGradient()
+to generate simple skin composed by a layer with a gradient box.
+
+For further informations about the skin system have a look
+at the G2D library.
+-------------------
+
+HGUI.Theme.Generate_SkinGradient(color1, color2)
+  Generates a skin that simulates a gradient skin
+*/
+
+; INCLUDE THE LIBRARIES DEFINITIONS
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; Creates a new HGui window
+Local myWin = HGui.Window:new(
+                { title = "HGui.Theme.Generate_SkinGradient()",
+                  name  = "myWindow",
+                  position   = { x = #CENTER, y = #CENTER }
+                  })
+
+; Disable auto-rendering to avoid flickering
+HGui.SetAutoRendering(False)
+
+; Creates one label and one button
+Local myLabel  = HGui.Gadget:new(#HGUI_LABEL_GADGET, { caption = { "Press the button", "to change the button skins", "with a random gradient" } })
+Local myButton = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+  { caption = { "Click me!"},
+    actions = {
+      onpushed =
+        Function(gadObj)
+          ; Change the skin everytime the button is pushed, to create nice colors
+          ; we will use the Color Object from the Helpers library.
+          color1, color2 = {}, {}
+          For Local i = 0 To 2
+            Local baseColor   = GetRandomColor()
+            
+            ; Creates the color objects using the base color then brigthen it
+            ; to create another color we will use to generate the gradient
+            Local brightColor = HL.Color:New(baseColor)
+            brightColor:Brighten(80)
+            
+            ; Store the generated colors
+            color1[i] = baseColor
+            color2[i] = brightColor:toRGBValue()
+          Next
+          
+          gadObj:set({
+            look = { 
+              nskin = HGui.Theme.Generate_SkinGradient(color1[0], color2[0]),
+              hskin = HGui.Theme.Generate_SkinGradient(color1[1], color2[1]),
+              pskin = HGui.Theme.Generate_SkinGradient(color1[2], color2[2]) }
+              },
+            True)
+        EndFunction }
+      })
+
+
+; Let's arrange the gadgets into the window
+mywin.rootgadget:layoutSet({ gadgets = { myLabel, myButton },
+                             weights = { 0.30, 0.70 },
+                             gap     = 1
+                             }, True )
+
+; Finally enable the auto-rendering and refresh the window
+HGui.SetAutoRendering(True)
+myWin:Render()
+                 
+Repeat
+   WaitEvent()
+Forever

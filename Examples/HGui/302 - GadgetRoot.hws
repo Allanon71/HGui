@@ -1,0 +1,76 @@
+/*******************************************************************************
+HGUI : Tutorial 302 - Gadget Root                            v1.1 : 10/02/2023 *
+********************************************************************************
+In the previous tutorial we have seen an overview of the interface building
+process, now we will focus on the Root Gadget and some more informations about
+the interface layout system.
+Every GUI you want to build inside a window must be defined using an
+hierarchy that starts always with a single gadgets and stores all your GUI
+elements following a tree graph, on the top of this graph there is the Root
+Gadget that must be attached to your first gadget (the top of your tree).
+
+Example:
+          +----------------+
+          |     window     |
+          |  [Root Gadget] |
+          +-------|--------+
+                [Box]
+          +-------+--------+
+      [Button1]        [Button2]
+      
+The workflow to define this interface is the following:
+1. Create the new window
+2. Create the Box gadget, we will use this gadget as a container for the two
+   buttons.
+3. Create the Button1 and Button2
+4. Attach the two buttons as children of the Box
+5. Attach the Box as child of the Root Gadget
+
+Seems complex but look below at the code...
+*******************************************************************************/
+
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; Step 1 : Create a window
+Local myWin = HGui.Window:new(
+                { title = "Two Buttons in a Box!",
+                  name  = "myWindow",
+                  position   = { x = 200, y = 200 },
+                  size       = { w = 600, h = 400 },
+                  background = "Resources/background.jpg" ; Image
+                  })
+                   
+; Let's switch off the automatic rendering
+HGui.SetAutoRendering(True)
+
+; Step 2 : Create the Box
+Local myBox = HGui.Gadget:new(#HGUI_BOX_GADGET)
+
+; Step 3 : Create the buttons
+Local myButton1 = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { Caption = "Button 1" })
+Local myButton2 = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { Caption = "Button 2" })
+
+; Step 4 : Set the two buttons as children of the box
+myBox:layoutSet({ gadgets = { myButton1, myButton2 },
+                  weights = { 0.50, 0.50 },
+                  gap     = 10,
+                  borders = { top = 10, bottom = 10, left = 10, right = 10 } }, True )
+                             
+; Step 5 : Set the box (that contains the two buttons) as child of
+;          the root gagdet
+mywin.rootgadget:layoutSet({ gadgets = { myBox },
+                             weights = { 1 },
+                             gap     = 0,
+                             borders = { top = 50, bottom = 50, left = 50, right = 50 } }, True )
+
+; Restore the AutoRendering flag to True
+HGui.SetAutoRendering(True)
+
+; Force a window refresh
+myWin:Render()
+                   
+Repeat
+   WaitEvent()
+Forever
+
