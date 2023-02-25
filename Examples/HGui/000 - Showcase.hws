@@ -2519,7 +2519,7 @@ Function app.ClassExample_LISTVIEW()
             EndFunction } })
 
   ; :setItems() -> Used to change an entire dataset
-  Local lv_insert = HGui.Gadget:new( #HGUI_BUTTON_GADGET, 
+  Local lv_setItems = HGui.Gadget:new( #HGUI_BUTTON_GADGET, 
     { Caption = ":setItems()", 
       Actions = 
         { OnPushed = 
@@ -2546,7 +2546,7 @@ Function app.ClassExample_LISTVIEW()
                            gap = 2,
                            type = #HGUI_HORIZONTAL_LAYOUT,
                            borders = { top = 2, bottom = 2, left = 2, right = 2 } }, True)                           
-  cmd_box:layoutSet({ gadgets = { lv_SelectAll, lv_selectNone, lv_removeAll, lv_removeSelected, lv_insert },
+  cmd_box:layoutSet({ gadgets = { lv_SelectAll, lv_selectNone, lv_removeAll, lv_removeSelected, lv_insert, lv_setItems },
                       gap = 2,
                       type = #HGUI_GRID_LAYOUT,
                       columns = 3 }, True)
