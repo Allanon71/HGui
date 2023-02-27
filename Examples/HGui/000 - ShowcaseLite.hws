@@ -1,0 +1,3215 @@
+
+/***********************************
+  HGui Showcase (Small screens version)
+  v2.2 - 27/02/2023
+  Fabio Falcucci (allanon)
+  ------------------------
+  This script shows how you can use the HGui gadgets for your own apps.
+  DON'T BE SCARED! :D
+***********************************/
+@REQUIRE "plananarama"
+
+; Let's include the HGui library
+@INCLUDE "../../+Includes.hws"
+@INCLUDE #INC_HGUI
+
+; Container for all the stuff related to this application
+Local app = {}
+app.version = "v2.2, 27/02/2023"
+
+; Uncomment to enable debug output
+;DBG.Console.Enable(True, True)
+;DBG.Console.AddChannel(HGui.DebugChannel)
+;DBG.Console.AddChannel(HGui.WChannel)
+
+; Some global resources used in this program
+Global Background1 = "Resources/background.jpg"
+Global Background2 = "Resources/background2.jpg"
+Global Background3 = "Resources/background3.jpg"
+Global IconPic     = "Resources/icon.png"
+Global Picture1    = "Resources/pic1.jpg"
+Global Picture2    = "Resources/pic2.jpg"
+Global Picture3    = "Resources/pic3.jpg"
+Global Showcase    = "Resources/showcase.png"
+Global SoundTest   = "Resources/sound.wav"
+Global Texture1    = "Resources/texture.jpg"
+Global Texture2    = "Resources/texture2.jpg"
+Global Texture3    = "Resources/texture3.jpg"
+
+
+Function app.closeWindow_callback(msg, win)
+  ; Callbeck function used to free the window that has
+  ; generated this event.
+  ; --------------------------------------------- 
+  win:free()
+
+EndFunction
+ 
+Function app.demo_windowSolidColorBG()
+  ; This code opens 6 windows with random background solid colors.
+  ; It show how you can setup a solid color for the window's background.
+  ;
+  ; The parameter where you can setup the solid color is 'bgcolor',
+  ; the only window event monitored here is the 'onclose' event that is used to
+  ; free the window.
+  ; ---------------------------------------------
+  Local w, h = GFX.GetHostSize()    ; Read the host screen's size
+  Local x, y = 10, 10               ; Starting coordinates
+
+  For Local i = 1 To 6
+    HGui.Window:new(
+      { Title    = "Window " .. ToString(i), 
+        Position = { x = x + (i-1)*15, 
+                     y = y + (i-1)*15 }, 
+        Size = { w = 120, h = 80 },
+        BgColor  = GetRandomColor(), 
+        Events   = 
+          { OnClose = 
+              Function(msg, win)
+                ; Anonymous function to close the window
+                ; the second parameter is the window object
+                ; so we can use directly the :free() method
+                ; We could have use app.closeWindow_callback()
+                ; for this purpose but this way is more
+                ; readable.
+                win:Free()
+              EndFunction
+            } 
+        })
+  Next
+
+EndFunction
+
+Function app.Windows_VariousBackgrounds()
+  ; Here you can see how you can setup the window's background using
+  ; a pattern or a background image. You can also see how you can create
+  ; a gradient background.
+  ;
+  ; The background pattern must be specified using the 'bgtexture'
+  ; parameter with the image file name, instead the background picture
+  ; can be set using the 'background' parameter with the image file name.
+  ;
+  ; The gradient background must be specified in the 'bggradient' 
+  ; parameter, you have to provide a table describing the gradient type:
+  ; have a look at the documentation for further details.
+  ; ---------------------------------------------
+  ; Setup two table to randomly pick image files & texture files
+  Local images = {}
+  images[0] = Background1
+  images[1] = Background2
+  images[2] = Background3
+  
+  Local textures = {}
+  textures[0] = Texture1
+  textures[1] = Texture2
+  textures[2] = Texture3
+  
+  Local w, h = GFX.GetHostSize()
+  Local x, y = 10, 10
+  
+  Local mywin1 = HGui.Window:new(
+    { title = "Image Background",
+      position = 
+        { x = x, 
+          y = y },
+      Size = { w = 120, h = 80 },
+      background = images[Rnd(3)],
+      events = 
+        { OnClose = app.closeWindow_callback } 
+      })
+
+  Local mywin2 = HGui.Window:new(
+    { title = "Fill Color Background", 
+      position = 
+       { x = x+15, 
+         y = y+15 }, 
+      Size = { w = 120, h = 80 },
+      bgcolor = GetRandomColor(), 
+      events = 
+        { OnClose = app.closeWindow_callback } 
+      })
+      
+  Local mywin3 = HGui.Window:new(
+    { title = "Textured Background",
+      position = 
+        { x = x+30, 
+          y = y+30 }, 
+      Size = { w = 120, h = 80 },
+      bgtexture = textures[Rnd(3)], 
+      events = 
+        { OnClose = app.closeWindow_callback }
+      })
+    
+  Local mywin4 = HGui.Window:new(
+    { title = "Gradient Background",
+      position = 
+        { x = x+45, 
+          y = y+45 }, 
+      Size = { w = 120, h = 80 },
+      bggradient =
+       { Type = #LINEAR, 
+         Angle = Rnd(360), 
+         Colors = { GetRandomColor(), 0 , 
+                    $FF0000, 0.5, 
+                    GetRandomColor(), 1.0 }
+         }, 
+      events = 
+        { OnClose = app.closeWindow_callback } 
+      } )
+  
+EndFunction
+
+Function app.ShowProgramInfos(msg)
+  ; Callback function part of the 'Show all supported gadgets' section
+  
+  HGui.Window:SysRequestNew(
+    { Name = "Version",
+      Icon = IconPic,
+      Title = "Version",
+      Size = { w = 400, h = 180 },
+      Blocking = True,
+      Text = "[b]HGui Showcase[/b]\n\nA program to show HGui capabilities.\n" ..
+             "Developed by Fabio Falcucci aka Allanon for Hollywood-MAL.\n\n" ..
+             app.version,
+      WordWrap = True,
+      buttons =
+          { { Caption = "Ok" },
+            },
+      })
+
+EndFunction
+
+Function app.About(msg)
+  ; A callback function used to show an about box in the
+  ; 'Show all supported classes' section -> app.Test_GUI()
+  
+  HGui.Window:SysRequestNew(
+    { Name = "About",
+      Icon = IconPic,
+      Title = "About",
+      Size = { w = 300, h = 140 },
+      Blocking = True,
+      Text = "[b]HGui Showcase[/b]\n\nThis interface shows almost all gadgets supported by HGui.",
+      WordWrap = True,
+      buttons =
+          { { Caption = "Ok" },
+            },
+      })
+
+EndFunction
+
+Function app.UpdateProgressbar(msg, value)
+  ; Used to update the progress bar, callback used in the
+  ; demo 'Show all supperted gadgets'
+
+  ; Change the value of the progress bar, note the bad practice of using
+  ; global object names...
+  ProgressBar1:set({ value = value + 3 }, True)
+  
+  ; Also change dynamically the Listview column sizes and the first column header!
+  ListView:set({ data = 
+                  { columnSizes = { 150+value*5, 150-value*5, 350 },
+                    headers     = { "column size : " .. Int(150+value*5) }
+                   } }, True)
+  
+EndFunction
+
+Function app.Test_GUI()
+  ; Show all available classes in a single window
+  
+  ; This demo cannot run with multiple instances
+  If HGui.windowExists("Show Case")
+    SystemRequest(
+      "WARNING!", 
+      "The showcase window is already opened!", 
+      "OK", #REQICON_WARNING)
+    Return()
+    
+  EndIf
+  
+  ; Setup the window
+  Local mywin = HGui.Window:new(
+    { name = "Show Case", 
+      title = "All Gadget Classes!", 
+      position = { x = #CENTER, y = #CENTER }, 
+      size = { w = 320, h = 200 }, 
+      bgcolor = $AABBBB, 
+      events = { OnClose = app.closeWindow_callback } } )
+
+  ; Turn off auto rendering to avoid unwanted flickering
+  HGui.SetAutoRendering(False)
+
+  ; First available area subdivisions
+  Global TopBox   = HGui.Gadget:new(#HGUI_BOX_GADGET)
+  
+  Global Divider1 = HGui.Gadget:new(#HGUI_VDIVIDER_GADGET)
+  
+  Global MidBox   = HGui.Gadget:new(#HGUI_BOX_GADGET)
+  
+  Global Label1   = HGui.Gadget:new(#HGUI_LABEL_GADGET, 
+    { Caption = { "LABEL" } })
+    
+  Global Group1   = HGui.Gadget:new(#HGUI_GROUP_GADGET, 
+    { Caption = { "Right vert Label" }, 
+      Group_LabelGap = 8, 
+      Group_LabelSide = #HGUI_ALIGN_RIGHT })
+      
+  Global Label2   = HGui.Gadget:new(#HGUI_LABEL_GADGET, 
+    { Angle = 90, 
+      Caption = { "Vertical Label" } })
+      
+  Global BoxGrp1  = HGui.Gadget:new(#HGUI_BOX_GADGET)
+  
+  Global Button1  = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+    { Tip = 
+        { "This is a [color=$ff0000]sample[/color] tip text", 
+          "in three [u]lines[/u]", 
+          "with [b][color=$0000FF]decorators[/color][/b]." }, 
+      Caption = 
+        { "Button + sound", 
+          "Leave the mouse", 
+          "here to see", 
+          "the tip" }, 
+      Sounds = 
+        { onPushed = test_sample } })
+        
+  Global Button2  = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+    { Angle = 15, 
+      Look = 
+        { Icons = 
+          { iName = "Icon", 
+            hName = "Icon2", 
+            Alignment = #HGUI_ALIGN_LEFT + #HGUI_ALIGN_VCENTER }
+          }, 
+      Caption = 
+      { "Btn+Icon", 
+        "Rot 15°" } })
+        
+  Global Divider2 = HGui.Gadget:new(#HGUI_HDIVIDER_GADGET)
+  
+  Global BoxGrp2  = HGui.Gadget:new(#HGUI_BOX_GADGET)
+  
+  Global Switch1  = HGui.Gadget:new(#HGUI_SWITCH_GADGET, 
+    { Look = 
+      { Icons = 
+        { iName = "Icon", 
+          hName = "Icon2", 
+          Alignment = #HGUI_ALIGN_HCENTER + #HGUI_ALIGN_VCENTER }
+        }, 
+      Caption = { "Switch ", "[color=$FF0000][b]1[/b][/color]" } })
+      
+  Global Switch2  = HGui.Gadget:new(#HGUI_SWITCH_GADGET, 
+    { Value = 1, 
+      Angle = 90, 
+      Caption = { "Switch", "[color=$FFFF00][b]2[/b][/color]" } })
+      
+  Global Switch3  = HGui.Gadget:new(#HGUI_SWITCH_GADGET,
+    { Value = 1, 
+      Angle = 180, 
+      Caption = { "Switch", "[color=$FF00FF][b]3[/b][/color]" } })
+      
+  Global Switch4  = HGui.Gadget:new(#HGUI_SWITCH_GADGET, 
+    { Value = 1, 
+      Angle = 270, 
+      Caption = { "Switch", "[color=$00FFFF][b]4[/b][/color]" } })
+      
+  Global Switch5  = HGui.Gadget:new(#HGUI_SWITCH_GADGET, 
+    { Value = 0, 
+      Caption = { "Switch", "[color=$FFFFFF][b]5[/b][/color]" } })
+
+  Global CheckGrp = HGui.Gadget:new(#HGUI_GROUP_GADGET, 
+    { Caption = { "GROUP : Checks" }, 
+      GroupType = #HGUI_GTYPE_CHECK, 
+      Group_LabelGap = 8, 
+      Group_LabelSide = #HGUI_ALIGN_TOP })
+      
+  Global Check1 = HGui.Gadget:new(#HGUI_SWITCH_GADGET, 
+    { Value = 1, 
+      Caption = { "Check 1" } })
+      
+  Global Check2 = HGui.Gadget:new(#HGUI_SWITCH_GADGET, 
+    { Value = 0, 
+      Caption = { "Check 2" } })
+      
+  Global Check3 = HGui.Gadget:new(#HGUI_SWITCH_GADGET, 
+    { Value = 0, 
+      Caption = { "Check 3" } })
+      
+  Global Check4 = HGui.Gadget:new(#HGUI_SWITCH_GADGET, 
+    { Value = 0, 
+      Caption = { "Check 4" } })
+
+  Global RadioGrp = HGui.Gadget:new(#HGUI_GROUP_GADGET, 
+    { Caption = { "GROUP : Radio Boxes" }, 
+      GroupType = #HGUI_GTYPE_RADIO, 
+      Group_LabelGap = 8, 
+      Group_LabelSide = #HGUI_ALIGN_BOTTOM })
+      
+  Global Radio1 = HGui.Gadget:new(#HGUI_SWITCH_GADGET, 
+    { Angle = 90, 
+      Value = 1, 
+      Caption = { "Radio 1" } })
+      
+  Global Radio2 = HGui.Gadget:new(#HGUI_SWITCH_GADGET, 
+    { Angle = 90, 
+      Value = 0, 
+      Caption = { "Radio 2" } })
+      
+  Global Radio3 = HGui.Gadget:new(#HGUI_SWITCH_GADGET, 
+    { Angle = 90, 
+      Value = 0, 
+      Caption = { "Radio 3" } })
+      
+  Global Radio4 = HGui.Gadget:new(#HGUI_SWITCH_GADGET, 
+    { Angle = 90, 
+      Value = 0, 
+      Caption = { "Radio 4" } })
+
+  Global ScrollBar1 = HGui.Gadget:new(#HGUI_SCROLLBAR_GADGET, 
+    { Range = { 1, 15, 3 },
+      OnChange    = app.UpdateProgressbar,
+      Orientation = #HGUI_HORIZONTAL_LAYOUT,
+      Caption     = "{intvalue}" })
+      
+  Global ProgressBar1 = HGui.Gadget:new(#HGUI_PROGRESSBAR_GADGET, 
+    { Range   = { 1, 15 }, 
+      Value   = 4,
+      Caption = " {intvalue}" })
+      
+  Global DropDown1 = HGui.Gadget:new(#HGUI_DROPDOWN_GADGET, 
+    { Value  = { "-click-" },
+      Column = 0,
+      Data   = 
+        { ColumnSizes = { 80, 100 },
+          Headers     = { "Name", "Surname" },
+          Items       = 
+            { 
+              { "Steve", "Austin" },
+              { "Bruce", "Wayne" },
+              { "Kathy", "Kane" },
+              { "Steven", "Rogers" },
+              { "Scott", "Summers" },
+              { "Alan", "Scott" },
+              { "Bruce", "Banner" },
+              { "Reed", "Richards" },
+              { "Hal", "Jordan" },
+              { "Dick", "Grayson" },
+              { "Anna", "Marie" },
+              { "Peter", "Parker" },
+              { "Clark", "Kent" }
+              },
+          SortOrder   = { Columns = { 0, 1 }, 
+          Descending  = { False, False } }
+          } 
+      })
+      
+  Global Slider1 = HGui.Gadget:new(#HGUI_SLIDER_GADGET, 
+    { Range       = { 1, 2000 }, 
+      Value       = 1,
+      CursorSize  = 0.1,
+      Orientation = #HGUI_VERTICAL_LAYOUT,
+      Actions     = { OnChange    = app.Slider1_Callback1 }
+      })
+      
+  Global BoxGrp3 = HGui.Gadget:new(#HGUI_BOX_GADGET)
+  
+  Global TreeView = HGui.Gadget:new(#HGUI_TREEVIEW_GADGET, 
+    { Data = 
+      { ColumnSizes = { 80, 80, 100 },
+        Headers = { "Name", "Surname", "Hero Name" },
+        Items = 
+          { 
+            { "Bruce", "Wayne", "Batman", _Selected = True },
+            { "Fantastic 4", "", "", 
+              childs = 
+                { 
+                  { "[color=#GREEN]Good guys[/color]", "", "", 
+                    childs = 
+                      { 
+                        { "Jonathan", "Lowell Spender", "Human Torch" },
+                        { "Susan Storm", "Richards", "Invisible Woman" },
+                        { "Benjamin Jacob", "Grimm", "Thing" },
+                        { "Reed", "Richards", "Mr. Fantastic" } 
+                        } 
+                    },
+                  { "[color=#RED]Bad guys[/color]", "", "", 
+                    childs = 
+                      { 
+                        { "Dark Man", "", "Abraxas" },
+                        { "Achilles", "Helmut", "Achilles" },
+                        { "Carl", "Zante", "Acrobat" },
+                        { "Eric", "Cameron", "Adonis" },
+                        { "Adrian", "Lynn", "Adrenazon" },
+                        { "Melody", "Guthrie", "Aero" },
+                        { "Rick", "Mason", "The Agent" } 
+                        } 
+                    } 
+                  } 
+              },
+            { "The Avengers", "", "", 
+              childs = 
+                { 
+                  { "T'Challa'", "", "Black Panther" },
+                  { "Natalie", "Alianova Romanova", "Black Widow" },
+                  { "Steven", "Rogers", "Captain America" },
+                  { "Carol ", "Danvers", "Captain Marvel" },
+                  { "Samuel Thomas", "Wilson", "Falcon" },
+                  { "Henry", "Pym", "Hank Pym", 
+                    childs = 
+                      { 
+                        { "Who is?", "Who knows...", "-_-'" } 
+                        } 
+                    },
+                  { "Clinton Fancis", "Barton", "Hawkeye" },
+                  { "Robert Bruce", "Banner", "Hulk" },
+                  { "Anthony Edward", "Stark", "Iron Man" } 
+                  } 
+              },
+          },
+        sortOrder = 
+          { columns = { 0, 1 }, 
+            descending = { False, False } },
+        }
+      })
+      
+  Global ListView = HGui.Gadget:new(#HGUI_LISTVIEW_GADGET, 
+    { Data = 
+      { ColumnSizes = { 100, 50, 150 },
+        Alignments = { #HGUI_ALIGN_RIGHT, #HGUI_ALIGN_CENTER, #HGUI_ALIGN_LEFT },
+        Headers = { "Features", "Yes/No", "Comments" },
+        Items = 
+          { 
+            { "Items sorting", "Yes", "A custom alghorythm have been used to sort large dataset quickly." },
+            { "Multiple column sort", "Yes", "You can define on which columns (one or more) you need to sort your data." },
+            { "Images", "Yes", "You can provide images to be included on each entry." },
+            { "Multi-select", "Yes", "You can select more then one item." },
+            { "Column resize", "Yes", "Actually only by code, but you will be able to use the mouse for this soon." },
+            { "Theme", "Yes", "You can customize deeply your listviews." },
+            { "Events", "Yes", "You can attach events on your listviews." },
+            { "Status", "--", "Still missing some fetures like onOver and onOut events." },
+            { "Scrollers", "Yes", "You can switch off scroller if you need it." },
+            { "Alternate Lines", "Yes", "Can be switched off and custom colors can be defined easily."}
+            },
+        Selected = { False, True, True, False, False, False, False, False, False, False, False },
+        SortOrder = { columns = { 0 }, descending = { False } }
+      },
+      Wordwrap = True,
+      EntryHeight = 16,
+      FontSizeOffset = -8,
+      })
+      
+  Global Knob01 = HGui.Gadget:new(#HGUI_KNOB_GADGET, 
+    { CursorRadius = 0.5,
+      Range = { 1, 2000 },
+      Value = 1,
+      Style = { Type = s },
+      OnChange = app.Knob01_Callback })
+      
+  Global Text01 = HGui.Gadget:new(#HGUI_TEXT_GADGET, 
+    { Text = "This is a text box!\nSupports cut/copy\nand paste!\nInsert and Overwrite mode!",
+      Gfx = { BgCursor = $FF0000, BgColor = $88ddff } })
+      
+  Global Text02 = HGui.Gadget:new(#HGUI_TEXT_GADGET, 
+    { Text = "Only a single line here...",
+      Gfx = { BgCursor = $FF00FF, BgColor = $dddddd, AdjustFontSize = True },
+      AllowNewLine = False })
+      
+  Global ImgGad = HGui.Gadget:new(#HGUI_IMAGE_GADGET, 
+    { Source = Background1,
+      Offset = { x = 0, y = 0 },
+      Alpha = #NONE,
+      Mode = 4,
+      Align = #CENTER,
+      Scale = { w = 0.5, h = 0.5 },
+      BorderColor = $000000,
+      Borders = { Left = 4, Right = 4 } })
+      
+  Global Virtual = HGui.Gadget:new(#HGUI_VIRTUAL_GADGET, 
+    { VirtualSize = { w = 250, h = 150 },
+      VirtualOffset = { x = 1, y = 1 } })
+      
+  Global vBox1 = HGui.Gadget:new(#HGUI_BOX_GADGET)
+  
+  Global vBox2 = HGui.Gadget:new(#HGUI_BOX_GADGET)
+  
+  Global vDiv = HGui.Gadget:new(#HGUI_VDIVIDER_GADGET)
+  
+  Global vLabel1 = HGui.Gadget:new(#HGUI_LABEL_GADGET, 
+    { Caption = { "Virtual Gadget" } })
+    
+  Global vLabel2 = HGui.Gadget:new(#HGUI_LABEL_GADGET, 
+    { Caption = "Me too! :)" })
+    
+  Global vBut1 = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+    { Caption = { "Button test.", "Seems OK." } })
+    
+  Global vBut2 = HGui.Gadget:new(#HGUI_BUTTON_GADGET, 
+    { Caption = "Another button." })
+
+  ; Create the interface layout
+  mywin.RootGadget:layoutSet(
+    { Gadgets = { TopBox, Divider1, MidBox, ScrollBar1, ProgressBar1 },
+      Weights = { 0.45, 4, 0.44, 0.05, 0.05 },
+      Type = #HGUI_VERTICAL_LAYOUT,
+      Gap = 0,
+      Borders = { Top = 0, Bottom = 0, Left = 0, Right = 0 } }, True )
+
+  TopBox:layoutSet(
+    { Gadgets = { CheckGrp, RadioGrp, TreeView, Slider1, BoxGrp3, Virtual },
+      Weights = { 0.13, 0.17, 0.30, 0.02, 0.18, 0.20 },
+      Gap = 0,
+      Type = #HGUI_HORIZONTAL_LAYOUT,
+      Borders = { Top = 0, Bottom = 0, Left = 0, Right = 0 } }, True )
+
+  BoxGrp3:layoutSet(
+    { Gadgets = { Knob01, Text01, Text02 },
+      Weights = { 0.30, 0.35, 0.35 },
+      Gap = 1,
+      Type = #HGUI_VERTICAL_LAYOUT,
+      Borders = { Top = 0, Bottom = 0, Left = 0, Right = 0 } }, True )
+
+  CheckGrp:layoutSet(
+    { gadgets = { Check1, Check2, Check3, Check4 },
+      weights = { 0.25, 0.25, 0.25, 0.25 },
+      gap = 1,
+      gap = 1,
+      type = #HGUI_VERTICAL_LAYOUT,
+      Borders = { Top = 0, Bottom = 0, Left = 0, Right = 0 } }, True )
+
+  RadioGrp:layoutSet(
+    { gadgets = { Radio1, Radio2, Radio3, Radio4 },
+      weights = { 0.25, 0.25, 0.25, 0.25 },
+      gap = 1,
+      type = #HGUI_HORIZONTAL_LAYOUT,
+      borders = { top = 1, bottom = 1, left = 1, right = 1 } }, True )
+
+  MidBox:layoutSet(
+    { gadgets = { Label1, Group1 },
+      weights = { 0.10, 0.90 },
+      gap = 0,
+      type = #HGUI_VERTICAL_LAYOUT,
+      Borders = { Top = 0, Bottom = 0, Left = 0, Right = 0 } }, True )
+  
+  Group1:layoutSet(
+    { gadgets = { Label2, BoxGrp1, Divider2, BoxGrp2, ListView, ImgGad },
+      weights = { 16, 0.20, 6, 0.20, 0.40, 0.20 },
+      gap = 1,
+      Type = #HGUI_HORIZONTAL_LAYOUT,
+      Borders = { Top = 0, Bottom = 0, Left = 0, Right = 0 } }, True )
+  
+  BoxGrp1:layoutSet(
+    { gadgets = { Button1, Button2 },
+      weights = { 0.50, 0.50 },
+      gap = 1,
+      Borders = { Top = 0, Bottom = 0, Left = 0, Right = 0 } }, True )
+
+  BoxGrp2:layoutSet(
+    { gadgets = { Switch1, Switch2, Switch3, Switch4, Switch5, DropDown1 },
+      columns = 2,
+      type = #HGUI_GRID_LAYOUT,
+      gap = 1,
+      Borders = { Top = 0, Bottom = 0, Left = 0, Right = 0 } }, True )
+
+  Virtual.VBox:layoutSet(
+    { Gadgets = { vBox1, vDiv, vBox2 },
+      Weights = { 0.48, 0.04, 0.48 },
+      Type    = #HGUI_VERTICAL_LAYOUT,
+      Gap     = 1,
+      Borders = { Top = 0, Bottom = 0, Left = 0, Right = 0 } }, True )
+
+  vBox1:layoutSet(
+    { Gadgets = { vLabel1, vLabel2 },
+      Weights = { 0.5, 0.5 },
+      Type    = #HGUI_VERTICAL_LAYOUT,
+      Gap     = 1,
+      Borders = { Top = 0, Bottom = 0, Left = 0, Right = 0 } }, True )
+
+  vBox2:layoutSet(
+    { Gadgets = { vBut1, vBut2 },
+      Weights = { 0.5, 0.5 },
+      Type    = #HGUI_HORIZONTAL_LAYOUT,
+      Gap     = 1,
+      Borders = { Top = 0, Bottom = 0, Left = 0, Right = 0 } }, True )
+                                  
+  HGui.SetAutoRendering(True)
+  mywin:render()
+
+  ;--- ADD A MENU ---
+  myWin:menuSet(
+    { 
+      { type = #HGUI_BUTTON_GADGET, params = { Caption = "File" }, 
+        submenu = 
+        { 
+          { type = #HGUI_BUTTON_GADGET, params = { Caption = "New" } },
+          { type = #HGUI_BUTTON_GADGET, params = { Caption = "Save As" }, 
+            submenu = 
+            { 
+              { type = #HGUI_BUTTON_GADGET, size = 20, params = { Caption = "PNG" } },
+              { type = #HGUI_BUTTON_GADGET, size = 25, params = { Caption = "JPG" } },
+              { type = #HGUI_BUTTON_GADGET, size = 30, params = { Caption = "BMP" } },
+              { type = #HGUI_VDIVIDER_GADGET, size = 5, params = {} },
+              { type = #HGUI_SWITCH_GADGET, size = 35, params = { Caption = "Compression", Value = 0 } },
+              { type = #HGUI_SWITCH_GADGET, size = 40, params = { Caption = "Smart Save", Value = 1 } },
+              { type = #HGUI_SLIDER_GADGET, size = 20, params = { Range = { 1, 100 }, value = 2,
+                                                                  CursorSize = 0.1,
+                                                                  Orientation = #HGUI_HORIZONTAL_LAYOUT } }
+              } 
+            },
+          { type = #HGUI_VDIVIDER_GADGET, params = {} },
+          { type = #HGUI_BUTTON_GADGET, params = { Caption = "Preferences" }, 
+            submenu = 
+            { 
+              { type = #HGUI_BUTTON_GADGET, params = { Caption = "Load" } },
+              { type = #HGUI_BUTTON_GADGET, params = { Caption = "Save" } },
+              { type = #HGUI_BUTTON_GADGET, params = { Caption = "Edit" } },
+              { type = #HGUI_VDIVIDER_GADGET, params = {} },
+              { type = #HGUI_SWITCH_GADGET, params = { Caption = "Encrypt data", Value = 0 } },
+              { type = #HGUI_SWITCH_GADGET, params = { Caption = "Compress data", Value = 1 } },
+              { type = #HGUI_BUTTON_GADGET, params = { Caption = "Set master keyword" } },
+              { type = #HGUI_BUTTON_GADGET, params = { Caption = "Recover master keyword" } },
+              { type = #HGUI_BUTTON_GADGET, params = { Caption = "Reset all" } },
+              { type = #HGUI_VDIVIDER_GADGET, params = {} },
+              { type = #HGUI_SWITCH_GADGET, params = { Caption = "Lock all files", Value = 0 } },
+              { type = #HGUI_SWITCH_GADGET, params = { Caption = "Reset preferences", Value = 1 } }
+              } 
+            },
+            { type = #HGUI_VDIVIDER_GADGET, params = {} },
+            { type = #HGUI_BUTTON_GADGET, params = { Caption = "Close" } },
+            { type = #HGUI_BUTTON_GADGET, params = { Caption = "Quit" } }
+          } 
+        },
+      { type = #HGUI_BUTTON_GADGET, params = { Caption = "Edit (empty)" } },
+      { type = #HGUI_BUTTON_GADGET, params = { Caption = "Search (empty)" } },
+      { type = #HGUI_BUTTON_GADGET, params = { Caption = "Help" }, 
+        submenu = 
+        { 
+          { type = #HGUI_BUTTON_GADGET, params = { Caption = "Version" }, callback = app.ShowProgramInfos },
+          { type = #HGUI_BUTTON_GADGET, params = { Caption = "About" }, callback = app.About }
+          } 
+        }
+      })
+
+EndFunction
+
+Function app.Slider1_Callback1(Obj, value)
+  ; As the slider moves the knob01 will also move
+  Knob01:set({ value = value }, True)
+  
+EndFunction
+
+Function app.Knob01_Callback(Obj, value)
+  ; As the knob01 moves the slider1 will also move
+  Slider1:set({ value = value }, True)
+  
+EndFunction
+
+Function app.Generate_RndBevelSkin()
+  ; Generates a random bevel skin
+  
+  ; Generate the colors using the HL.Color objects
+  Local alpha = TB.PickRandom({ True, False })
+  Local color = HL.GetRndColor(alpha)
+  Local midColor = HL.Color:New()
+  midColor:fromValue(color)
+  Local briColor = midColor:Clone()
+  Local darColor = midColor:Clone()
+
+  briColor:Brighten(30)
+  darColor:Darken(30)
+  
+  ; Generate the skin
+  Local skin = HGui.Theme.Generate_SkinBevel(
+    ; Bevel type
+    TB.PickRandom({ GFX.BevelType_Standard, GFX.BevelType_Sunken }),
+    
+    ; Bevel effect
+    TB.PickRandom({ GFX.BevelFx_Raised, GFX.BevelFx_Recessed, GFX.BevelFx_Flat }),
+    
+    ; Bevel height
+    Rnd(10),
+
+    ; Bevel bright edges color
+    briColor:toARGBValue(),
+    
+    ; Bevel dark edges color
+    darColor:toARGBValue(),
+    
+    ; Bevel middle color
+    color)
+
+  Return(skin)
+  
+EndFunction
+
+Function app.Generate_RndTextSkin()
+  ; Generate a random text skin
+  
+  Local skin = HGui.Theme.Generate_Text(
+    ; Font size
+    Rnd(12)+12,
+    
+    ; Text style
+    TB.PickRandom({ #NORMAL, #ANTIALIAS, #BOLD, #ITALIC, #UNDERLINED, #ANTIALIAS+#BOLD }),
+    
+    ; Text color
+    HL.GetRndColor(True),
+    
+    ; Text alignment
+    TB.PickRandom({ #HGUI_ALIGN_LEFT, #HGUI_ALIGN_RIGHT, #HGUI_ALIGN_HCENTER }) Or
+    TB.PickRandom({ #HGUI_ALIGN_TOP, #HGUI_ALIGN_BOTTOM, #HGUI_ALIGN_VCENTER }),
+    
+    ; Edge effect
+    IIf(Rnd(2)=1, True, False),
+    
+    ; Shadow effect
+    IIf(Rnd(2)=1, True, False),
+    
+    ; Margins
+    { top = Rnd(16)+2, 
+      bottom = Rnd(16)+2, 
+      left = Rnd(16)+4, 
+      right = Rnd(16)+4 })
+    
+  Return(skin)
+  
+EndFunction
+
+Function app.GlobalTheme_BOX()
+  ; Apply a global theme to box class
+  HGui.Theme.SetGlobalTheme(#HGUI_BOX_GADGET, { nSkin = app.Generate_RndBevelSkin() })
+
+EndFunction
+
+Function app.GlobalTheme_HDIVIDER()
+  HGui.Theme.SetGlobalTheme(#HGUI_HDIVIDER_GADGET, 
+    { nSkin = app.Generate_RndBevelSkin(),
+      Colors = { Color1 = HL.GetRndColor(False), Color2 = HL.GetRndColor(False) },
+      Size = Rnd(5),
+      Padding = Rnd(20) })
+      
+EndFunction
+
+Function app.GlobalTheme_VDIVIDER()
+  HGui.Theme.SetGlobalTheme(#HGUI_VDIVIDER_GADGET, 
+    { nSkin = app.Generate_RndBevelSkin(),
+      Colors = { Color1 = HL.GetRndColor(False), Color2 = HL.GetRndColor(False) },
+      Size = Rnd(5),
+      Padding = Rnd(20) })
+EndFunction
+
+Function app.GlobalTheme_LABEL()
+  HGui.Theme.SetGlobalTheme(#HGUI_LABEL_GADGET, 
+    { nSkin = app.Generate_RndBevelSkin(),
+      nText = app.Generate_RndTextSkin()})
+EndFunction
+
+Function app.GlobalTheme_BUTTON()
+  Local skins = { "nskin", "hskin", "pskin", "dskin" }
+  Local texts = { "ntext", "htext", "ptext", "dtext" }
+  Local theme = {}
+  For Local k = 0 To 3
+    Local skin, text = skins[k], texts[k]
+    theme[skin] = app.Generate_RndBevelSkin()
+    theme[text] = app.Generate_RndTextSkin()
+  Next
+  HGui.Theme.SetGlobalTheme(#HGUI_BUTTON_GADGET, theme)
+EndFunction
+
+Function app.GlobalTheme_SWITCH()
+  Local skins = { "nskin", "hskin", "pskin", "dskin", "npskin", "hpskin", "dpskin" }
+  Local texts = { "ntext", "htext", "ptext", "dtext", "nptext", "hptext", "dptext" }
+  Local theme = {}
+  For Local k = 0 To 6
+    Local skin, text = skins[k], texts[k]
+    theme[skin] = app.Generate_RndBevelSkin()
+    theme[text] = app.Generate_RndTextSkin()
+  Next
+  HGui.Theme.SetGlobalTheme(#HGUI_SWITCH_GADGET, theme)
+EndFunction
+
+Function app.GlobalTheme_GROUP()
+  HGui.Theme.SetGlobalTheme(#HGUI_GROUP_GADGET, 
+    { obSkin = app.Generate_RndBevelSkin(),
+      ibSkin = app.Generate_RndBevelSkin(),
+      nSkin = app.Generate_RndBevelSkin(),
+      nText = app.Generate_RndTextSkin(),
+      iBorders = { top = Rnd(16), bottom = Rnd(16), left = Rnd(16), right = Rnd(16) },
+      oBorders = { top = Rnd(16), bottom = Rnd(16), left = Rnd(16), right = Rnd(16) },
+      Gap = Rnd(16),
+      AnonymousGroupHeader = Rnd(16) })
+EndFunction
+
+Function app.GlobalTheme_SCROLLBAR()
+  Local skins = { "nskin", "hskin", "pskin", "dskin" }
+  Local texts = { "ntext", "htext", "ptext", "dtext" }
+  Local types = { "lines", "dots", "box", "none" }
+  Local rType = types[Rnd(4)]
+  Local Handle = 
+  { normal    = { color1 = HL.GetRndColor(True), color3 = HL.GetRndColor(True), color2 = HL.GetRndColor(True) },
+    hilighted = { color1 = HL.GetRndColor(True), color3 = HL.GetRndColor(True), color2 = HL.GetRndColor(True) },
+    pushed    = { color1 = HL.GetRndColor(True), color3 = HL.GetRndColor(True), color2 = HL.GetRndColor(True) },
+    disabled  = { color1 = HL.GetRndColor(True), color3 = HL.GetRndColor(True), color2 = HL.GetRndColor(True) },
+    type      = rType,
+    quantity  = Rnd(6),       ; solo per lines, dots
+    size      = Rnd(6),
+    gap       = Rnd(16) }      ; solo per lines, dots
+  Local theme = { oBox = {}, cBox = {}, Handle = Handle }
+  For Local k = 0 To 3
+    Local skin, text = skins[k], texts[k]
+    theme.oBox[skin] = app.Generate_RndBevelSkin()
+    theme.cBox[skin] = app.Generate_RndBevelSkin()
+    theme.cBox[text] = app.Generate_RndTextSkin()
+  Next
+  HGui.Theme.SetGlobalTheme(#HGUI_SCROLLBAR_GADGET, theme)
+EndFunction
+;******************************************************************************
+
+Function app.SingleTheme_BOX()
+  ; Change the theme of the middle box gadget
+  Local g = HGui.gadgetFindByName("g2")
+  g:setTheme({ nSkin = app.Generate_RndBevelSkin() }, True)
+  
+EndFunction
+
+Function app.SingleTheme_HDIVIDER()
+  Local g = HGui.gadgetFindByName("g2")
+  g:setTheme({ nSkin = app.Generate_RndBevelSkin() }, True)
+EndFunction
+
+Function app.SingleTheme_VDIVIDER()
+  Local g = HGui.gadgetFindByName("g2")
+  g:setTheme({ nSkin = app.Generate_RndBevelSkin() }, True)
+EndFunction
+
+Function app.SingleTheme_LABEL()
+  Local g = HGui.gadgetFindByName("g2")
+  g:setTheme({ nSkin = app.Generate_RndBevelSkin(), nText = app.Generate_RndTextSkin() }, True)
+EndFunction
+
+Function app.SingleTheme_BUTTON()
+  Local g = HGui.gadgetFindByName("g2")
+  Local skins = { "nskin", "hskin", "pskin", "dskin" }
+  Local texts = { "ntext", "htext", "ptext", "dtext" }
+  Local theme = {}
+  For Local k = 0 To 3
+    Local skin, text = skins[k], texts[k]
+    theme[skin] = app.Generate_RndBevelSkin()
+    theme[text] = app.Generate_RndTextSkin()
+  Next
+  g:setTheme(theme, True)
+EndFunction
+
+Function app.SingleTheme_SWITCH()
+  Local g = HGui.gadgetFindByName("g2")
+  Local skins = { "nskin", "hskin", "pskin", "dskin", "npskin", "hpskin", "dpskin" }
+  Local texts = { "ntext", "htext", "ptext", "dtext", "nptext", "hptext", "dptext" }
+  Local theme = {}
+  For Local k = 0 To 6
+    Local skin, text = skins[k], texts[k]
+    theme[skin] = app.Generate_RndBevelSkin()
+    theme[text] = app.Generate_RndTextSkin()
+  Next
+  g:setTheme(theme, True)
+EndFunction
+
+Function app.SingleTheme_GROUP()
+  Local g = HGui.gadgetFindByName("g2")
+  g:setTheme({ obSkin = app.Generate_RndBevelSkin(),
+               ibSkin = app.Generate_RndBevelSkin(),
+               nSkin = app.Generate_RndBevelSkin(),
+               nText = app.Generate_RndTextSkin() }, True)
+EndFunction
+
+Function app.SingleTheme_SCROLLBAR()
+  Local g = HGui.gadgetFindByName("g2")
+  Local skins = { "nskin", "hskin", "pskin", "dskin" }
+  Local texts = { "ntext", "htext", "ptext", "dtext" }
+  Local Handle = 
+  { normal    = { color1 = HL.GetRndColor(True), color3 = HL.GetRndColor(True), color2 = HL.GetRndColor(True) },
+    hilighted = { color1 = HL.GetRndColor(True), color3 = HL.GetRndColor(True), color2 = HL.GetRndColor(True) },
+    pushed    = { color1 = HL.GetRndColor(True), color3 = HL.GetRndColor(True), color2 = HL.GetRndColor(True) },
+    disabled  = { color1 = HL.GetRndColor(True), color3 = HL.GetRndColor(True), color2 = HL.GetRndColor(True) },
+    type      = rType,
+    quantity  = Rnd(6),       ; solo per lines, dots
+    size      = Rnd(6),
+    gap       = Rnd(16) }      ; solo per lines, dots
+  Local theme = { oBox = {}, cBox = {}, Handle = Handle }
+  For Local k = 0 To 3
+    Local skin, text = skins[k], texts[k]
+    theme.oBox[skin] = app.Generate_RndBevelSkin()
+    theme.cBox[skin] = app.Generate_RndBevelSkin()
+    theme.cBox[text] = app.Generate_RndTextSkin()
+  Next
+  g:setTheme(theme, True)
+EndFunction
+;******************************************************************************
+Function app.ClassTest_SingleMove(w)
+  Local g = HGui.gadgetFindByName("g2")
+  g:set({ position = { x = Rnd(400), y = Rnd(300) }}, False)
+  w:Render()
+EndFunction
+;******************************************************************************
+Function app.ClassTest_SingleSize(w)
+  Local g = HGui.gadgetFindByName("g2")
+  g:set({ size = { w = Rnd(400)+1, h = Rnd(300)+1 }}, False)
+  w:Render()
+EndFunction
+;******************************************************************************
+Function app.ClassTest_NestedLayout(w)
+  Local g1 = HGui.gadgetFindByName("g1")
+  Local g2 = HGui.gadgetFindByName("g2")
+  Local g3 = HGui.gadgetFindByName("g3")
+  Local type = IIf(Rnd(2), #HGUI_VERTICAL_LAYOUT, #HGUI_HORIZONTAL_LAYOUT)
+  Local w1 = Rnd(101)/100
+  Local w2 = 1-w1
+  w.rootgadget:layoutSet({ gadgets = { g1, g2 },
+                           weights = { w1, w2 },
+                           type = type,
+                           gap = Rnd(15),
+                           borders = { top = Rnd(25), bottom = Rnd(25), left = Rnd(25), right = Rnd(25) } }, True)
+  g1:layoutSet({ gadgets = { g3 },
+                 weights = { 1 },
+                 gap = 0,
+                 borders = { top = Rnd(25), bottom = Rnd(25), left = Rnd(25), right = Rnd(25) } }, True)
+  w:render()
+EndFunction
+;******************************************************************************
+Function app.ClassTest_LinearLayout(w)
+  Local g1 = HGui.gadgetFindByName("g1")
+  Local g2 = HGui.gadgetFindByName("g2")
+  Local g3 = HGui.gadgetFindByName("g3")
+  Local type = IIf(Rnd(2), #HGUI_VERTICAL_LAYOUT, #HGUI_HORIZONTAL_LAYOUT)
+  Local w1 = Rnd(70)
+  Local w2 = Rnd(101-w1)
+  Local w3 = 100 - w1 - w2
+  w1 = w1/100
+  w2 = w2/100
+  w3 = w3/100
+  w.rootgadget:layoutSet({ gadgets = { g1, g2, g3 },
+                           weights = { w1, w2, w3 },
+                           type = type,
+                           gap = Rnd(15),
+                           borders = { top = Rnd(15), bottom = Rnd(15), left = Rnd(15), right = Rnd(15) } }, True)
+  w:render()
+EndFunction
+
+;******************************************************************************
+
+Function app.Test_OpenBenchmarkInfos()
+  ; Open the benchmark window
+  
+  If HGui.windowExists("bench info") Then Return()
+  
+  ; To pass the TextBox window to the callback function we must
+  ; define it as an empty table
+  app._BenchInfosWindow = {}
+  
+  ; Now we can include it in the callback function
+  app._BenchInfosWindow = HGui.Window:textBoxNew(
+    { Name     = "bench info",
+      Title    = "Benchmark Log...",
+      Position = { x = 20, y = 300 },
+      Size     = { w = 250, h = 180 },
+      ;--- Ok/Cancel buttons ---
+      Ok      = "[Color=$660000][b]Dismiss[/b][/color]",
+      Cancel  = "[Color=$000066][b]Save log[/b][/color]",
+      Caption = "",
+      ; Let's set monospace font
+      LabelLook =
+        { nText =
+          { Font = { Name = #MONOSPACE } }
+          },
+      
+      CallbackClose = app.closeWindow_callback,
+      CallbackCancel =
+        ; This callback function will save the current log...
+        Function(msg)
+          ; IMPORTANT!
+          ; If you are using callback functions you have to close manually
+          ; the window! But in this case we will just add some more informaitons...
+        
+          ; We must retrieve the label where the log is stored
+          Local win = msg.window
+          Local lab = win.boxLabel
+          ; The 'caption' field holds the label text
+          Local filename = FileRequest("Log file destination...", "*", #REQ_SAVEMODE, GetCurrentDirectory(), "Test_Suite_Log.txt")
+          If filename <> ""
+            Local fid = OpenFile(Nil, filename, #MODE_WRITE)
+            For i = 0 To ListItems(lab.Caption)-1
+              WriteLine(fid, lab.Caption[i])
+            Next
+            CloseFile(fid)
+            app._BenchInfosWindow:AppendLine(" ")
+            app._BenchInfosWindow:AppendLine("Log saved to :")
+            app._BenchInfosWindow:AppendLine(filename)
+            app._BenchInfosWindow:AppendLine(" ")
+          Else
+            app._BenchInfosWindow:AppendLine(" ")
+            app._BenchInfosWindow:AppendLine("Save cancelled.")
+            app._BenchInfosWindow:AppendLine(" ")
+          EndIf
+
+        EndFunction
+        
+
+      })
+      
+EndFunction
+
+
+;******************************************************************************
+
+Function app.Test_Benchmarks(class)
+  Local iterations = 10
+  
+  Local cl, win = "", {}
+  Switch class
+    Case #HGUI_BOX_GADGET
+      cl   = "box"
+      win  = HGui.windowFindByName("Box Tester")
+      desc = "[b]BOX CLASS BENCHMARKS[/b]"
+      
+    Case #HGUI_HDIVIDER_GADGET
+      cl   = "hDivider"
+      win  = HGui.windowFindByName("HDiv Tester")
+      desc = "[b]HDIVIDER CLASS BENCHMARKS[/b]"
+      
+    Case #HGUI_VDIVIDER_GADGET
+      cl   = "vDivider"
+      win  = HGui.windowFindByName("VDiv Tester")
+      desc = "[b]VDIVIDER CLASS BENCHMARKS[/b]"
+
+    Case #HGUI_LABEL_GADGET
+      cl   = "slabel"
+      win  = HGui.windowFindByName("Label Tester")
+      desc = "[b]LABEL CLASS BENCHMARKS[/b]"
+      
+    Case #HGUI_GROUP_GADGET
+      cl   = "group"
+      win  = HGui.windowFindByName("Group Tester")
+      desc = "[b]GROUP CLASS BENCHMARKS[/b]"
+      
+    Case #HGUI_BUTTON_GADGET
+      cl   = "button"
+      win  = HGui.windowFindByName("Button Tester")
+      desc = "[b]BUTTON CLASS BENCHMARKS[/b]"
+      
+    Case #HGUI_SWITCH_GADGET
+      cl   = "switch"
+      win  = HGui.windowFindByName("Switch Tester")
+      desc = "[b]SWITCH CLASS BENCHMARKS[/b]"
+      
+    Case #HGUI_SCROLLBAR_GADGET
+      cl   = "scrollbar"
+      win  = HGui.windowFindByName("Scrollbar Gadget Test")
+      desc = "[b]SCROLLBAR CLASS BENCHMARKS[/b]"
+      
+  EndSwitch
+  
+  Local results = 
+    { cacheon  = {},
+      cacheoff = {}
+      }
+      
+  app._BenchInfosWindow:AppendLine(desc)
+  app._BenchInfosWindow:AppendLine(" ")
+  app._BenchInfosWindow:AppendLine("=== CACHE ON ===")
+  
+  ; GADGET CREATION
+  ; ---------------
+  app._BenchInfosWindow:AppendLine("- Gadget creation...")
+
+  HGui.SetAutoRendering(False)
+  Local gList = {}
+  StartTimer(1)
+  For Local i = 1 To iterations
+    InsertItem(gList, HGui.Gadget:new(class, { caption = "test", useCache = True, window = win }))
+  Next
+  results.cacheon.creation = GetTimer(1)/iterations
+  
+  
+  ; GADGET DESTRUCTION
+  ; ------------------
+  app._BenchInfosWindow:AppendLine("- Gadget destruction...")
+
+  StartTimer(1)
+  For Local i = 0 To iterations-1
+    gList[i]:free()
+    gList[i] = Nil
+  Next
+  results.cacheon.destruction = GetTimer(1)/iterations
+  
+  
+  ; GADGET RENDERING
+  ; ----------------
+  app._BenchInfosWindow:AppendLine("- Gadget rendering...")
+
+  HGui.SetAutoRendering(True)
+  Local gad = HGui.Gadget:new(class, { caption = "test", useCache = True, window = win })
+  StartTimer(1)
+  For Local i = 0 To iterations-1 Do gad:render()
+  results.cacheon.rendering = GetTimer(1)/iterations
+  gad:free()
+  gad = Nil
+  
+  
+  ; GADGET :SET() METHOD
+  ; --------------------
+  app._BenchInfosWindow:AppendLine("- Gadget :Set()...")
+
+  Local gad = HGui.Gadget:new(class, { caption = "test", useCache = True, window = win })
+  StartTimer(1)
+  For Local i = 0 To iterations-1 Do gad:set({ position = { x = 100, y = 100 }}, False)
+  results.cacheon.set = GetTimer(1)/iterations
+  gad:free()
+  gad = Nil
+
+  
+  ; GADGET :SETTHEME()
+  ; ------------------
+  app._BenchInfosWindow:AppendLine("- Gadget :SetTheme()...")
+
+  Local gad = HGui.Gadget:new(class, { caption = "test", useCache = True, window = win })
+  
+  StartTimer(1)
+  For Local i = 0 To iterations-1 Do gad:setTheme(HGui.Theme[LowerStr(cl)], False)
+  results.cacheon.settheme = GetTimer(1)/iterations
+  gad:free()
+  gad = Nil
+  
+  app._BenchInfosWindow:AppendLine(" ")
+  app._BenchInfosWindow:AppendLine("=== CACHE OFF ===")
+  
+  ; GADGET CREATION
+  ; ---------------
+  app._BenchInfosWindow:AppendLine("- Gadget creation...")
+
+  HGui.SetAutoRendering(False)
+  Local gList = {}
+  StartTimer(1)
+  For Local i = 1 To iterations Do InsertItem(gList, HGui.Gadget:new(class, { caption = "test", useCache = False, window = win }))
+  results.cacheoff.creation = GetTimer(1)/iterations
+
+  
+  ; GADGET DESTRUCTION
+  ; ------------------
+  app._BenchInfosWindow:AppendLine("- Gadget destruction...")
+  StartTimer(1)
+  For Local i = 0 To iterations-1
+    gList[i]:free()
+    gList[i] = Nil
+  Next
+  results.cacheoff.destruction = GetTimer(1)/iterations
+  
+  
+  ; GADGET RENDERING
+  ; ----------------
+  app._BenchInfosWindow:AppendLine("- Gadget rendering...")
+  HGui.SetAutoRendering(True)
+  Local gad = HGui.Gadget:new(class, { caption = "test", useCache = False, window = win })
+  StartTimer(1)
+  For Local i = 0 To iterations-1 Do gad:render()
+  results.cacheoff.rendering = GetTimer(1)/iterations
+  gad:free()
+  gad = Nil
+  
+  
+  ; GADGET :SET() METHOD
+  app._BenchInfosWindow:AppendLine("- Gadget :Set()...")
+  Local gad = HGui.Gadget:new(class, { caption = "test", useCache = False, window = win })
+  StartTimer(1)
+  For Local i = 0 To iterations-1 Do gad:set({ position = { x = 100, y = 100 }}, False)
+  results.cacheoff.set = GetTimer(1)/iterations
+  gad:free()
+  gad = Nil
+
+  
+  ; GADGET :SETTHEME() METHOD
+  ; -------------------------
+  app._BenchInfosWindow:AppendLine("- Gadget :SetTheme()...")
+  Local gad = HGui.Gadget:new(class, { caption = "test", useCache = False, window = win })
+  StartTimer(1)
+  For Local i = 0 To iterations-1 Do gad:setTheme(HGui.Theme[LowerStr(cl)])
+  results.cacheoff.settheme = GetTimer(1)/iterations
+  gad:free()
+  gad = Nil
+
+  app._BenchInfosWindow:AppendLine(" ")
+  app._BenchInfosWindow:AppendLine("[b]RESULTS (ms)[/b]") 
+  app._BenchInfosWindow:AppendLine("+--------------+-----------+-----------+")
+  app._BenchInfosWindow:AppendLine("| Test name    | Cache ON  | Cache OFF |")
+  app._BenchInfosWindow:AppendLine("|--------------|-----------|-----------|")
+  app._BenchInfosWindow:AppendLine("| Creation     | " .. HL.SizeString(results.cacheon.creation, 9) .. " | " .. HL.SizeString(results.cacheoff.creation, 9) .. " |")
+  app._BenchInfosWindow:AppendLine("| Destruction  | " .. HL.SizeString(results.cacheon.destruction, 9) .. " | " .. HL.SizeString(results.cacheoff.destruction, 9) .. " |")  
+  app._BenchInfosWindow:AppendLine("| Rendering    | " .. HL.SizeString(results.cacheon.rendering, 9) .. " | " .. HL.SizeString(results.cacheoff.rendering, 9) .. " |")  
+  app._BenchInfosWindow:AppendLine("| Set          | " .. HL.SizeString(results.cacheon.set, 9) .. " | " .. HL.SizeString(results.cacheoff.set, 9) .. " |")  
+  app._BenchInfosWindow:AppendLine("| Set Theme    | " .. HL.SizeString(results.cacheon.settheme, 9) .. " | " .. HL.SizeString(results.cacheoff.settheme, 9) .. " |")  
+  app._BenchInfosWindow:AppendLine("+--------------+-----------+-----------+")
+  
+  Local d = GetDate(True)
+  d = ReplaceStr(d, ":", "-")
+  d = ReplaceStr(d, " ", "_")
+
+  Local answer = SystemRequest("INFORMATION!", "Do you want to save the benchmark results?", "YES|NO", #REQICON_QUESTION)
+  If answer = 1
+    app._BenchInfosWindow:AppendLine("Saving...")
+    Local filename = "HGUI_benchmark-".. cl .."-" .. d .. ".txt"
+    OpenFile(1, filename, #MODE_WRITE)
+    WriteLine(1, UpperStr(cl) .. " GADGET, "  .. d .. ", Iterations : " .. iterations)
+    WriteLine(1, "+--------------+-----------+-----------+")
+    WriteLine(1, "| Test name    | Cache ON  | Cache OFF |")
+    WriteLine(1, "|--------------|-----------|-----------|")
+    WriteLine(1, "| Creation     | " .. HL.SizeString(results.cacheon.creation, 9) .. " | " .. HL.SizeString(results.cacheoff.creation, 9) .. " |")
+    WriteLine(1, "| Destruction  | " .. HL.SizeString(results.cacheon.destruction, 9) .. " | " .. HL.SizeString(results.cacheoff.destruction, 9) .. " |")  
+    WriteLine(1, "| Rendering    | " .. HL.SizeString(results.cacheon.rendering, 9) .. " | " .. HL.SizeString(results.cacheoff.rendering, 9) .. " |")  
+    WriteLine(1, "| Set          | " .. HL.SizeString(results.cacheon.set, 9) .. " | " .. HL.SizeString(results.cacheoff.set, 9) .. " |")  
+    WriteLine(1, "| Set Theme    | " .. HL.SizeString(results.cacheon.settheme, 9) .. " | " .. HL.SizeString(results.cacheoff.settheme, 9) .. " |")  
+    WriteLine(1, "+--------------+-----------+-----------+")
+    CloseFile(1)
+    app._BenchInfosWindow:AppendLine("Saved in '" .. filename .. "'")
+    
+  EndIf
+  
+  app._BenchInfosWindow:AppendLine(" ")
+  
+EndFunction
+
+;******************************************************************************
+
+Function app.StressTest_BOX(w)
+  ; Performs a stress test
+  
+  Local iterations = 100
+  StartTimer(1)
+  
+  app.Test_OpenBenchmarkInfos()
+  app._BenchInfosWindow:AppendLine(" ")
+  app._BenchInfosWindow:AppendLine("[b]Executing Stress Test[/b]")
+  app._BenchInfosWindow:AppendLine("BOX Class : " .. iterations .. " iterations.")
+  
+  For Local c = 1 To iterations
+    If Mod(c, 5) = 0
+      app._BenchInfosWindow:AppendLine("  Executed " .. c .. " of " .. iterations)
+    EndIf
+    
+    Local t = Rnd(6)
+    Switch t
+      Case 0
+        app.SingleTheme_BOX(w)
+      Case 1
+        app.SingleTheme_BOX(w)
+      Case 2
+        app.ClassTest_NestedLayout(w)
+      Case 3
+        app.ClassTest_LinearLayout(w)
+      Case 4
+        app.ClassTest_SingleMove(w)
+      Case 5
+        app.ClassTest_SingleSize(w)
+    EndSwitch
+  Next
+  
+  app._BenchInfosWindow:AppendLine(" ")
+  app._BenchInfosWindow:AppendLine("Test completed in " .. GetTimer(1)/1000 .. " seconds.")
+  app._BenchInfosWindow:AppendLine(" ")
+  
+EndFunction
+
+Function app.StressTest_HDIVIDER(w)
+  ; Performs a stress test
+  
+  Local iterations = 2500
+  StartTimer(1)
+  
+  app.Test_OpenBenchmarkInfos()
+  app._BenchInfosWindow:AppendLine(" ")
+  app._BenchInfosWindow:AppendLine("[b]Executing Stress Test[/b]")
+  app._BenchInfosWindow:AppendLine("HDIVIDER Class : " .. iterations .. " iterations.")
+  
+  For Local c = 1 To iterations
+    If Mod(c, 100) = 0
+      app._BenchInfosWindow:AppendLine("  Executed " .. c .. " of " .. iterations)
+    EndIf
+    
+    Local t = Rnd(6)
+    Switch t
+      Case 0
+        app.SingleTheme_HDIVIDER(w) ; app.GlobalTheme_HDIVIDER(w)
+      Case 1
+        app.SingleTheme_HDIVIDER(w)
+      Case 2
+        app.ClassTest_NestedLayout(w)
+      Case 3
+        app.ClassTest_LinearLayout(w)
+      Case 4
+        app.ClassTest_SingleMove(w)
+      Case 5
+        app.ClassTest_SingleSize(w)
+    EndSwitch
+  Next
+  app._BenchInfosWindow:AppendLine(" ")
+  app._BenchInfosWindow:AppendLine("Test completed in " .. GetTimer(1)/1000 .. " seconds.")
+  app._BenchInfosWindow:AppendLine(" ")
+  
+EndFunction
+
+Function app.StressTest_VDIVIDER(w)
+  Local iterations = 2500
+  StartTimer(1)
+  
+  app.Test_OpenBenchmarkInfos()
+  app._BenchInfosWindow:AppendLine(" ")
+  app._BenchInfosWindow:AppendLine("[b]Executing Stress Test[/b]")
+  app._BenchInfosWindow:AppendLine("VDIVIDER Class : " .. iterations .. " iterations.")
+  
+  For Local c = 1 To iterations
+    If Mod(c, 100) = 0
+      app._BenchInfosWindow:AppendLine("  Executed " .. c .. " of " .. iterations)
+    EndIf
+    
+    Local t = Rnd(6)
+    Switch t
+      Case 0
+        app.SingleTheme_VDIVIDER(w) ; app.GlobalTheme_VDIVIDER(w)
+      Case 1
+        app.SingleTheme_VDIVIDER(w)
+      Case 2
+        app.ClassTest_NestedLayout(w)
+      Case 3
+        app.ClassTest_LinearLayout(w)
+      Case 4
+        app.ClassTest_SingleMove(w)
+      Case 5
+        app.ClassTest_SingleSize(w)
+    EndSwitch
+  Next
+  app._BenchInfosWindow:AppendLine(" ")
+  app._BenchInfosWindow:AppendLine("Test completed in " .. GetTimer(1)/1000 .. " seconds.")
+  app._BenchInfosWindow:AppendLine(" ")
+  
+EndFunction
+
+Function app.StressTest_LABEL(w)
+  Local iterations = 2500
+  StartTimer(1)
+  
+  app.Test_OpenBenchmarkInfos()
+  app._BenchInfosWindow:AppendLine(" ")
+  app._BenchInfosWindow:AppendLine("[b]Executing Stress Test[/b]")
+  app._BenchInfosWindow:AppendLine("LABEL Class : " .. iterations .. " iterations.")
+  
+  For Local c = 1 To iterations
+    If Mod(c, 100) = 0
+      app._BenchInfosWindow:AppendLine("  Executed " .. c .. " of " .. iterations)
+    EndIf
+    
+    Local t = Rnd(6)
+    Switch t
+      Case 0
+        app.SingleTheme_LABEL(w) ; app.GlobalTheme_LABEL(w)
+      Case 1
+        app.SingleTheme_LABEL(w)
+      Case 2
+        app.ClassTest_NestedLayout(w)
+      Case 3
+        app.ClassTest_LinearLayout(w)
+      Case 4
+        app.ClassTest_SingleMove(w)
+      Case 5
+        app.ClassTest_SingleSize(w)
+    EndSwitch
+  Next
+  app._BenchInfosWindow:AppendLine(" ")
+  app._BenchInfosWindow:AppendLine("Test completed in " .. GetTimer(1)/1000 .. " seconds.")
+  app._BenchInfosWindow:AppendLine(" ")
+  
+EndFunction
+
+Function app.StressTest_BUTTON(w)
+  Local iterations = 2500
+  StartTimer(1)
+  
+  app.Test_OpenBenchmarkInfos()
+  app._BenchInfosWindow:AppendLine(" ")
+  app._BenchInfosWindow:AppendLine("[b]Executing Stress Test[/b]")
+  app._BenchInfosWindow:AppendLine("BUTTON Class : " .. iterations .. " iterations.")
+
+  For Local c = 1 To iterations
+    If Mod(c, 100) = 0
+      app._BenchInfosWindow:AppendLine("  Executed " .. c .. " of " .. iterations)
+    EndIf
+    
+    Local t = Rnd(6)
+    Switch t
+      Case 0
+        app.SingleTheme_BUTTON(w) ;app.GlobalTheme_BUTTON(w)
+      Case 1
+        app.SingleTheme_BUTTON(w)
+      Case 2
+        app.ClassTest_NestedLayout(w)
+      Case 3
+        app.ClassTest_LinearLayout(w)
+      Case 4
+        app.ClassTest_SingleMove(w)
+      Case 5
+        app.ClassTest_SingleSize(w)
+    EndSwitch
+  Next
+  app._BenchInfosWindow:AppendLine(" ")
+  app._BenchInfosWindow:AppendLine("Test completed in " .. GetTimer(1)/1000 .. " seconds.")
+  app._BenchInfosWindow:AppendLine(" ")
+
+EndFunction
+
+Function app.StressTest_SWITCH(w)
+  Local iterations = 1000
+  StartTimer(1)
+  
+  app.Test_OpenBenchmarkInfos()
+  app._BenchInfosWindow:AppendLine(" ")
+  app._BenchInfosWindow:AppendLine("[b]Executing Stress Test[/b]")
+  app._BenchInfosWindow:AppendLine("SWITCH Class : " .. iterations .. " iterations.")
+  
+  For Local c = 1 To iterations
+    If Mod(c, 100) = 0
+      app._BenchInfosWindow:AppendLine("  Executed " .. c .. " of " .. iterations)
+    EndIf
+    
+    Local t = Rnd(6)
+    Switch t
+      Case 0
+        app.SingleTheme_SWITCH(w) ; app.GlobalTheme_SWITCH(w)
+      Case 1
+        app.SingleTheme_SWITCH(w)
+      Case 2
+        app.ClassTest_NestedLayout(w)
+      Case 3
+        app.ClassTest_LinearLayout(w)
+      Case 4
+        app.ClassTest_SingleMove(w)
+      Case 5
+        app.ClassTest_SingleSize(w)
+    EndSwitch
+  Next
+  app._BenchInfosWindow:AppendLine(" ")
+  app._BenchInfosWindow:AppendLine("Test completed in " .. GetTimer(1)/1000 .. " seconds.")
+  app._BenchInfosWindow:AppendLine(" ")
+  
+EndFunction
+
+Function app.StressTest_GROUP(w)
+  Local iterations = 2500
+  StartTimer(1)
+  
+  app.Test_OpenBenchmarkInfos()
+  app._BenchInfosWindow:AppendLine(" ")
+  app._BenchInfosWindow:AppendLine("[b]Executing Stress Test[/b]")
+  app._BenchInfosWindow:AppendLine("GROUP Class : " .. iterations .. " iterations.")
+  
+  For Local c = 1 To iterations
+    If Mod(c, 100) = 0
+      app._BenchInfosWindow:AppendLine("  Executed " .. c .. " of " .. iterations)
+    EndIf
+    
+    Local t = Rnd(6)
+    Switch t
+      Case 0
+        app.SingleTheme_GROUP(w) ; app.GlobalTheme_GROUP(w)
+      Case 1
+        app.SingleTheme_GROUP(w)
+      Case 2
+        app.ClassTest_NestedLayout(w)
+      Case 3
+        app.ClassTest_LinearLayout(w)
+      Case 4
+        app.ClassTest_SingleMove(w)
+      Case 5
+        app.ClassTest_SingleSize(w)
+    EndSwitch
+  Next
+  app._BenchInfosWindow:AppendLine(" ")
+  app._BenchInfosWindow:AppendLine("Test completed in " .. GetTimer(1)/1000 .. " seconds.")
+  app._BenchInfosWindow:AppendLine(" ")
+
+EndFunction
+
+Function app.StressTest_SCROLLBAR(w)
+  Local iterations = 2500
+  StartTimer(1)
+  
+  app.Test_OpenBenchmarkInfos()
+  app._BenchInfosWindow:AppendLine(" ")
+  app._BenchInfosWindow:AppendLine("[b]Executing Stress Test[/b]")
+  app._BenchInfosWindow:AppendLine("SCROLLBAR Class : " .. iterations .. " iterations.")
+  
+  For Local c = 1 To iterations
+    If Mod(c, 100) = 0
+      app._BenchInfosWindow:AppendLine("  Executed " .. c .. " of " .. iterations)
+    EndIf
+    
+    Local t = Rnd(6)
+    Switch t
+      Case 0
+        app.SingleTheme_SCROLLBAR(w) ; app.GlobalTheme_SCROLLBAR(w)
+      Case 1
+        app.SingleTheme_SCROLLBAR(w)
+      Case 2
+        app.SingleTheme_SCROLLBAR(w) ; app.ClassTest_NestedLayout(w)
+      Case 3
+        app.ClassTest_LinearLayout(w)
+      Case 4
+        app.ClassTest_SingleMove(w)
+      Case 5
+        app.ClassTest_SingleSize(w)
+    EndSwitch
+  Next
+  app._BenchInfosWindow:AppendLine(" ")
+  app._BenchInfosWindow:AppendLine("Test completed in " .. GetTimer(1)/1000 .. " seconds.")
+  app._BenchInfosWindow:AppendLine(" ")
+  
+EndFunction
+;******************************************************************************
+
+Function app.Test_OpenInfoWindow()
+  ; This function opens a window with instructions on how you can
+  ; interact and perform tests on HGui classes.
+  
+  ; If the window is already opened fo nothing.
+  If HGui.windowExists("info window") Then Return()
+  
+  HGui.Window:MessageNew(
+    { Name = "info window",
+      Title = "Informations",
+      Position = { x = 20, y = 20 },
+      Size = { w = 200, h = 200 },
+      Events = { OnClose = app.closeWindow_callback },
+      Message = 
+        { "{:font++:}[b]INFO BOX[/b]",
+          "Hotkeys are listened by the test window!",
+          "",
+          "[b]HOTKEYS[/b]",
+          "",
+          "{:align-l:} [b]a[/b] : Random global theme",
+          "{:align-l:} [b]s[/b] : Random gadget theme",
+          "{:align-l:} [b]n[/b] : Random nested layout",
+          "{:align-l:} [b]l[/b] : Random linear layout",
+          "{:align-l:} [b]m[/b] : Random gadget position",
+          "{:align-l:} [b]z[/b] : Random gadget size",
+          "{:align-l:} [b]b[/b] : Perform a Benchmark",
+          "{:align-l:} [b]x[/b] : Perform a Stress-Test"
+          }
+      })
+    
+EndFunction
+
+Function app.ClassTest_BOX()
+  ; Function to perform tests on the Box class
+  ; -----
+  If HGui.windowExists("Box Tester") Or HGui.windowExists("info window") Or HGui.windowExists("bench info")
+    SystemRequest("WARNING!", "Please close the opened windows!", "OK", #REQICON_WARNING)
+    Return()
+    
+  EndIf
+
+  DBG.Console.Disable()
+  app.Test_OpenInfoWindow()
+  
+  ;:: Window ::
+  Local w = HGui.Window:new(
+    { title    = "Box Class Test", Name = "Box Tester" ,
+      position = { x = #CENTER, y = #CENTER }, 
+      size     = { w = 300, h = 190 },
+      events   = { OnClose = app.closeWindow_callback },
+      customHotKeys = { 
+        { Qualifier = "", Key = "a", Event = "OnKeyDown", Callback = app.GlobalTheme_BOX }, 
+        { Qualifier = "", Key = "s", Event = "OnKeyDown", Callback = app.SingleTheme_BOX },
+        { Qualifier = "", Key = "n", Event = "OnKeyDown", Callback = app.ClassTest_NestedLayout },
+        { Qualifier = "", Key = "l", Event = "OnKeyDown", Callback = app.ClassTest_LinearLayout },
+        { Qualifier = "", Key = "m", Event = "OnKeyDown", Callback = app.ClassTest_SingleMove },
+        { Qualifier = "", Key = "z", Event = "OnKeyDown", Callback = app.ClassTest_SingleSize },
+        { Qualifier = "", Key = "b", Event = "OnKeyDown", 
+          Callback = 
+            Function()
+              app.Test_OpenBenchmarkInfos()
+              app.Test_Benchmarks(#HGUI_BOX_GADGET) 
+            EndFunction },
+        { Qualifier = "", Key = "x", Event = "OnKeyDown", Callback = app.StressTest_BOX }}
+      })
+      
+  ;:: Box gadgets ::
+  HGui.SetAutoRendering(False)
+  Local b1 = HGui.Gadget:new(#HGUI_BOX_GADGET, { name = "g1", window = w })
+  Local b2 = HGui.Gadget:new(#HGUI_BOX_GADGET, { name = "g2", window = w })
+  Local b3 = HGui.Gadget:new(#HGUI_BOX_GADGET, { name = "g3", window = w })
+
+  ;:: Layout ::
+  w.rootgadget:layoutSet({ gadgets = { b1, b2, b3 },
+                           weights = { 0.20, 0.35, 0.45 },
+                           gap = 2,
+                           type = #HGUI_VERTICAL_LAYOUT,
+                           borders = { top = 2, bottom = 2, left = 2, right = 2 } }, True)
+
+  ;:: Refresh ::
+  HGui.SetAutoRendering(True)
+  w:render()
+  
+EndFunction
+
+Function app.ClassTest_HDIVIDER()
+  ; Function to perform tests on the HDivider class
+  ; -----
+  If HGui.windowExists("HDiv Tester") Or HGui.windowExists("info window") Or HGui.windowExists("bench info")
+    SystemRequest("WARNING!", "Please close the opened windows!", "OK", #REQICON_WARNING)
+    Return()
+    
+  EndIf
+
+  DBG.Console.Disable()
+  app.Test_OpenInfoWindow()
+  
+  ;:: Window ::
+  Local w = HGui.Window:new(
+    { title = "HDivider Gadget Test", Name = "HDiv Tester",
+      position = { x = #CENTER, y = #CENTER }, 
+      size     = { w = 300, h = 190 },
+      events = { OnClose = app.closeWindow_callback },
+      customHotKeys = { 
+        { Qualifier = "", Key = "a", Event = "OnKeyDown", Callback = app.GlobalTheme_HDIVIDER }, 
+        { Qualifier = "", Key = "s", Event = "OnKeyDown", Callback = app.SingleTheme_HDIVIDER },
+        { Qualifier = "", Key = "n", Event = "OnKeyDown", Callback = app.ClassTest_NestedLayout },
+        { Qualifier = "", Key = "l", Event = "OnKeyDown", Callback = app.ClassTest_LinearLayout },
+        { Qualifier = "", Key = "m", Event = "OnKeyDown", Callback = app.ClassTest_SingleMove },
+        { Qualifier = "", Key = "z", Event = "OnKeyDown", Callback = app.ClassTest_SingleSize },
+        { Qualifier = "", Key = "b", Event = "OnKeyDown", 
+          Callback = 
+            Function()
+              app.Test_OpenBenchmarkInfos()
+              app.Test_Benchmarks(#HGUI_HDIVIDER_GADGET) 
+            EndFunction },
+        { Qualifier = "", Key = "x", Event = "OnKeyDown", Callback = app.StressTest_HDIVIDER }}
+      })
+
+  ;:: Box gadgets ::
+  HGui.SetAutoRendering(False)
+  Local b1 = HGui.Gadget:new(#HGUI_HDIVIDER_GADGET, { name = "g1", window = w })
+  Local b2 = HGui.Gadget:new(#HGUI_HDIVIDER_GADGET, { name = "g2", window = w })
+  Local b3 = HGui.Gadget:new(#HGUI_HDIVIDER_GADGET, { name = "g3", window = w })
+
+  ;:: Layout ::
+  w.rootgadget:layoutSet({ gadgets = { b1, b2, b3 },
+                           weights = { 0.20, 0.35, 0.45 },
+                           gap = 2,
+                           type = #HGUI_VERTICAL_LAYOUT,
+                           borders = { top = 2, bottom = 2, left = 2, right = 2 } }, True)
+
+  ;:: Rendering ::
+  HGui.SetAutoRendering(True)
+  w:render()
+  
+EndFunction
+
+Function app.ClassExample_LISTVIEW()
+  ; Example/test about the Listview class usage
+  
+  If HGui.windowExists("LView Tester")
+    SystemRequest("WARNING!", "This window is already opened!", "OK", #REQICON_WARNING)
+    Return()
+    
+  EndIf
+  
+  ;:: Window ::
+  Local w = HGui.Window:new(
+    { title = "ListView Gadget Test", Name = "ListView Tester",
+      position = { x = #CENTER, y = #CENTER }, 
+      size = { w = 300, h = 190 },
+      events = { OnClose = app.closeWindow_callback },
+      })
+
+  HGui.SetAutoRendering(False)
+
+  ; Listview example #1
+  ; -------------------
+  ; Basic listview with multi-select enabled and some items selected at startup
+  Local lv1 = HGui.Gadget:new(#HGUI_LISTVIEW_GADGET, 
+    { ; Data field is used to store all the data-related informations
+      Data = 
+      { ; ColumnSizes are used to specify the size in pixels for each columns
+        ColumnSizes = { 100, 25, 160 },
+        ; Headers is used to set the column header's captions
+        Headers = { "Features", "Yes/No", "Comments" },
+        ; Items hold the data records
+        Items = 
+        { 
+          { "Items sorting", "Yes", "A custom alghorythm have been used to sort large dataset quickly." },
+          { "Multiple column sort", "Yes", "You can define on which columns (one or more) you need to sort your data." },
+          { "Images", "Yes", "You can provide images to be included on each entry." },
+          { "Multi-select", "Yes", "You can select more then one item." },
+          { "Column resize", "Yes", "Actually only by code, but you will be able to use the mouse for this soon." },
+          { "Theme", "Yes", "You can customize deeply your listviews." },
+          { "Events", "Yes", "You can attach events on your listviews." },
+          { "Status", "--", "Still missing some fetures like onOver and onOut events." },
+          { "Scrollers", "Yes", "You can switch off scroller if you need it." },
+          { "Alternate Lines", "Yes", "Can be switched off and custom colors can be defined easily."}
+          },
+        ; Selected can be used to specify which row must be selected as default
+        Selected = { False, True, True, False, False, False, False, False, False, False, False },
+        ; SortOrder is used to specify for each column the sort order
+        SortOrder = { columns = { 0 }, descending = { False } }
+        },
+      EntryHeight = 12
+      })
+  
+  ; Listview example #2
+  ; -------------------
+  ; Example that show optional icons in the listview lines with item's entry custom height and
+  ; some more options related to the icon positioning.
+  Local lv2 = HGui.Gadget:new(#HGUI_LISTVIEW_GADGET, 
+    { Data = 
+      { ColumnSizes = { 120, 30, 120 },
+        ; For each column you can specify the alignment
+        Alignments = { #HGUI_ALIGN_RIGHT, #HGUI_ALIGN_CENTER, #HGUI_ALIGN_LEFT },
+        Headers = { "Features", "Yes/No", "Comments" },
+        Items = 
+        { 
+          { "Items sorting", "Yes", "A custom alghorythm have been used to sort large dataset quickly." },
+          { "Multiple column sort", "Yes", "You can define on which columns (one or more) you need to sort your data." },
+          { "Images", "Yes", "You can provide images to be included on each entry." },
+          { "Multi-select", "Yes", "You can select more then one item." },
+          { "Column resize", "Yes", "Actually only by code, but you will be able to use the mouse for this soon." },
+          { "Theme", "Yes", "You can customize deeply your listviews." },
+          { "Events", "Yes", "You can attach events on your listviews." },
+          { "Status", "--", "Still missing some fetures like onOver and onOut events." },
+          { "Scrollers", "Yes", "You can switch off scroller if you need it." },
+          { "Alternate Lines", "Yes", "Can be switched off and custom colors can be defined easily."}
+          },
+        Selected = { False, True, True, False, False, False, False, False, False, False, False },
+        SortOrder = { columns = { 0 }, descending = { False } },                                                                      
+        ; For each row you can specify an icon/image
+        Icons = { Picture1, Picture2, Nil, Picture3, IconPic, Nil, Picture1, Showcase }
+        },
+      ; You can override the default row height, this can be useful if you are using
+      ; multiline rows
+      EntryHeight = 14,
+      ; Icon's offset is used to add space/margins
+      IconsSizeOffset = 4,
+      ; IconsMaximize is used to enlarge the icon to the maximum height
+      IconsMaximize = False,
+      ; The parameter below is used to add space between the icon and the text
+      IconsTextGap = 2,
+      ; IconsAsBackground can be used to set the icon as background image instead of an icon
+      IconsAsBackground = False,
+      ; This last parameter is used to make the text of all rows aligned indipendently
+      ; from the icon size
+      IconsFixedTextOffset = True,
+    })
+    
+  ; Listview example #3
+  ; -------------------
+  ; Another listview showing how you can usedata handler display data with dynamic conversion functions
+  ; and some more options.
+  Local lv3 = HGui.Gadget:new(#HGUI_LISTVIEW_GADGET, 
+    { ; HScrollerOFF (and VScrollerOFF) is used to switch off the scroll bars
+      HScrollerOff = True,
+      EntryHeight = 14,
+      Data = 
+        { ; if you turn off horizontal scroller the column size are interpreted as
+          ; space percentual because all of them must be visible
+          ColumnSizes = { 0.3, 0.1, 0.6 },
+          Headers = { "Features", "value", "Comments" },
+          Items = 
+          { 
+            { "Items sorting", 100, "A custom alghorythm have been used to sort large dataset quickly." },
+            { "Multiple column sort", 150, "You can define on which columns (one or more) you need to sort your data." },
+            { "Images", 1200, "You can provide images to be included on each entry." },
+            { "Multi-select", 1600, "You can select more then one item." },
+            { "Column resize", 4500, "Actually only by code, but you will be able to use the mouse for this soon." },
+            { "Theme", 9000, "You can customize deeply your listviews." },
+            { "Events", 15600, "You can attach events on your listviews." },
+            { "Status", 32581, "Still missing some fetures like onOver and onOut events." },
+            { "Scrollers", 96589, "You can switch off scroller if you need it." },
+            { "Alternate Lines", 3125164, "Can be switched off and custom colors can be defined easily."}
+            },
+          Alignments = { #HGUI_ALIGN_LEFT, #HGUI_ALIGN_RIGHT, #HGUI_ALIGN_RIGHT },
+          Selected = { False, True, True, False, False, False, False, False, False, False, False },
+          SortOrder = { columns = { 0 }, descending = { False } },                                                                      
+          ; For each column you can set a conversion function that is used to display the data
+          ; as you wish: in this case the value of the first column, column 0, is capitalized while
+          ; the second column (1) is converted in kilobytes.
+          ColumnHandlers = 
+            { ; First columns
+              Function(v) Return(UpperStr(v)) EndFunction,
+              
+              ; Second column
+              Function(v) Local n=ToNumber(v) Return(HL.Convert.BytesTo(n, #HL_KILOBYTES, 0) .. "Kb") EndFunction
+              }
+          },
+      EntryHeight = 10
+      })
+  
+  ; Just a couple of container
+  Local box = HGui.Gadget:new(#HGUI_BOX_GADGET)
+  Local cmd_box = HGui.Gadget:new(#HGUI_BOX_GADGET)
+  
+  ; Listview example #4
+  ; -------------------
+  Local lv4 = HGui.Gadget:new(#HGUI_LISTVIEW_GADGET,
+    { ; Let's switch off multiselect: in this listview only one item can be selected at a time
+      Multiselect= False,
+      ; Distance in pixels between columns
+      ColumnsGap = 0,
+      ; If you want you can switch off vertical lines
+      VLines = False,
+      ; There are several events you can monitor, OnSelect is triggered when an item is
+      ; selected and returns the gadget object, the items list, the selected list and the
+      ; index of the selected item.
+      OnSelect = 
+        Function(gad, items, selected, item)
+          w:set({ title = "You have selected item " .. items[item][0] .. ", " .. GetTime(True)})
+        EndFunction,
+      ; Switch off both scroll bars
+      VScrollerOff = True,
+      HScrollerOff = True,
+      EntryHeight  = 12,
+      Data = 
+        { ColumnSizes = { 0.48, 0.10, 0.20, 0.22 },
+          Headers = { "Product", "Qty", "Tax", "Price" },
+          Items = 
+          { 
+            { "Sandwich",     1, 0.75, 5.75 },
+            { "Water 0.5 lt", 1, 0.20, 2.20 }
+            },
+          Alignments = { #HGUI_ALIGN_LEFT, #HGUI_ALIGN_RIGHT, #HGUI_ALIGN_RIGHT, #HGUI_ALIGN_RIGHT },
+          ColumnHandlers = { Nil,
+                             Nil,
+                             Function(v) Return(v .. " €") EndFunction,
+                             Function(v) Return(v .. " €") EndFunction
+                             }
+          }
+      })
+      
+  ; Here are some buttons to show how to use listview's methods
+  ; -----------------------------------------------------------
+  ; :selectAll(refresh) -> Used to select all the listview items
+  Local lv_SelectAll = HGui.Gadget:new( #HGUI_BUTTON_GADGET, 
+    { Caption = ":selectAll()", 
+      Actions = 
+        { OnPushed = 
+            Function()
+              lv1:selectAll(True)
+            EndFunction } })
+
+  ; :unselectAll(refresh) -> Used to unselect all the listview items
+  Local lv_SelectNone = HGui.Gadget:new( #HGUI_BUTTON_GADGET, 
+    { Caption = ":deselectAll()", 
+      Actions = 
+        { OnPushed = 
+            Function()
+              lv1:unselectAll(True)
+            EndFunction } })
+  
+  ; :removeAll(refresh) -> Used to empty a listview dataset
+  Local lv_removeAll = HGui.Gadget:new( #HGUI_BUTTON_GADGET, 
+    { Caption = ":removeAll()", 
+      Actions = 
+        { OnPushed = 
+            Function()
+              lv2:removeAll(True)
+            EndFunction } })
+
+  ; :removeAll(refresh) -> Used to empty a listview dataset
+  Local lv_removeSelected = HGui.Gadget:new( #HGUI_BUTTON_GADGET, 
+    { Caption = ":removeSelected()", 
+      Actions = 
+        { OnPushed = 
+            Function()
+              lv1:removeSelected(True)
+            EndFunction } })
+
+  ; :insert() -> Used to insert an item
+  Local lv_insert = HGui.Gadget:new( #HGUI_BUTTON_GADGET, 
+    { Caption = ":insert()", 
+      Actions = 
+        { OnPushed = 
+            Function()
+              lv4:insert({ "Icecream", 1, 0.30, 1.99 }, -1, False, True)
+            EndFunction } })
+
+  ; :setItems() -> Used to change an entire dataset
+  Local lv_setItems = HGui.Gadget:new( #HGUI_BUTTON_GADGET, 
+    { Caption = ":setItems()", 
+      Actions = 
+        { OnPushed = 
+            Function()
+              lv4:setitems(
+                {
+                  { "Item 1 (" .. GetTime(True) .. ")", Rnd(10), Rnd(100), Rnd(100) },
+                  { "Item 2 (" .. GetTime(True) .. ")", Rnd(10), Rnd(100), Rnd(100) },
+                  { "Item 3 (" .. GetTime(True) .. ")", Rnd(10), Rnd(100), Rnd(100) },
+                  { "Item 4 (" .. GetTime(True) .. ")", Rnd(10), Rnd(100), Rnd(100) },
+                  { "Item 5 (" .. GetTime(True) .. ")", Rnd(10), Rnd(100), Rnd(100) }
+                  },
+                True)
+            EndFunction } })
+            
+  ;:: Layout ::
+  w.rootgadget:layoutSet({ gadgets = { box, lv2, lv3, cmd_box },
+                           weights = { 0.37, 0.25, 0.25, 0.13 },
+                           gap = 1,
+                           type = #HGUI_VERTICAL_LAYOUT,
+                           borders = { top = 0, bottom = 0, left = 0, right = 0 } }, True)
+  box:layoutSet({ gadgets = { lv1, lv4 },
+                           weights = { 0.50,0.50 },
+                           gap = 1,
+                           type = #HGUI_HORIZONTAL_LAYOUT,
+                           borders = { top = 0, bottom = 0, left = 0, right = 0 } }, True)                       
+  cmd_box:layoutSet({ gadgets = { lv_SelectAll, lv_selectNone, lv_removeAll, lv_removeSelected, lv_insert, lv_setItems },
+                      gap = 1,
+                      type = #HGUI_GRID_LAYOUT,
+                      columns = 3 }, True)
+                      
+  ;:: Rendering ::
+  HGui.SetAutoRendering(True)
+  w:render()
+  
+EndFunction
+
+Function app.ClassTest_VDIVIDER()
+  ; Function to perform tests on the VDivider class
+  ; -----
+  
+  If HGui.windowExists("VDiv Tester") Or HGui.windowExists("info window") Or HGui.windowExists("bench info")
+    SystemRequest("WARNING!", "Please close the opened windows!", "OK", #REQICON_WARNING)
+    Return()
+    
+  EndIf
+
+  DBG.Console.Disable()
+  app.Test_OpenInfoWindow()
+  
+  ;:: Window ::
+  Local w = HGui.Window:new(
+    { title = "VDivider Gadget Test", Name = "VDiv Tester",
+      position = { x = #CENTER, y = #CENTER }, 
+      size     = { w = 300, h = 190 },
+      events = { OnClose = app.closeWindow_callback },
+      customHotKeys = { 
+        { Qualifier = "", Key = "a", Event = "OnKeyDown", Callback = app.GlobalTheme_VDIVIDER }, 
+        { Qualifier = "", Key = "s", Event = "OnKeyDown", Callback = app.SingleTheme_VDIVIDER },
+        { Qualifier = "", Key = "n", Event = "OnKeyDown", Callback = app.ClassTest_NestedLayout },
+        { Qualifier = "", Key = "l", Event = "OnKeyDown", Callback = app.ClassTest_LinearLayout },
+        { Qualifier = "", Key = "m", Event = "OnKeyDown", Callback = app.ClassTest_SingleMove },
+        { Qualifier = "", Key = "z", Event = "OnKeyDown", Callback = app.ClassTest_SingleSize },
+        { Qualifier = "", Key = "b", Event = "OnKeyDown", 
+          Callback = 
+            Function()
+              app.Test_OpenBenchmarkInfos()
+              app.Test_Benchmarks(#HGUI_VDIVIDER_GADGET) 
+            EndFunction },
+        { Qualifier = "", Key = "x", Event = "OnKeyDown", Callback = app.StressTest_VDIVIDER }}
+      })
+  ;:: Box gadgets ::
+  HGui.SetAutoRendering(False)
+  Local b1 = HGui.Gadget:new(#HGUI_VDIVIDER_GADGET, { name = "g1", window = w })
+  Local b2 = HGui.Gadget:new(#HGUI_VDIVIDER_GADGET, { name = "g2", window = w })
+  Local b3 = HGui.Gadget:new(#HGUI_VDIVIDER_GADGET, { name = "g3", window = w })
+
+  ;:: Layout ::
+  w.rootgadget:layoutSet({ gadgets = { b1, b2, b3 },
+                           weights = { 0.20, 0.35, 0.45 },
+                           gap = 2,
+                           type = #HGUI_VERTICAL_LAYOUT,
+                           borders = { top = 2, bottom = 2, left = 2, right = 2 } }, True)
+
+  ;:: Rendering ::
+  HGui.SetAutoRendering(True)
+  w:render()
+  
+EndFunction
+
+Function app.ClassTest_LABEL()
+  ; Function to perform tests on the Label class
+  ; -----
+  
+  If HGui.windowExists("Label Tester") Or HGui.windowExists("info window") Or HGui.windowExists("bench info")
+    SystemRequest("WARNING!", "Please close the opened windows!", "OK", #REQICON_WARNING)
+    Return()
+
+  EndIf
+
+  DBG.Console.Disable()
+  app.Test_OpenInfoWindow()
+  
+  ;:: Window ::
+  Local w = HGui.Window:new(
+    { title = "Label Gadget Test", 
+      name = "Label Tester",
+      position = { x = #CENTER, y = #CENTER }, 
+      size     = { w = 300, h = 190 },
+      events = { OnClose = app.closeWindow_callback },
+      customHotKeys = { 
+        { Qualifier = "", Key = "a", Event = "OnKeyDown", Callback = app.GlobalTheme_LABEL }, 
+        { Qualifier = "", Key = "s", Event = "OnKeyDown", Callback = app.SingleTheme_LABEL },
+        { Qualifier = "", Key = "n", Event = "OnKeyDown", Callback = app.ClassTest_NestedLayout },
+        { Qualifier = "", Key = "l", Event = "OnKeyDown", Callback = app.ClassTest_LinearLayout },
+        { Qualifier = "", Key = "m", Event = "OnKeyDown", Callback = app.ClassTest_SingleMove },
+        { Qualifier = "", Key = "z", Event = "OnKeyDown", Callback = app.ClassTest_SingleSize },
+        { Qualifier = "", Key = "b", Event = "OnKeyDown", 
+          Callback =
+            Function()
+              app.Test_OpenBenchmarkInfos()
+              app.Test_Benchmarks(#HGUI_LABEL_GADGET) 
+            EndFunction },
+        { Qualifier = "", Key = "x", Event = "OnKeyDown", Callback = app.StressTest_LABEL }}
+      })
+
+  ;:: Box gadgets ::
+  HGui.SetAutoRendering(False)
+  Local b1 = HGui.Gadget:new(#HGUI_LABEL_GADGET, { name = "g1", window = w, caption = {"LABEL 1"} })
+  Local b2 = HGui.Gadget:new(#HGUI_LABEL_GADGET, { name = "g2", window = w, caption = {"LABEL", "number 2"} })
+  Local b3 = HGui.Gadget:new(#HGUI_LABEL_GADGET, { name = "g3", window = w, caption = {"THIRD", "and", "last one"} })
+
+  ;:: Layout ::
+  w.rootgadget:layoutSet({ gadgets = { b1, b2, b3 },
+                           weights = { 0.20, 0.35, 0.45 },
+                           gap = 2,
+                           type = #HGUI_VERTICAL_LAYOUT,
+                           borders = { top = 2, bottom = 2, left = 2, right = 2 } }, True)
+
+  ;:: Rendering ::
+  HGui.SetAutoRendering(True)
+  w:render()
+  
+EndFunction
+
+Function app.ClassTest_BUTTON()
+  ; Performs tests on the Button class
+  
+  If HGui.windowExists("Button Tester") Or HGui.windowExists("info window") Or HGui.windowExists("bench info")
+    SystemRequest("WARNING!", "Please close the opened windows!", "OK", #REQICON_WARNING)
+    Return()
+    
+  EndIf
+
+  DBG.Console.Disable()
+  app.Test_OpenInfoWindow()
+  
+  ;:: Window ::
+  Local w = HGui.Window:new(
+    { title = "Button Gadget Test", Name = "Button Tester",
+      position = { x = #CENTER, y = #CENTER }, 
+      size     = { w = 300, h = 190 },
+      events = { OnClose = app.closeWindow_callback },
+      customHotKeys = { 
+        { Qualifier = "", Key = "a", Event = "OnKeyDown", Callback = app.GlobalTheme_BUTTON }, 
+        { Qualifier = "", Key = "s", Event = "OnKeyDown", Callback = app.SingleTheme_BUTTON },
+        { Qualifier = "", Key = "n", Event = "OnKeyDown", Callback = app.ClassTest_NestedLayout },
+        { Qualifier = "", Key = "l", Event = "OnKeyDown", Callback = app.ClassTest_LinearLayout },
+        { Qualifier = "", Key = "m", Event = "OnKeyDown", Callback = app.ClassTest_SingleMove },
+        { Qualifier = "", Key = "z", Event = "OnKeyDown", Callback = app.ClassTest_SingleSize },
+        { Qualifier = "", Key = "b", Event = "OnKeyDown", 
+          Callback = 
+            Function()
+              app.Test_OpenBenchmarkInfos()
+              app.Test_Benchmarks(#HGUI_BUTTON_GADGET) 
+            EndFunction },
+        { Qualifier = "", Key = "x", Event = "OnKeyDown", Callback = app.StressTest_BUTTON }}
+      })
+
+  ;:: Box gadgets ::
+  HGui.SetAutoRendering(False)
+  Local b1 = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { name = "g1", window = w, caption = {"BUTTON 1"} })
+  Local b2 = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { name = "g2", window = w, caption = {"BUTTON", "number 2"} })
+  Local b3 = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { name = "g3", window = w, caption = {"THIRD", "and", "last one"} })
+
+  ;:: Layout ::
+  w.rootgadget:layoutSet({ gadgets = { b1, b2, b3 },
+                           weights = { 0.20, 0.35, 0.45 },
+                           gap = 2,
+                           type = #HGUI_VERTICAL_LAYOUT,
+                           borders = { top = 2, bottom = 2, left = 2, right = 2 } }, True)
+                           
+  ;:: Rendering ::
+  HGui.SetAutoRendering(True)
+  w:render()
+  
+EndFunction
+
+Function app.ClassTest_SWITCH()
+  ; Performs tests on the Switch class
+  
+  If HGui.windowExists("Switch Tester") Or HGui.windowExists("info window") Or HGui.windowExists("bench info")
+    SystemRequest("WARNING!", "Please close the opened windows!", "OK", #REQICON_WARNING)
+    Return()
+    
+  EndIf
+
+  DBG.Console.Disable()
+  app.Test_OpenInfoWindow()
+  
+  ;:: Window ::
+  Local w = HGui.Window:new(
+    { title = "Switch Gadget Test", Name = "Switch Tester",
+      position = { x = #CENTER, y = #CENTER }, 
+      size     = { w = 300, h = 190 },
+      events = { OnClose = app.closeWindow_callback },
+      customHotKeys = { 
+        { Qualifier = "", Key = "a", Event = "OnKeyDown", Callback = app.GlobalTheme_SWITCH }, 
+        { Qualifier = "", Key = "s", Event = "OnKeyDown", Callback = app.SingleTheme_SWITCH },
+        { Qualifier = "", Key = "n", Event = "OnKeyDown", Callback = app.ClassTest_NestedLayout },
+        { Qualifier = "", Key = "l", Event = "OnKeyDown", Callback = app.ClassTest_LinearLayout },
+        { Qualifier = "", Key = "m", Event = "OnKeyDown", Callback = app.ClassTest_SingleMove },
+        { Qualifier = "", Key = "z", Event = "OnKeyDown", Callback = app.ClassTest_SingleSize },
+        { Qualifier = "", Key = "b", Event = "OnKeyDown", 
+          Callback =
+            Function()
+              app.Test_OpenBenchmarkInfos()
+              app.Test_Benchmarks(#HGUI_SWITCH_GADGET) 
+            EndFunction },
+        { Qualifier = "", Key = "x", Event = "OnKeyDown", Callback = app.StressTest_SWITCH }}
+      })
+
+  ;:: Box gadgets ::
+  HGui.SetAutoRendering(False)
+  Local b1 = HGui.Gadget:new(#HGUI_SWITCH_GADGET, { name = "g1", window = w, caption = {"SWITCH 1"} })
+  Local b2 = HGui.Gadget:new(#HGUI_SWITCH_GADGET, { name = "g2", window = w, caption = {"SWITCH", "number 2"} })
+  Local b3 = HGui.Gadget:new(#HGUI_SWITCH_GADGET, { name = "g3", window = w, caption = {"THIRD", "and", "last one"} })
+
+  ;:: Layout ::
+  w.rootgadget:layoutSet({ gadgets = { b1, b2, b3 },
+                           weights = { 0.20, 0.35, 0.45 },
+                           gap = 2,
+                           type = #HGUI_VERTICAL_LAYOUT,
+                           borders = { top = 2, bottom = 2, left = 2, right = 2 } }, True)
+  ;:: Rendering ::
+  HGui.SetAutoRendering(True)
+  w:render()
+  
+EndFunction
+
+Function app.ClassTest_GROUP_CHECKS()
+  ; Performs tests on the Group (Checks) class
+  ; -----
+  If HGui.windowExists("Group Tester") Or HGui.windowExists("info window") Or HGui.windowExists("bench info")
+    SystemRequest("WARNING!", "This window is already opened!", "OK", #REQICON_WARNING)
+    Return()
+
+  EndIf
+  ;:: Window ::
+  DBG.Console.Disable() 
+  app.Test_OpenInfoWindow()
+  
+  Local w = HGui.Window:new(
+    { title = "Checkbox Group Gadget Test", Name = "Group Tester",
+      position = { x = #CENTER, y = #CENTER }, 
+      size     = { w = 300, h = 190 },
+      events = { OnClose = app.closeWindow_callback },
+      customHotKeys = { 
+        { Qualifier = "", Key = "a", Event = "OnKeyDown", Callback = app.GlobalTheme_GROUP }, 
+        { Qualifier = "", Key = "s", Event = "OnKeyDown", Callback = app.SingleTheme_GROUP },
+        { Qualifier = "", Key = "n", Event = "OnKeyDown", Callback = app.ClassTest_NestedLayout },
+        { Qualifier = "", Key = "l", Event = "OnKeyDown", Callback = app.ClassTest_LinearLayout },
+        { Qualifier = "", Key = "m", Event = "OnKeyDown", Callback = app.ClassTest_SingleMove },
+        { Qualifier = "", Key = "z", Event = "OnKeyDown", Callback = app.ClassTest_SingleSize },
+        { Qualifier = "", Key = "b", Event = "OnKeyDown", 
+          Callback =
+            Function()
+              app.Test_OpenBenchmarkInfos()
+              app.Test_Benchmarks(#HGUI_GROUP_GADGET) 
+            EndFunction },
+        { Qualifier = "", Key = "x", Event = "OnKeyDown", Callback = app.StressTest_GROUP }}
+      })
+
+  ;:: Box gadgets ::
+  HGui.SetAutoRendering(False)
+  Local b1 = HGui.Gadget:new(#HGUI_GROUP_GADGET, { name = "g1", window = w, caption = {"Group 1"} })
+  Local b2 = HGui.Gadget:new(#HGUI_GROUP_GADGET, { name = "g2", window = w, caption = {"Group", "number 2"}, group_labelgap = 16, GroupType = #HGUI_GTYPE_CHECK })
+  Local b3 = HGui.Gadget:new(#HGUI_GROUP_GADGET, { name = "g3", window = w })
+
+  Local s1 = HGui.Gadget:new(#HGUI_SWITCH_GADGET, { name = "s1", window = w, caption = { "check 1" }})
+  Local s2 = HGui.Gadget:new(#HGUI_SWITCH_GADGET, { name = "s2", window = w, caption = { "check 2" }})
+  Local s3 = HGui.Gadget:new(#HGUI_SWITCH_GADGET, { name = "s3", window = w, caption = { "check 3" }})
+  Local s4 = HGui.Gadget:new(#HGUI_SWITCH_GADGET, { name = "s4", window = w, caption = { "check 4" }})
+  
+  ;:: Layout ::
+  w.rootgadget:layoutSet({ gadgets = { b1, b2, b3 },
+                           weights = { 0.20, 0.35, 0.45 },
+                           gap = 2,
+                           type = #HGUI_VERTICAL_LAYOUT,
+                           borders = { top = 2, bottom = 2, left = 2, right = 2 } }, True)
+  b2:layoutset({ gadgets = { s1, s2, s3, s4 },
+                 type = #HGUI_GRID_LAYOUT,
+                 rows = 2, columns = 2,
+                 borders = { top = 2, bottom = 2, left = 2, right = 2 } }, True)
+
+  ;:: Rendering ::
+  HGui.SetAutoRendering(True)
+  w:render()
+
+EndFunction
+
+Function app.ClassTest_GROUP_RADIOS()
+  ; Performs tests on the GROUP (Radios) class
+  ; -----
+  If HGui.windowExists("Group Tester") Or HGui.windowExists("info window") Or HGui.windowExists("bench info")
+    SystemRequest("WARNING!", "This window is already opened!", "OK", #REQICON_WARNING)
+    Return()
+    
+  EndIf
+
+  ;:: Window ::
+  DBG.Console.Disable() 
+  app.Test_OpenInfoWindow()
+  
+  Local w = HGui.Window:new(
+    { title = "Radio Group Gadget Test", Name = "Group Tester",
+      position = { x = #CENTER, y = #CENTER }, 
+      size     = { w = 300, h = 190 },
+      events = { OnClose = app.closeWindow_callback },
+      customHotKeys = { 
+        { Qualifier = "", Key = "a", Event = "OnKeyDown", Callback = app.GlobalTheme_GROUP }, 
+        { Qualifier = "", Key = "s", Event = "OnKeyDown", Callback = app.SingleTheme_GROUP },
+        { Qualifier = "", Key = "n", Event = "OnKeyDown", Callback = app.ClassTest_NestedLayout },
+        { Qualifier = "", Key = "l", Event = "OnKeyDown", Callback = app.ClassTest_LinearLayout },
+        { Qualifier = "", Key = "m", Event = "OnKeyDown", Callback = app.ClassTest_SingleMove },
+        { Qualifier = "", Key = "z", Event = "OnKeyDown", Callback = app.ClassTest_SingleSize },
+        { Qualifier = "", Key = "b", Event = "OnKeyDown", 
+          Callback =            Function()
+              app.Test_OpenBenchmarkInfos()
+              app.Test_Benchmarks(#HGUI_GROUP_GADGET) 
+            EndFunction },
+        { Qualifier = "", Key = "x", Event = "OnKeyDown", Callback = app.StressTest_GROUP }}
+      })
+
+  ;:: Box gadgets ::
+  HGui.SetAutoRendering(False)
+  Local b1 = HGui.Gadget:new(#HGUI_GROUP_GADGET, { name = "g1", window = w, caption = {"Group 1"} })
+  Local b2 = HGui.Gadget:new(#HGUI_GROUP_GADGET, { name = "g2", window = w, caption = {"Group", "number 2"}, group_labelgap = 16, GroupType = #HGUI_GTYPE_RADIO })
+  Local b3 = HGui.Gadget:new(#HGUI_GROUP_GADGET, { name = "g3", window = w })
+
+  Local s1 = HGui.Gadget:new(#HGUI_SWITCH_GADGET, { name = "s1", window = w, caption = { "radio 1" }})
+  Local s2 = HGui.Gadget:new(#HGUI_SWITCH_GADGET, { name = "s2", window = w, caption = { "radio 2" }})
+  Local s3 = HGui.Gadget:new(#HGUI_SWITCH_GADGET, { name = "s3", window = w, caption = { "radio 3" }})
+  Local s4 = HGui.Gadget:new(#HGUI_SWITCH_GADGET, { name = "s4", window = w, caption = { "radio 4" }})
+  
+  ;:: Layout ::
+  w.rootgadget:layoutSet({ gadgets = { b1, b2, b3 },
+                           weights = { 0.20, 0.35, 0.45 },
+                           gap = 2,
+                           type = #HGUI_VERTICAL_LAYOUT,
+                           borders = { top = 2, bottom = 2, left = 2, right = 2 } }, True)
+  b2:layoutset({ gadgets = { s1, s2, s3, s4 },
+                 type = #HGUI_GRID_LAYOUT,
+                 rows = 2, columns = 2,
+                 borders = { top = 2, bottom = 2, left = 2, right = 2 } }, True)
+
+  ;:: Rendering ::
+  HGui.SetAutoRendering(True)
+  w:render()
+
+EndFunction
+
+Function app.ClassTest_GROUP_GENERIC()
+  ; Function to perform tests on the Group (Generic) class
+  ; -----
+  If HGui.windowExists("Group Tester") Or HGui.windowExists("info window") Or HGui.windowExists("bench info")
+    SystemRequest("WARNING!", "Please close the opened windows!", "OK", #REQICON_WARNING)
+    Return()
+    
+  EndIf
+
+  DBG.Console.Disable()
+  app.Test_OpenInfoWindow()
+  
+  ;:: Window ::
+  Local w = HGui.Window:new(
+    { title = "Group Gadget Test", Name = "Group Tester",
+      position = { x = #CENTER, y = #CENTER }, 
+      size     = { w = 300, h = 190 },
+      events = { OnClose = app.closeWindow_callback },
+      customHotKeys = { 
+        { Qualifier = "", Key = "a", Event = "OnKeyDown", Callback = app.GlobalTheme_GROUP }, 
+        { Qualifier = "", Key = "s", Event = "OnKeyDown", Callback = app.SingleTheme_GROUP },
+        { Qualifier = "", Key = "n", Event = "OnKeyDown", Callback = app.ClassTest_NestedLayout },
+        { Qualifier = "", Key = "l", Event = "OnKeyDown", Callback = app.ClassTest_LinearLayout },
+        { Qualifier = "", Key = "m", Event = "OnKeyDown", Callback = app.ClassTest_SingleMove },
+        { Qualifier = "", Key = "z", Event = "OnKeyDown", Callback = app.ClassTest_SingleSize },
+        { Qualifier = "", Key = "b", Event = "OnKeyDown", 
+          Callback =
+            Function()
+              app.Test_OpenBenchmarkInfos()
+              app.Test_Benchmarks(#HGUI_GROUP_GADGET) 
+            EndFunction },
+      { Qualifier = "", Key = "x", Event = "OnKeyDown", Callback = app.StressTest_GROUP }}
+      })
+
+  ;:: Box gadgets ::
+  HGui.SetAutoRendering(False)
+  Local b1 = HGui.Gadget:new(#HGUI_GROUP_GADGET, { name = "g1", window = w, caption = {"Group 1"} })
+  Local b2 = HGui.Gadget:new(#HGUI_GROUP_GADGET, { name = "g2", window = w, caption = {"Group", "number 2"}, group_labelgap = 16 })
+  Local b3 = HGui.Gadget:new(#HGUI_GROUP_GADGET, { name = "g3", window = w })
+
+  ;:: Layout ::
+  w.rootgadget:layoutSet({ gadgets = { b1, b2, b3 },
+                           weights = { 0.20, 0.35, 0.45 },
+                           gap = 2,
+                           type = #HGUI_VERTICAL_LAYOUT,
+                           borders = { top = 2, bottom = 2, left = 2, right = 2 } }, True)
+
+  ;:: Rendering ::
+  HGui.SetAutoRendering(True)
+  w:render()
+  
+EndFunction
+
+Function app.ClassTest_SCROLLBAR()
+  ; Scrollbar class test
+  ; --------------------
+  If HGui.windowExists("Box Tester") Or HGui.windowExists("info window") Or HGui.windowExists("bench info")
+    SystemRequest("WARNING!", "Please close the opened windows!", "OK", #REQICON_WARNING)
+    Return()
+  EndIf
+
+  ;:: Window ::
+  DBG.Console.Disable() 
+  app.Test_OpenInfoWindow()
+  
+  Local w = HGui.Window:new(
+    { title = "Scrollbar Gadget Test", 
+      position = { x = #CENTER, y = #CENTER }, 
+      size     = { w = 300, h = 190 },
+      events = { OnClose = app.closeWindow_callback },
+      customHotKeys = { 
+        { Qualifier = "", Key = "a", Event = "OnKeyDown", Callback = app.GlobalTheme_SCROLLBAR }, 
+        { Qualifier = "", Key = "s", Event = "OnKeyDown", Callback = app.SingleTheme_SCROLLBAR },
+        { Qualifier = "", Key = "n", Event = "OnKeyDown", Callback = Function() SystemRequest("OPS!", "Nested scrollbars is a non-sense!", "OK") EndFunction },
+        { Qualifier = "", Key = "l", Event = "OnKeyDown", Callback = app.ClassTest_LinearLayout },
+        { Qualifier = "", Key = "m", Event = "OnKeyDown", Callback = app.ClassTest_SingleMove },
+        { Qualifier = "", Key = "z", Event = "OnKeyDown", Callback = app.ClassTest_SingleSize },
+        { Qualifier = "", Key = "b", Event = "OnKeyDown", Callback = Function() SystemRequest("OPS!", "Benchmarks not available.", "OK") EndFunction },
+        { Qualifier = "", Key = "x", Event = "OnKeyDown", Callback = Function() SystemRequest("OPS!", "Stress test not available", "OK") EndFunction }}
+      })
+      
+  ;:: Box gadgets ::
+  HGui.SetAutoRendering(False)
+  Local b1 = HGui.Gadget:new(#HGUI_SCROLLBAR_GADGET, { name = "g1", window = w, caption = "cursor" })
+  Local b2 = HGui.Gadget:new(#HGUI_SCROLLBAR_GADGET, { name = "g2", window = w, caption = "value={value}" })
+  Local b3 = HGui.Gadget:new(#HGUI_SCROLLBAR_GADGET, { name = "g3", window = w })
+  
+  ;:: Layout ::
+  w.rootgadget:layoutSet({ gadgets = { b1, b2, b3 },
+                           weights = { 0.20, 0.35, 0.45 },
+                           gap = 2,
+                           type = #HGUI_HORIZONTAL_LAYOUT,
+                           borders = { top = 2, bottom = 2, left = 2, right = 2 } }, True)
+                           
+  ;:: Rendering ::
+  HGui.SetAutoRendering(True)
+  w:render()
+  
+EndFunction
+
+Function app.HelperTest_TextBox()
+  /****************************************************************************
+  With this helper function you can easily build a window with a text to show
+  to the user, it is really useful to show text files like licences, readmes,
+  or changelogs.
+  This helper accepts all the standard window's parameters, in addition you
+  need to provide the following arguments:
+    caption : the text you have to display, you can also specify a text file using
+              the format ::file::<filename>
+    ok : A string or table of strings for the confirmation button
+    cancel : A string or a table of strings for the abort button
+    callbackOk : Callback executed when the confirmation button is pressed
+    callbackCancel : Callback executed when the abort button is pressed
+    callbackClose : Callback executed when the window is closed by the 
+                    window's close gadget.
+      
+  In this example we will create a window with some random text.
+  ****************************************************************************/
+  ; Let's create a array of text to add some variety to the demo
+  Local texts =
+    { "Knowledge nay estimable questions repulsive daughters boy. Solicitude gay way unaffected expression for. His mistress ladyship required off horrible disposed rejoiced. Unpleasing pianoforte unreserved as oh he unpleasant no inquietude insipidity. Advantages can discretion possession add favourable cultivated admiration far. Why rather assure how esteem end hunted nearer and before. By an truth after heard going early given he. Charmed to it excited females whether at examine. Him abilities suffering may are yet dependent.",
+      "As absolute is by amounted repeated entirely ye returned. These ready timed enjoy might sir yet one since. Years drift never if could forty being no. On estimable dependent as suffering on my. Rank it long have sure in room what as he. Possession travelling sufficient yet our. Talked vanity looked in to. Gay perceive led believed endeavor. Rapturous no of estimable oh therefore direction up. Sons the ever not fine like eyes all sure.",
+      "It real sent your at. Amounted all shy set why followed declared. Repeated of endeavor mr position kindness offering ignorant so up. Simplicity are melancholy preference considered saw companions. Disposal on outweigh do speedily in on. Him ham although thoughts entirely drawings. Acceptance unreserved old admiration projection nay yet him. Lasted am so before on esteem vanity oh.",
+      "She who arrival end how fertile enabled. Brother she add yet see minuter natural smiling article painted. Themselves at dispatched interested insensible am be prosperous reasonably it. In either so spring wished. Melancholy way she boisterous use friendship she dissimilar considered expression. Sex quick arose mrs lived. Mr things do plenty others an vanity myself waited to. Always parish tastes at as mr father dining at.",
+      "Ham followed now ecstatic use speaking exercise may repeated. Himself he evident oh greatly my on inhabit general concern. It earnest amongst he showing females so improve in picture. Mrs can hundred its greater account. Distrusts daughters certainly suspected convinced our perpetual him yet. Words did noise taken right state are since."
+      }
+  Local randomText = texts[Rnd(5)]
+  
+  ; Since we want more variety let's have a variable window's size
+  Local size = { w = Rnd(20)+200, h = Rnd(20)+150 }
+  
+  ; We need a callback function to close the window since it is not closed
+  ; automatically by design, and eventually to handle the event with some
+  ; code...
+  Local callback = 
+    Function(msg)
+      ; msg.ok     = True if the user pressed the OK button
+      ; msg.cancel = True if the user pressed the CANCEL button
+      ; msg.window = The window's object attached to the TextBox
+      
+      ; Handle the close event that misses the window field
+      If TB.Item.IsNil(msg, "window")
+        ; In this case we have the window id, let put it manually in the
+        ; msg table...
+        msg.window = HGui.windowFindByHWID(msg.id)
+      EndIf
+      
+      msg.window:Free()
+      
+    EndFunction
+    
+  ; Now let's build the TextBox
+  Local myTextBox = HGui.Window:textBoxNew(
+    { caption = randomText,
+      ok = "OK",
+      cancel = "Dismiss",
+      callbackOK = callback,
+      callbackCancel = callback,
+      callbackClose = callback,
+      ;--- standard window's arguments ---
+      title = "Message Box " .. GetTime(True),
+      size = size
+      })
+
+EndFunction
+
+Function app.HelperTest_SysRequest()
+  /****************************************************************************
+  HGui provides a configurable system requester that can be blocking or not,
+  depending on your needs.
+  This requester have support for an icon and a variable number of buttons.
+  In this demo we will build non-blocking requesters so the demo program will
+  not be blocked.
+  As always this helper accepts all standard window's parameters, in addition
+  you have to specify the following arguments:
+    name : A unique window name
+    icon : An image file name or a brush id
+    blocking : True|False, set to True if you want a blocking requester.
+    text : Message to show in the requester
+    wordwrap : True|False, this is useful if you are passing a single long
+               string in the text tag.
+    buttons : A table of buttons
+    align : Text alignment
+    buttonweights : Optional table with the buttons weights
+    groupweights : Optional table with the body and button group weights
+    layout : How to arrange the buttons (horizontally or vertically)
+    callback : Function to call to handle the requester events
+    
+  For simplicity in this example no callbacks have beeb set.
+  For more detailed informations see the documentation.
+  The requester window will be closed automatically when the user selects an
+  option or closes the window.
+  ****************************************************************************/
+  ; This is to set all available layouts
+  Local layouts = { #HGUI_VERTICAL_LAYOUT, #HGUI_HORIZONTAL_LAYOUT }
+  Local positions = { { x = 20, y = 20 }, { x = 80, y = 80 } }
+  
+  ; Simple callback function
+  Local callback = 
+    Function(winObj, btnObj, btnNum)     
+      SystemRequest("SysRequester closed",
+                    "Button pressed : " .. btnNum .. "\n" ..
+                    "Button object : " .. ToString(btnObj) .. "\n" ..
+                    "Window : " .. winObj.Name,
+                    "OK")
+    EndFunction
+    
+  For Local l = 1 To ListItems(layouts)   
+    Local req = HGui.Window:SysRequestNew(
+      { Name = "WIN " .. l .. "-" .. HL.GetRndName(), ; Let's set a completely random name :)
+        Icon = IconPic,
+        size = { w = 220, h = 110 },
+        Title = "SysRequest() - Window " .. l,
+        Blocking = False,
+        Text = "WINDOW " .. l .. "\n\nLorem ipsum dolor sit amet, consectetuer adipiscing elit. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Aenean leo ligula, porttitor eu...",
+        WordWrap = True,
+        Position = positions[l-1],
+        Callback = callback,
+        buttons =
+          { { ; Button 1
+              Caption = l .. ":Btn 1" },
+            { ; Button 2
+              Caption = l .. ":Btn 2" },
+            { ; Button 3
+              Caption = l .. ":Btn 3" },
+            { ; Button 4
+              Caption = l .. ":Btn 4" }
+             },
+        layout = layouts[l-1],
+        })
+      
+  Next
+  
+EndFunction
+
+Function app.HelperTest_ProgressWindow()
+  /****************************************************************************
+  A prebuilt progress window can be handy in many circumstances and HGui provides
+  this feature.
+  Like a standard window you can pass any parameter you need to tune the window to
+  your taste, in addition the parameters table accepts also the following args:
+    valueMin : The minimum value you have to show
+    valueMax : The maximum value you have to show
+    value : The starting value of the progress bar
+    message : a message to show, a string or a table of strings.
+  
+  In this example we are going to use also the 'cursor' tag, a specific tag
+  of the ProgressBar gadget to add more variety.
+  
+  Since we do want to allow multiple instances in this demo we don't have to
+  block the executions, for this reason we will use an interval to update
+  the simulated progress bars.
+  ****************************************************************************/
+  Local myWin = HGui.Window:ProgressNew(
+    { Title = "Progress " ..  GetTime(True), 
+      valueMin = 1, 
+      valueMax = 100, 
+      value    = 1, 
+      message  = "Testing the progress window...",
+      size     = { w = 120, h = 60 },
+      
+      ; Random position
+      position = { x = Rnd(190), y = Rnd(150) },
+      
+      ; Let's set a random skin for the cursor bar
+      cursor =
+        { look =
+          { nskin = HGui.Theme.Generate_SkinColor(GetRandomColor()),
+            }
+          }
+      })
+  
+  ; Now let's do a simple loop for our test, but since we don't want to block
+  ; the demo we will setup an interval.
+  ; We will use the message window structure as a storage for out interval data,
+  ; so that the window is closed before the end we are able to free the insterval.
+  myWin._data =
+    { intervalId  = -1,
+      currentItem = -1,
+      lastItem    = 100 }
+      
+  ; Let's setup the interval that updates the progress bar
+  myWin._data.intervalId = SetInterval(Nil, 
+    ; Interval Function
+    Function(msg)
+      ; This is executed at each interval call
+      Local win = msg.UserData
+      Local current = win._data.currentItem   
+      
+      ; Compute the next item to show
+      current = current + 1
+
+      ; Check if we have passed the last item
+      If current > win._data.lastItem
+        ; Finished: we need to disable the interval from within the callback function
+        ClearInterval(win._data.intervalId)
+        ; Let's clear also our temporary storage
+        win._data = Nil
+        ; Finally let's free this window
+        win:Free()
+        
+      Else
+        ; Show the current message
+        win:ProgressUpdate({ Message = "Counter : " .. current, value = current })
+        ; Updates the current item
+        win._data.currentItem = current
+        
+      EndIf
+      
+    EndFunction, 
+    
+    ; Interval Frequency
+    150,
+    
+    ; Userdata : we are going to pass the window object
+    myWin)
+  
+    ; When the window is closed we need to remove the interval function
+    myWin:set(
+      { events =
+        { OnClose = 
+          Function(msg, win)
+            ; Remove the interval
+            ClearInterval(win._data.intervalId)
+            
+            ; Free the window
+            win:free()
+            
+          EndFunction 
+          }
+        })
+
+EndFunction 
+
+Function app.HelperTest_MessageBox()
+  /****************************************************************************
+  This helper function will build for you a message window you can easily
+  update, for example, if you want to show a feedback to the user during long
+  operations.
+  Like a standard window you can pass any parameters you want to tune the window
+  to your needs, in addition the parameters table accept also the following
+  argument:
+    message : The message you want to show in the window, a string or a table
+              of strings.
+
+  Here you will se a fake updater that simulates a process.
+  ****************************************************************************/
+  ; Let's build the message window
+  Local message = HGui.Window:MessageNew(
+    { Title = "Message : " .. GetTime(True),
+      Message = { "Please wait...", "work in progress" },
+      
+      ; Random position
+      position = { x = Rnd(400), y = Rnd(400) },
+      size = { w = 200, h = 80 }
+      })
+  
+  ; Setup an array with random messages for our simulation...
+  Local strings = 
+    { "Loading love...",
+      "Loading tranquility...",
+      "Loading peace...",
+      { "Please wait...", "processing ingredients" },
+      "Finalization...",
+      "Production...",
+      "Done!" }
+      
+  Local count = ListItems(strings)-1
+  
+  ; Now let's do a simple loop for our test, but since we don't want to block
+  ; our demo we will setup an interval.
+  ; We will use the message window structure as a storage for out interval data.
+  message._data =
+    { intervalId  = -1,
+      currentItem = -1,
+      lastItem    = count,
+      strings     = strings }
+      
+  ; Let's setup the interval...
+  message._data.intervalId = SetInterval(Nil, 
+    Function(msg)
+      ; This is executed at each interval call
+      Local win     = msg.UserData
+      Local strings = win._data.strings
+      Local current = win._data.currentItem   
+      
+      ; Compute the next item to show
+      current = current + 1
+      
+      ; Check if we have passed the last item
+      If current > win._data.lastItem
+        ; We need to disable the interval from within the callback function
+        ClearInterval(win._data.intervalId)
+        
+        ; Let's clear also our temporary storage
+        win._data = Nil
+        
+        ; Finally let's free this window
+        win:Free()
+        
+      Else
+        ; Show the current message
+        win:MessageUpdate({ Message = strings[current] })
+        
+        ; Updates the current item
+        win._data.currentItem = current
+        
+      EndIf
+      
+    EndFunction, 
+    
+    ; Interval Frequency
+    1500,
+    
+    ; Userdata : we are going to pass the window object
+    message)
+  
+EndFunction
+
+Function app.HelperTest_Keypad()
+  /****************************************************************************
+  Very quick and dirty test to show how to generate keypad interfaces.
+  This helper can be used to request for pins or numeric passwords.
+  ****************************************************************************/
+
+  ; TEST of a blocking Keypad
+  Local params =
+    { isPassword = False,
+      ;value = 10,
+      generate = True,
+      mathSigns = True,
+      waitInput = True,
+      
+      callbackOk = 
+        Function(msg)
+          SystemRequest("RESULT IS",
+                        ToString(msg),
+                        "OK", REQICON_INFORMATION)
+        EndFunction
+      }
+      
+  Local w = HGui.Window:SoftKeypadNew(params)
+
+EndFunction
+
+Function app.HelperTest_Keybd()
+  /****************************************************************************
+  Very quick and dirty test to show how to generate keyboard interfaces.
+  ****************************************************************************/
+
+  If HGui.windowExists("Keyboard")
+    SystemRequest("INFORMATION",
+                  "Only one keyboard at a time!",
+                  "OK", #REQICON_INFORMATION)
+    Return()
+  
+  EndIf
+  
+  Local params =
+    { isPassword = False,
+      waitInput = True,
+      font = "Resources/HGuiDS.ttf",
+      name = "Keyboard",
+      
+      callbackOk = 
+        Function(msg)
+          SystemRequest("RESULT IS",
+                        ToString(msg),
+                        "OK", REQICON_INFORMATION)
+        EndFunction,
+        
+      callbackClose = 
+        Function(msg)
+          SystemRequest("Closed!!",
+                        "The soft keyboard has been closed!",
+                        "OK", REQICON_INFORMATION)
+        EndFunction
+        
+      }
+      
+  Local w = HGui.Window:SoftKeyboardNew(params)
+
+EndFunction
+
+Function app.HelperTest_Waiter()
+  /****************************************************************************
+  Very quick and dirty test to show how to use the waiter helper.
+  
+  This kind of helper can be used while you are initializing you app or while
+  closing it, just remember to check for events if you want to see the animation.
+  Of course it can also be used while performing very long operations that does
+  not allow you to use progress bars.
+  ****************************************************************************/
+
+  If HGui.windowExists("Waiter")
+    SystemRequest("INFORMATION",
+                  "Only one Waiter at a time!",
+                  "OK", #REQICON_INFORMATION)
+    Return()
+  
+  EndIf
+
+  Local w = HGui.Window:WaiterNew(
+    { text  = { "{:font++:}This is a waiter window,", "uncloseable & unmoveable" },
+      size  = { w = 200, h = 60 },
+      fg    = $FF6600,
+      bg    = $AA440000,
+      round = 0,
+      freq  = 50,
+      segments = 24 })
+      
+  ; Timeout to change the message
+  SetTimeout(Nil, Function() 
+                    w:waiterUpdate(
+                      { "{:font++:}[b]Wait some more time...[/b]" ,
+                        "It's not a blocking window!" },
+                      $00FF00, 
+                      $DD004400) 
+                  EndFunction, 5000)
+
+  ; Timeout to remove the waiter
+  SetTimeout(Nil, Function() w:Free() EndFunction, 10000)
+
+  
+EndFunction
+
+Function app.HelperTest_InputBox()
+  /****************************************************************************
+  This example shows you how you can use the built in InputBox requester. 
+  Like a standard window you can pass any parameter you want to tune the window
+  to your needs, in addition the parameters table accept also the following
+  arguments:
+    text : You can specify here a default text, a single string or a table of
+           string.
+    ok : Text to show in the confirmation button.
+    cancel : Text to show in the abort button.
+    callbackok : A callback function called when the user hit the confirmation
+                 button.
+    callbackcancel : A callback function called when the user hit the abort
+                    button.
+    callbackclose : A callback function called when the user closes the input
+                    box using the window's close gadget.
+
+  You can specify additional parameters to have more control on the input:
+    allownewline : True|False, used to allow multiline input or not.
+    entertoclose : True|False, if True hitting enter the input will confirm
+                   the types text, to insert a new line you have to hit
+                   shift+enter, instead, if set to False hitting enter
+                   will add a new line.
+    bgcursor : A color code used to hilight the text during the selection.
+    bgcolor : A color code for the window background.
+    adjustfontsize : True|False, if True the font size is adjusted to fit into
+                     the available height, useful for single line input boxes.
+
+  Please note that the input box must be closed manually by your code, it's
+  simple, just call the :Free() method in your callback functions like any
+  other window.
+  
+  Your callbackOk and callbackCancel functions will get as unique argument the
+  gadget that have received the input, if you inspect the subtable 'result'
+  you will find this fields:
+    text : The current text in the text box
+    ok : True if the event was generated by the confirmation button
+    cancel : True if the even was generated by the abort button
+    window : The father window's structure
+  Instead the callbackClose function will get only get the following fields:
+    id : Window id (numeric or LightUserData)
+    action : It should be "CloseWindow"
+  ***************************************************************************/
+  
+  ; We don't want to run multiple instances of this demo because we are using
+  ; named windows
+  If HGui.windowExists("inputBox1") Or HGui.windowExists("inputBox2")
+    SystemRequest("Warning!",
+                  "Close all opened input box first!",
+                  "OK", #REQICON_WARNING)
+    Return()
+  
+  EndIf
+  
+  ; During the test we need to disable CTRL-C to allow copy
+  CtrlCQuit(False)
+  
+  ; Let's define a callback function for all our possible events...
+  Local callback = 
+    Function(Gadget)
+      If TB.Item.IsNil(Gadget, "result")
+        ; No result here, the window has been closed
+        ; We don't have the result table in this case but the window object!
+        ; Pay attention, the variable is called gadget, but here you have the window!
+        Gadget:Free()
+        SystemRequest("Why???", "You have closed the window...\n\nWhat a pity! :D", "Too bad...")
+        Return()
+        
+      Else
+        ; We are here only if the event has been generated by one of the two
+        ; available buttons.
+        
+        ; Let's free the InputBox window
+        Gadget.Result.Window:Free()
+        
+        ; Cancel (show me more) pressed?
+        If gadget.Result.Cancel
+          ; Let's open another InputBox to show some more options...
+          ; This time we will open a BLOCKING requester with some more options
+          ; used.
+          Local result2 = HGui.Window:InputBoxNew(
+            { caption = "If you want you can also add a description!",
+              text = "Auto size enabled",
+              size = { w = 280, h = 120 },
+              ok = "OK",
+              cancel = "CANCEL",
+              waitInput = True,       ; <-- determines if the input box is blocking or not
+              activateInput = True,   ; <-- the text box is activated at creation time
+              adjustFontSize = True,  ; <-- font size is adjusted to the available space
+              captionWeight = 0.2,    ; <-- allows you to determine the caption box height (range: v>0 and <1)
+              ;--- some standard window's tags ---
+              title = "BLOCKING Input Box (try to resize the window)",
+              name = "inputBox2"
+              })
+
+          ; This point is reached only when the box is closed and in this case the you
+          ; don't need to manually free the window
+          SystemRequest("YOU GOT IT!",
+                        "Typed text : " .. result2.text .. "\n" ..
+                        "Ok button  : " .. result2.ok .. "\n" ..
+                        "Cancel button : " .. result2.cancel .. "\n" ..
+                        "Close button : " .. result2.close,
+                        "Ok, end it now!")
+          
+        Else
+          ; Ok, button has been pressed
+          SystemRequest("Great! You have confirmed!",
+                        "Text : " .. Gadget.Result.text .. "\n\n" ..
+                        "ok : " .. ToString(Gadget.Result.ok) .. "\n" ..
+                        "cancel : " .. ToString(Gadget.Result.cancel) .. "\n\n" ..
+                        "window : " .. ToString(Gadget.Result.window),
+                        "GOT IT!")
+        EndIf
+        
+      EndIf
+      
+      ; In every case the input box has been closed, let's enable CTRL-C
+      CtrlCQuit(True)
+      
+    EndFunction
+              
+  ; Now that we have defined the callback function we can build the Input Box:
+  Local myWin = HGui.Window:InputBoxNew(
+    { text = "Please type something!",
+      ok = "Well done!",
+      cancel = { "Don't bother and", "show me more!" },
+      size = { w = 280, h = 120 },
+      callbackOk = callback,
+      callbackCancel = callback,
+      callbackClose = callback,
+      ;--- some standard window's tags ---
+      title = "The HGui Input Box...",
+      name = "inputBox1"
+      })
+
+  ; Done! This is a nice, non-blocking input box and here is a demonstration
+  SetInterval(999, 
+    Function()
+      If HGui.windowExists("inputBox1")
+        ; Change the window title to demonstrate that it's a non-blocking requester
+        myWin:Set({ title = "NON BLOCKING! Current time is " .. GetTime(True)}, True)
+      Else
+        ; The window is gone, remove the interval
+        ClearInterval(999)
+      EndIf
+    EndFunction,
+    500)
+  
+EndFunction
+ 
+
+; SETUP SOME RESOURCES USED IN THE TESTS
+Global test_sample = LoadSample(Nil, SoundTest)
+Global image  = GFX.Image:Add("Icon", IconPic, { w = 16, h = 16 })
+Global image2 = image:Clone("Icon2", { Color = $FFFFFF, Strenght = 128 })
+
+; SETUP A LIGHT THEME
+; -------------------
+HGui.Theme.Tip.nText = HGui.Theme.Generate_Text(8, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Root.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Flat, 1, $FFFFFF, $666666, #NONE)
+HGui.Theme.Menu.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Flat, 1, $DDDDDD, $DDDDDD, $DDDDDD)
+HGui.Theme.Menu.Height = 12
+HGui.Theme.SubMenu.Height = 11
+HGui.Theme.Menu.ItemsLook.nText = HGui.Theme.Generate_Text(16, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Menu.ItemsLook.hText = HGui.Theme.Generate_Text(16, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Menu.ItemsLook.pText = HGui.Theme.Generate_Text(16, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Menu.ItemsLook.dText = HGui.Theme.Generate_Text(16, #NORMAL, $AAAAAA, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Menu.ItemsLook.npText= HGui.Theme.Generate_Text(16, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Menu.ItemsLook.hpText= HGui.Theme.Generate_Text(16, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Menu.ItemsLook.dpText= HGui.Theme.Generate_Text(16, #NORMAL, $AAAAAA, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.SysRequest.nText = HGui.Theme.Generate_Text(12, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False, { left = 20, right = 20 })
+HGui.Theme.SysRequest.Buttons.nText = HGui.Theme.Generate_Text(12, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.SysRequest.Buttons.hText = HGui.Theme.Generate_Text(12, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.SysRequest.Buttons.pText = HGui.Theme.Generate_Text(12, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.SysRequest.iconSize = 16
+HGui.Theme.Box.nSkin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $EEEEEE, $333333, $CCCCCC)
+HGui.Theme.sLabel.nText = HGui.Theme.Generate_Text(12, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Group.nText  = HGui.Theme.Generate_Text(8, #NORMAL, $444444, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Group.nSkin  = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $EEEEEE, $888888, $CCCCCC, { Top = 1, Bottom = 1, Left = 1, Right = 1 })
+HGui.Theme.Button.nText = HGui.Theme.Generate_Text(12, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Button.hText = HGui.Theme.Generate_Text(12, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Button.pText = HGui.Theme.Generate_Text(12, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Button.dText = HGui.Theme.Generate_Text(12, #NORMAL, $666666, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.DropDown.nText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.DropDown.hText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.DropDown.pText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.DropDown.dText = HGui.Theme.Generate_Text(10, #NORMAL, $777777, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.DropDown.LVFont = { Name = #SANS, Style = #NORMAL, Color = $000000, SizeOffset = 0 }
+HGui.Theme.DropDown.EntryHeight = 12
+HGui.Theme.ListView.nText = HGui.Theme.Generate_Text(12, #NORMAL, $000000, #HGUI_ALIGN_LEFT, False, False, { top = 0, bottom = 0, left = 2, right = 0 })
+HGui.Theme.ListView.hText = HGui.Theme.Generate_Text(12, #NORMAL, $000000, #HGUI_ALIGN_LEFT, False, False, { top = 0, bottom = 0, left = 2, right = 0 })
+HGui.Theme.ListView.pText = HGui.Theme.Generate_Text(12, #NORMAL, $000000, #HGUI_ALIGN_LEFT, False, False, { top = 0, bottom = 0, left = 2, right = 0 })
+HGui.Theme.ListView.dText = HGui.Theme.Generate_Text(12, #NORMAL, $777777, #HGUI_ALIGN_LEFT, False, False, { top = 0, bottom = 0, left = 2, right = 0 })
+HGui.Theme.ListView.Font = { Name = #SANS, SizeOffset = -2, Style = #NORMAL, Color = $000000 }
+HGui.Theme.ListView.HeadersHeight = 12
+HGui.Theme.ListView.Scrollbar.Size = 8
+HGui.Theme.ListView.Selected = { FontColor = $FFFFFF, BGColor = $FF0000 }
+HGui.Theme.ListView.Scrollbar.cBox.nText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.ListView.Scrollbar.cBox.hText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.ListView.Scrollbar.cBox.pText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.ListView.Scrollbar.cBox.dText = HGui.Theme.Generate_Text(10, #NORMAL, $777777, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.TreeView.nText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_LEFT, False, False, { top = 0, bottom = 0, left = 2, right = 0 })
+HGui.Theme.TreeView.hText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_LEFT, False, False, { top = 0, bottom = 0, left = 2, right = 0 })
+HGui.Theme.TreeView.pText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_LEFT, False, False, { top = 0, bottom = 0, left = 2, right = 0 })
+HGui.Theme.TreeView.dText = HGui.Theme.Generate_Text(10, #NORMAL, $777777, #HGUI_ALIGN_LEFT, False, False, { top = 0, bottom = 0, left = 2, right = 0 })
+HGui.Theme.TreeView.Font = { Name = #SANS, SizeOffset = -2, Style = #NORMAL, Color = $000000 }
+HGui.Theme.TreeView.Selected = { FontColor = $FFFF00, BGColor = $007777 }
+HGui.Theme.TreeView.EntryHeight = 12
+HGui.Theme.TreeView.HeadersHeight = 12
+HGui.Theme.TreeView.Scrollbar.Size = 8
+HGui.Theme.TreeView.Scrollbar.cBox.nText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.TreeView.Scrollbar.cBox.hText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.TreeView.Scrollbar.cBox.pText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.TreeView.Scrollbar.cBox.dText = HGui.Theme.Generate_Text(10, #NORMAL, $777777, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Scrollbar.oBox.nText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_LEFT, False, False)
+HGui.Theme.Scrollbar.oBox.hText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_LEFT, False, False)
+HGui.Theme.Scrollbar.oBox.pText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_LEFT, False, False)
+HGui.Theme.Scrollbar.oBox.dText = HGui.Theme.Generate_Text(10, #NORMAL, $666666, #HGUI_ALIGN_LEFT, False, False)
+HGui.Theme.Scrollbar.cBox.nText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Scrollbar.cBox.hText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Scrollbar.cBox.pText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Scrollbar.cBox.dText = HGui.Theme.Generate_Text(10, #NORMAL, $777777, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Slider.oBox.nText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Slider.oBox.hText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Slider.oBox.pText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Slider.oBox.dText = HGui.Theme.Generate_Text(10, #NORMAL, $777777, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Slider.cBox.nText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Slider.cBox.hText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Slider.cBox.pText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Slider.cBox.dText = HGui.Theme.Generate_Text(10, #NORMAL, $777777, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Progressbar.oBox.nskin = HGui.Theme.Generate_SkinColor($666666)
+HGui.Theme.Progressbar.cBox.nSkin = HGui.Theme.Generate_SkinColor($BBFFDD)
+HGui.Theme.Progressbar.cBox.nText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme["switch"].nText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme["switch"].hText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme["switch"].pText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme["switch"].dText = HGui.Theme.Generate_Text(10, #NORMAL, $666666, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme["switch"].npText= HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme["switch"].hpText= HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme["switch"].dpText= HGui.Theme.Generate_Text(10, #NORMAL, $666666, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Virtual.Scroller.cBox.nText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Virtual.Scroller.cBox.hText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Virtual.Scroller.cBox.pText = HGui.Theme.Generate_Text(10, #NORMAL, $000000, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Virtual.Scroller.cBox.dText = HGui.Theme.Generate_Text(10, #NORMAL, $777777, #HGUI_ALIGN_CENTER, False, False)
+HGui.Theme.Text.Gfx = { bgColor  = $DDDDDD,
+                        fgColor  = $000000,
+                        bgCursor = $FF0000,
+                        fgCursor = $FFFFFF,
+                        bgSelect = $FFFF00,
+                        FontName = #SANS,
+                        FontSize = 10,
+                        FontStyle = #NORMAL,
+                        AdjustFontSize = False }
+
+;------------- MAIN WINDOW --------------
+Global Benchmarking = False
+
+app.Windows = {}
+app.Gadgets = {}
+app.Windows.Main = HGui.Window:new(
+  { title    = "HGui Showcase (" .. app.version .. ")",
+    name     = "main",
+    position = { x = #CENTER, y = #CENTER },
+    size     = { w = 180, h = 260 },
+    
+    ; Let's attach a confirmation requester when the user
+    ; closes the main window clicking on the close gadget.
+    flags    = { AutoClose = False },
+    events   = { OnClose = Function(msg)
+                             Local answer = SystemRequest("ARE YOU SURE?", 
+                                                          "Do you want to quit?",
+                                                          "Yes|No")
+                             If answer = 1 Then End
+                           EndFunction
+                 }
+    })
+
+  HGui.SetAutoRendering(False)
+  app.Gadgets.labTitle = HGui.Gadget:new(#HGUI_IMAGE_GADGET, { Source = Showcase, Alpha = #NONE, Mode = 4, Align = #CENTER, BorderColor = $DDDDDD })
+  app.Gadgets.GrpTop   = HGui.Gadget:new(#HGUI_GROUP_GADGET, { Caption = { "Demos" }, Group_LabelGap = 10, Group_LabelSide = #HGUI_ALIGN_LEFT })
+
+  ;::: Solid Color Background
+  app.Gadgets.butTestWindows1 = HGui.Gadget:new(
+    #HGUI_BUTTON_GADGET, 
+    { Caption = "Windows: Solid BG", 
+      Actions = { OnPushed = app.demo_windowSolidColorBG } })
+
+  ;::: Various Background Types
+  app.Gadgets.butTestWindows2 = HGui.Gadget:new(
+    #HGUI_BUTTON_GADGET, 
+    { Caption = "Windows : BG Types",
+      Actions = { OnPushed = app.Windows_VariousBackgrounds } })
+
+  ;::: Let's create the buttons...
+  ; I want buttons to have different looks so I'm going to create simple skins
+  Local helperBtnSkin =
+    { nskin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $AAAADD, $000033, $8888AA),
+      hskin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $AAAADD, $000033, $8899BB),
+      pskin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $AAAADD, $000033, $7788AA),
+      dskin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Flat, 1, $DDDDDD, $333333, $888888),
+      }
+  Local testBtnSkin =
+    { nskin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $AADDAA, $003300, $88AA88),
+      hskin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $AADDAA, $003300, $88BB99),
+      pskin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $AADDAA, $003300, $77AA77),
+      dskin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Flat, 1, $DDDDDD, $333333, $888888)} 
+  Local exampleBtnSkin =
+    { nskin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $DDAAAA, $330000, $AA8888),
+      hskin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Raised, 1, $DDAAAA, $330000, $BB9999),
+      pskin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Recessed, 1, $DDAAAA, $330000, $AA7777),
+      dskin = HGui.Theme.Generate_SkinBevel(GFX.BevelType_Standard, GFX.BevelFx_Flat, 1, $DDDDDD, $333333, $888888)}
+  
+  app.Gadgets.butTestGadgets1 = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { Caption = "Classes demo", Actions = { OnPushed = app.Test_GUI } })
+  app.Gadgets.GrpBot   = HGui.Gadget:new(#HGUI_GROUP_GADGET, { Caption = { "Examples, Benchs & Tests" }, Group_LabelGap = 10, Group_LabelSide = #HGUI_ALIGN_LEFT })
+  app.Gadgets.butTestBox1 = HGui.Gadget:new(#HGUI_BUTTON_GADGET,  { Caption = { "BOX" },        Actions = { OnPushed = app.ClassTest_BOX }, look = testBtnSkin })
+  app.Gadgets.butTestHDiv1 = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { Caption = { "HDiv" },       Actions = { OnPushed = app.ClassTest_HDIVIDER }, look = testBtnSkin })
+  app.Gadgets.butTestVDiv1 = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { Caption = { "VDiv" },       Actions = { OnPushed = app.ClassTest_VDIVIDER }, look = testBtnSkin })
+  app.Gadgets.butTestLab1  = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { Caption = { "Label" },      Actions = { OnPushed = app.ClassTest_LABEL }, look = testBtnSkin })
+  app.Gadgets.butTestGrp1  = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { Caption = { "GenericGrp" }, Actions = { OnPushed = app.ClassTest_GROUP_GENERIC }, look = testBtnSkin })
+  app.Gadgets.butTestGrpC  = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { Caption = { "ChecksGrp" },  Actions = { OnPushed = app.ClassTest_GROUP_CHECKS }, look = testBtnSkin })
+  app.Gadgets.butTestGrpR  = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { Caption = { "RadiosGrp" },  Actions = { OnPushed = app.ClassTest_GROUP_RADIOS }, look = testBtnSkin })
+  app.Gadgets.butTestButt  = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { Caption = { "Button" },     Actions = { OnPushed = app.ClassTest_BUTTON }, look = testBtnSkin })
+  app.Gadgets.butTestSwit  = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { Caption = { "Switch" },     Actions = { OnPushed = app.ClassTest_SWITCH }, look = testBtnSkin })
+  app.Gadgets.butTestListV = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { Caption = { "Listview" },   Actions = { OnPushed = app.ClassExample_LISTVIEW }, look = exampleBtnSkin })
+  app.Gadgets.butTestScrB  = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { Caption = { "Scrollbar" },       Actions = { OnPushed = app.ClassTest_SCROLLBAR }, look = testBtnSkin })
+  app.Gadgets.butTestProgW = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { Caption = { "ProgressBar" }, Actions = { OnPushed = app.HelperTest_ProgressWindow }, Look = helperBtnSkin })
+  app.Gadgets.butTestInpuB = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { Caption = { "InputBox" },    Actions = { OnPushed = app.HelperTest_InputBox }, Look = helperBtnSkin })
+  app.Gadgets.butTestMessB = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { Caption = { "MessageBox" },  Actions = { OnPushed = app.HelperTest_MessageBox }, Look = helperBtnSkin })
+  app.Gadgets.butTestSystR = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { Caption = { "SysRequest" },  Actions = { OnPushed = app.HelperTest_SysRequest }, Look = helperBtnSkin })
+  app.Gadgets.butTestTextB = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { Caption = { "TextBox" },     Actions = { OnPushed = app.HelperTest_TextBox }, Look = helperBtnSkin })
+  app.Gadgets.butTestWaitr = HGui.Gadget:new(#HGUI_BUTTON_GADGET, { Caption = { "Waiter" },      Actions = { OnPushed = app.HelperTest_Waiter }, Look = helperBtnSkin })
+ 
+  app.Gadgets.GrpTop:layoutSet(
+    { gadgets = { app.Gadgets.butTestWindows1,
+                  app.Gadgets.butTestWindows2,
+                  app.Gadgets.butTestGadgets1 },
+      gap     = 1,
+      borders = { top = 0, bottom = 0, left = 0, right = 0 } }, True)
+
+  app.Gadgets.GrpBot:layoutSet(
+    { gadgets = { app.Gadgets.butTestProgW,
+                  app.Gadgets.butTestInpuB,
+                  app.Gadgets.butTestMessB,                  
+                  app.Gadgets.butTestSystR,
+                  app.Gadgets.butTestTextB,
+                  app.Gadgets.butTestWaitr,
+                  app.Gadgets.butTestBox1,
+                  app.Gadgets.butTestHDiv1,
+                  app.Gadgets.butTestVDiv1,
+                  app.Gadgets.butTestLab1,
+                  app.Gadgets.butTestGrp1,
+                  app.Gadgets.butTestGrpC,
+                  app.Gadgets.butTestGrpR,
+                  app.Gadgets.butTestButt,
+                  app.Gadgets.butTestSwit,
+                  app.Gadgets.butTestScrB,
+                  app.Gadgets.butTestListV },
+      type    = #HGUI_GRID_LAYOUT,
+      columns = 2,
+      gap     = 1,
+      borders = { top = 1, bottom = 1, left = 1, right = 1 } }, True)
+      
+  app.Windows.Main.RootGadget:layoutSet(
+    { gadgets = { app.Gadgets.labTitle, 
+                  app.Gadgets.GrpTop,
+                  app.Gadgets.GrpBot },
+      weights = { -0.15, 0.20, 0.65 },
+      gap     = 1,
+      borders = { top = 2, bottom = 2, left = 2, right = 2 } }, True)
+  HGui.SetAutoRendering(True)
+  
+  app.Windows.Main:render()
+  
+  
+  Repeat
+    WaitEvent()
+  Forever
+  
+
