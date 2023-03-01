@@ -11832,8 +11832,11 @@ INPUT
                
           Local cid = CreateClipRegion(Nil, #BOX, 0, y, object.ListArea.Area.Size.w, h)
 
+          Local visualText = object.ColumnHandlers[k](object.data.realItems[i][k])
+
           If k = 0
             ; Prima colonna, traccia il segno di apertura/chiusura
+            ; Ignore alignment on first row because it interfere with identation
             If object.data.realItems[i]._opened And TB.Item.Exists(object.data.realItems[i], "childs")
               HGui.treeView_drawOpenCloseSign(True, x+margin+ident-signOffset, y, h, h, object.VLinesColor1, object.VLinesColor2, object.OCStyle)
               ;sign = openedSign
@@ -11844,10 +11847,23 @@ INPUT
             EndIf
             TextOut(x+margin, y, sign, { WordWrap = sizes[k] })
             SetClipRegion(cid)
-            TextOut(x+margin+ident, y, HL.Convert.ForTextOut(object.data.realItems[i][k]), { WordWrap = sizes[k]-ident })
+            TextOut(x+margin+ident, y, HL.Convert.ForTextOut(visualtext), { WordWrap = sizes[k]-ident })
           Else
             SetClipRegion(cid)
-            TextOut(x+margin, y, HL.Convert.ForTextOut(object.data.realItems[i][k]), { WordWrap = sizes[k] })
+            Local colSpace = sizes[k] - GFX.Text.GetWidth(visualText)
+            Local alignedX = 0
+            Local align = #LEFT
+            If object.data.alignments[k] = #HGUI_ALIGN_RIGHT
+              align = #RIGHT
+              alignedX = colSpace-margin
+            ElseIf object.data.alignments[k] = #HGUI_ALIGN_CENTER
+              align = #CENTER
+              alignedX = colSpace/2
+            EndIf
+            Local xrender  = x+margin+ alignedX
+            Local wrapSize = sizes[k]
+            ;If Not(object.Wordwrap) Then wrapSize = 0
+            TextOut(xrender, y, HL.Convert.ForTextOut(visualText), { WordWrap = sizes[k] })
           EndIf
           FreeClipRegion(cid)
         Next
@@ -14799,7 +14815,8 @@ NOTE
         ;     ._Selected (True|False)
         ;     ._Opened (True|False)
         ;   .SortOrder
-        
+        ;   .Alignments
+        ;   .columnHandlers
         ; :: OuterBox_Borders : distanze tra il contenitore principale e i gadget interni.
         ; :: VScrollerGap : distanza fra i contenuti e lo scroller verticale
         ; :: ScrollerSize : dimensione in pixel degli scroller
@@ -14876,6 +14893,13 @@ NOTE
 
         ;-----
 
+        ; Check if there are alignments specified otherwise align all to the left
+        If TB.Item.IsNil(options.data, "alignments")
+          options.data.alignments = {}
+          Local count = ListItems(options.data.Headers)
+          For Local i = 0 To count-1 Do options.data.alignments[i] = #HGUI_ALIGN_LEFT
+        EndIf
+        
         NewGad.SelectGroups = True
         If TB.Item.Exists(options, "selectgroups") Then NewGad.SelectGroups = options.SelectGroups
          
@@ -16946,7 +16970,11 @@ Internal function used to handle the treeView children selection
     For Local i = 0 To count
       Item.Childs[i]._Selected = True
       If TB.Item.Exists(Parent, "onselect")
-        Parent.OnSelect(Parent, Parent.Data.realItems, Parent.Data.realItems[item], item)
+        Local real = {}
+        If TB.Item.Exists(parent.data.realItems, item)
+          real = Parent.Data.realItems[item]
+        EndIf
+        Parent.OnSelect(Parent, Parent.Data.realItems, real, item)
       EndIf
       HGui.treeView_SelectChilds(Parent, Item.Childs[i])
     Next
