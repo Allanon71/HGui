@@ -665,7 +665,7 @@ HGui.Theme.ListView.dText = HGui.Theme.Generate_Text(16, #ANTIALIAS, $777777, #H
 
   ; Content's area
 HGui.Theme.ListView.Font     = { Name = #SANS, SizeOffset = -2, Style = #ANTIALIAS, Color = $000000 }
-HGui.Theme.ListView.BGColors = { odd = $8899FF, even = $99AAFF }
+HGui.Theme.ListView.BGColors = { odd = $BBAABB, even = $CCBBCC }
 HGui.Theme.ListView.Selected = { FontColor = $FFFFFF, BGColor = $99FF0000 }
 HGui.Theme.ListView.EntryHeight = 20
 ;--NEW--
