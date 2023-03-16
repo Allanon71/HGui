@@ -67,6 +67,7 @@ TP =
      actions = { OnUnactivate = Function() EndFunction,
                  OnChange     = Function() EndFunction },
      encoding = #ENCODING_UTF8,
+     align = #LEFT,                                       ; #LEFT, #CENTER, #RIGHT
      tokens = { "[b]", "[/b]",                            ; Elenco delle tokens da gestire
 
                 "[i]", "[/i]",
@@ -381,6 +382,7 @@ Function TP:Render()
    EndIf
 
    Local Cx, Cy = x+hos, (crow+1)*self.gfx.RowHeight+y-3
+   
    Local Rf1 = self.Gfx.RowFirst*self.gfx.RowHeight
    Local Rf2 = Rf1
    Local Rf = Rf1
@@ -446,22 +448,40 @@ Function TP:Render()
     vSpace = 0
    EndIf
    
-   Local x = 0
+   Local x = 0   
    For i = 0 To ListItems(buffer)-1
+      Local t = buffer[i]
+      
       If self.pwdMode
-         If StrLen(buffer[i]) > 0 Then TextOut(x, y, RepeatStr("*", StrLen(buffer[i])), { encoding = self.Encoding, color = self.gfx.fgColor })
-      Else
-         TextOut(x, y, buffer[i], { encoding = self.Encoding, color = self.gfx.fgColor })
+        If StrLen(buffer[i]) > 0
+          t = RepeatStr("*", StrLen(buffer[i]))
+        EndIf
       EndIf
+      
+      If Not(self.cursorOn)
+        If self.align = #LEFT
+          ; Do nothing
+        ElseIf self.align = #RIGHT
+          x = x + Area.w - TextWidth(t)
+        ElseIf self.align = #CENTER
+          x = x + (Area.w - TextWidth(t))/2
+        EndIf
+      Endif
+      
+      ;If self.pwdMode
+      ;   If StrLen(buffer[i]) > 0 Then TextOut(x, y, RepeatStr("*", StrLen(buffer[i])), { encoding = self.Encoding, color = self.gfx.fgColor })
+        
+      ;Else
+         TextOut(x, y, t, { encoding = self.Encoding, color = self.gfx.fgColor })
+      ;EndIf
       y = y + self.gfx.RowHeight
    Next
 
    GFX.OutputDevice.EndSelect() ; EndSelect()
 
    ; Crop area
-   
    Local Crop = { x = 0, y = 0, w = self.gfx.area.w, h = self.gfx.area.h }
-   If Cx+CharWidth > self.gfx.area.w
+   If Cx+CharWidth > self.gfx.area.w And self.cursorOn
       Crop.x = Cx+CharWidth - self.gfx.area.w
    EndIf
    

@@ -2,6 +2,13 @@
   * HISTORY                                                                   *
   *****************************************************************************
   
+  16/03/2023
+    TextProcessing (HGui's text box gadget)
+    - Added support for .align argument (#LEFT, #RIGHT, #CENTER)
+    - During editing the text is always left aligned
+    - When editing is finished the text will be rendered with the alignment of choice
+    - Default alignment is #LEFT
+  
   21/02/2023 : Last two weeks
     - Documentation and examples
     - Showcase revision

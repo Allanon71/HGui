@@ -14145,6 +14145,7 @@ NOTE
         ;   .adjustFontSize : True to automatically adjust the font size to the gadget size
         ; - allowNewLine : True to allow new line/multiline box
         ; - text : Initial text contents
+        ; - align : Text alignment (#LEFT, #RIGHT, #CENTER), default #LEFT
         ; - any other options usuported by the TP Object (NEED MORE DOCS)
         ;
         ; Additional Actions
