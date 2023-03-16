@@ -11,7 +11,7 @@ If v.platform = "MorphOS" Or v.platform = "AmigaOS4"
 EndIf
 
 ;*** SET THE BELOW CONSTANT WITH YOUR PATH ***
-Const #INC_PATH     = "C:/Users/Fabio.NB-FABIO/Desktop/HGui/"
+Const #INC_PATH     = "Your-path-to/HGui/"
 
 Const #INC_DATETIME = #INC_PATH .. "DateTime.hws"
 Const #INC_DEBUG    = #INC_PATH .. "Debug.hws"
