@@ -2117,6 +2117,180 @@ OUTPUT
 
 EndFunction
 
+G2D._skinValidator =
+  { [ GFX.SkinType_Stretch ] = 
+      Function(skinLayer, t_area)
+        If Not(HaveItem(skinLayer.params, "brush"       )) Then Return(False)
+        If Not(HaveItem(skinLayer.params, "offset"      )) Then skinLayer.params.offset      = { x = 0, y = 0 }
+        If Not(HaveItem(skinLayer.params, "alpha"       )) Then skinLayer.params.alpha       = #NONE
+        If Not(HaveItem(skinLayer.params, "stretch_fix" )) Then skinLayer.params.stretch_fix = -999
+        
+        t_area:skinStretch(
+          skinLayer.params.brush,
+          skinLayer.params.offset,
+          skinLayer.params.alpha,
+          skinLayer.params.stretch_fix)
+      EndFunction,
+    ;--------------------------
+    [ GFX.SkinType_Pattern ] =
+      Function(skinlayer, t_area)
+        Local size
+        If Not(HaveItem(skinLayer.params, "brush" )) Then Return(False)
+        If Not(HaveItem(skinLayer.params, "offset")) Then skinLayer.params.offset = { x = 0, y = 0 }
+        If Not(HaveItem(skinLayer.params, "alpha" )) Then skinLayer.params.alpha  = #NONE
+        If Not(HaveItem(skinLayer.params, "size"  )) Then size = skinLayer.params.size
+
+        t_area:skinPattern(
+          skinLayer.params.brush,
+          skinLayer.params.offset,
+          skinLayer.params.alpha,
+          size)
+      EndFunction,
+    ;--------------------------
+    [ GFX.SkinType_FitMax ] =
+      Function(skinLayer, t_area)
+        If Not(HaveItem(skinLayer.params, "brush" )) Then Return(False)
+        If Not(HaveItem(skinLayer.params, "offset")) Then skinLayer.params.offset = { x = 0, y = 0 }
+        If Not(HaveItem(skinLayer.params, "alpha" )) Then skinLayer.params.alpha  = #NONE
+        If Not(HaveItem(skinLayer.params, "align" )) Then skinLayer.params.align  = #CENTER
+
+        t_area:skinFitMax(
+          skinLayer.params.brush,
+          skinLayer.params.offset,
+          skinLayer.params.alpha,
+          skinLayer.params.align)
+      EndFunction,
+    ;--------------------------
+    [ GFX.SkinType_FitMin ] =
+      Function(skinLayer, t_area)
+        If Not(HaveItem(skinLayer.params, "brush" )) Then Return(False)
+        If Not(HaveItem(skinLayer.params, "offset")) Then skinLayer.params.offset = { x = 0, y = 0 }
+        If Not(HaveItem(skinLayer.params, "alpha" )) Then skinLayer.params.alpha  = #NONE
+        If Not(HaveItem(skinLayer.params, "align" )) Then skinLayer.params.align  = #CENTER
+        If Not(HaveItem(skinLayer.params, "border")) Then skinLayer.params.border = $FF000000
+
+        t_area:skinFitMin(
+          skinLayer.params.brush,
+          skinLayer.params.offset,
+          skinLayer.params.alpha,
+          skinLayer.params.align,
+          skinLayer.params.border)
+      EndFunction,
+    ;--------------------------
+    [ GFX.SkinType_Color ] =
+      Function(skinLayer, t_area)
+        If Not(HaveItem(skinLayer.params, "color")) Then Return(False)
+        If Not(HaveItem(skinLayer.params, "alpha")) Then skinLayer.params.alpha = #NONE
+
+        t_area:skinColor(
+          skinLayer.params.color,
+          skinLayer.params.alpha)
+      EndFunction,
+    ;--------------------------
+    [ GFX.SkinType_Bevel ] =
+      Function(skinLayer, t_area)
+        If Not(HaveItem(skinLayer.params, "colors")) Then skinLayer.params.colors = { light = $EEEEEE, dark = $444444 }
+        If Not(HaveItem(skinLayer.params, "aspect")) Then skinLayer.params.aspect = { fx = GFX.BevelFx_Raised, height = 1 }
+        If Not(HaveItem(skinLayer.params, "type"  )) Then skinLayer.params.type   = GFX.BevelType_Standard
+
+        t_area:skinBevel(
+          skinLayer.params.colors,
+          skinLayer.params.aspect,
+          skinLayer.params.type)
+      EndFunction,
+    ;--------------------------
+    [ GFX.SkinType_Gradient ] =
+      Function(skinLayer, t_area)
+        If Not(HaveItem(skinLayer.params, "color1")) Then Return(False)
+        If Not(HaveItem(skinLayer.params, "color2")) Then Return(False)
+        If Not(HaveItem(skinLayer.params, "alpha" )) Then skinLayer.params.alpha = #NONE
+        If Not(HaveItem(skinLayer.params, "angle" )) Then skinLayer.params.angle = 0
+
+        t_area:skinGradient(
+          skinLayer.params.color1,
+          skinLayer.params.color2,
+          skinLayer.params.alpha,
+          skinLayer.params.angle)
+      EndFunction,
+    ;--------------------------
+    [ GFX.SkinType_Shades ] =
+      Function(skinLayer, t_area)
+        If Not(HaveItem(skinLayer.params, "colorlist")) Then Return(False)
+        If Not(HaveItem(skinLayer.params, "angle"    )) Then skinLayer.params.angle = 0
+
+        t_area:skinShades(
+          skinLayer.params.ColorList,
+          skinLayer.params.angle)
+      EndFunction,
+    ;--------------------------
+    [ GFX.SkinType_VPattern ] =
+      Function(skinLayer, t_area)
+        If Not(HaveItem(skinLayer.params, "brush" )) Then Return(False)
+        If Not(HaveItem(skinLayer.params, "offset")) Then skinLayer.params.offset = { x = 0, y = 0 }
+        If Not(HaveItem(skinLayer.params, "alpha" )) Then skinLayer.params.alpha  = #NONE
+
+        t_area:skinVPattern(
+          skinLayer.params.Brush,
+          skinLayer.params.offset,
+          skinLayer.params.alpha)
+      EndFunction,
+    ;--------------------------
+    [ GFX.SkinType_HPattern ] =
+      Function(skinLayer, t_area)
+        If Not(HaveItem(skinLayer.params, "brush" )) Then Return(False)
+        If Not(HaveItem(skinLayer.params, "offset")) Then skinLayer.params.offset = { x = 0, y = 0 }
+        If Not(HaveItem(skinLayer.params, "alpha" )) Then skinLayer.params.alpha  = #NONE
+
+        t_area:skinHPattern(
+          skinLayer.params.Brush,
+          skinLayer.params.offset,
+          skinLayer.params.alpha)
+      EndFunction,
+    ;--------------------------
+    [ GFX.SkinType_VPattern3S ] =
+      Function(skinLayer, t_area)
+        If Not(HaveItem(skinLayer.params, "brush"  )) Then Return(False)
+        If Not(HaveItem(skinLayer.params, "sectors")) Then Return(False)
+        If Not(HaveItem(skinLayer.params, "alpha"  )) Then skinLayer.params.alpha  = #NONE
+        If Not(HaveItem(skinLayer.params, "vadapt" )) Then skinLayer.params.vadapt = False
+
+        t_area:skinVPattern3S(
+          skinLayer.params.Brush,
+          skinLayer.params.sectors,
+          skinLayer.params.alpha,
+          skinLayer.params.vadapt)
+      EndFunction,
+    ;--------------------------
+    [ GFX.SkinType_HPattern3S ] =
+      Function(skinLayer, t_area)
+        If Not(HaveItem(skinLayer.params, "brush"  )) Then Return(False)
+        If Not(HaveItem(skinLayer.params, "sectors")) Then Return(False)
+        If Not(HaveItem(skinLayer.params, "alpha"  )) Then skinLayer.params.alpha  = #NONE
+        If Not(HaveItem(skinLayer.params, "vadapt" )) Then skinLayer.params.vadapt = False
+
+        t_area:skinHPattern3S(
+          skinLayer.params.Brush,
+          skinLayer.params.sectors,
+          skinLayer.params.alpha,
+          skinLayer.params.vadapt)
+      EndFunction,
+    ;--------------------------
+    [ GFX.SkinType_Pattern9S ] =
+      Function(skinLayer, t_area)
+        If Not(HaveItem(skinLayer.params, "brush"  )) Then Return(False)
+        If Not(HaveItem(skinLayer.params, "sectors")) Then Return(False)
+        If Not(HaveItem(skinLayer.params, "alpha"  )) Then skinLayer.params.alpha  = #NONE
+        If Not(HaveItem(skinLayer.params, "vadapt" )) Then skinLayer.params.vadapt = False
+
+        t_area:skinPattern9S(
+          skinLayer.params.Brush,
+          skinLayer.params.sectors,
+          skinLayer.params.alpha,
+          skinLayer.params.vadapt)
+      EndFunction
+    }
+
+
 Function G2D.Area:SkinMulti(levels, offset) ; v1.8
 /******************************************************************************
 result = G2D.Area:SkinMulti(levels, offset)
@@ -2307,92 +2481,106 @@ OUTPUT
   result => Returns TRUE if the operation has been completed without errors.
 ******************************************************************************/
   ; Main skinning loop
-  Local lcount = ListItems(levels) - 1
-  For local i = 0 To lcount
+  Local lcount, i = ListItems(levels) - 1
+  For i = 0 To lcount
     ; Check <area> table and make a new area object for the current layer
-    If TB.Item.IsNil(levels[i], "area")
+    If Not(HaveItem(levels[i], "area"))
       levels[i].area = { x = 0, y = 0, w = 0, h = 0 }
     EndIf
+    
     If IsNil(offset)
       offset = { x = 0, y = 0 }
+      
     Else
-      If TB.Item.IsNil(offset, "x") Then offset.x = 0
-      If TB.Item.IsNil(offset, "y") Then offset.y = 0
+      If Not(HaveItem(offset, "x")) Then offset.x = 0
+      If Not(HaveItem(offset, "y")) Then offset.y = 0
+      
     EndIf
 
     Local t_area = G2D.Area:new(self.x + levels[i].area.x + offset.x, self.y + levels[i].area.y + offset.y,
                                 self.w + levels[i].area.w, self.h + levels[i].area.h )
 
 
+    ; NEW IMPLEMENTATION (20.03.2023)
+    G2D._skinValidator[levels[i].type](levels[i], t_area)
+    
+    ; OLD IMPLEMENTATION
     ;::: GFX.SkinType.Stretch ::::::::::::::::::::::::::::::: skinStretch :::
+    /*
     If levels[i].type = GFX.SkinType_Stretch
-      If TB.Item.IsNil(levels[i].params, "brush"       ) Then Return(False)
-      If TB.Item.IsNil(levels[i].params, "offset"      ) Then levels[i].params.offset      = { x = 0, y = 0 }
-      If TB.Item.IsNil(levels[i].params, "alpha"       ) Then levels[i].params.alpha       = #NONE
-      If TB.Item.IsNil(levels[i].params, "stretch_fix" ) Then levels[i].params.stretch_fix = -999
+      If Not(HaveItem(levels[i].params, "brush"       )) Then Return(False)
+      If Not(HaveItem(levels[i].params, "offset"      )) Then levels[i].params.offset      = { x = 0, y = 0 }
+      If Not(HaveItem(levels[i].params, "alpha"       )) Then levels[i].params.alpha       = #NONE
+      If Not(HaveItem(levels[i].params, "stretch_fix" )) Then levels[i].params.stretch_fix = -999
 
       t_area:skinStretch(levels[i].params.brush,
                          levels[i].params.offset,
                          levels[i].params.alpha,
                          levels[i].params.stretch_fix)
+                         
     ;::: GFX.SkinType.Pattern ::::::::::::::::::::::::::::::: skinPattern :::
     ElseIf levels[i].type = GFX.SkinType_Pattern
       Local size
-      If TB.Item.IsNil(levels[i].params, "brush" ) Then Return(False)
-      If TB.Item.IsNil(levels[i].params, "offset") Then levels[i].params.offset = { x = 0, y = 0 }
-      If TB.Item.IsNil(levels[i].params, "alpha" ) Then levels[i].params.alpha  = #NONE
-      If TB.Item.Exists(levels[i].params, "size" ) Then size = levels[i].params.size
+      If Not(HaveItem(levels[i].params, "brush" )) Then Return(False)
+      If Not(HaveItem(levels[i].params, "offset")) Then levels[i].params.offset = { x = 0, y = 0 }
+      If Not(HaveItem(levels[i].params, "alpha" )) Then levels[i].params.alpha  = #NONE
+      If Not(HaveItem(levels[i].params, "size" )) Then size = levels[i].params.size
 
       t_area:skinPattern(levels[i].params.brush,
                          levels[i].params.offset,
                          levels[i].params.alpha,
                          size)
+                         
     ;::: GFX.SkinType.FitMax ::::::::::::::::::::::::::::::::: skinFitMax :::
     ElseIf levels[i].type = GFX.SkinType_FitMax
-      If TB.Item.IsNil(levels[i].params, "brush" ) Then Return(False)
-      If TB.Item.IsNil(levels[i].params, "offset") Then levels[i].params.offset = { x = 0, y = 0 }
-      If TB.Item.IsNil(levels[i].params, "alpha" ) Then levels[i].params.alpha  = #NONE
-      If TB.Item.IsNil(levels[i].params, "align" ) Then levels[i].params.align  = #CENTER
+      If Not(HaveItem(levels[i].params, "brush" )) Then Return(False)
+      If Not(HaveItem(levels[i].params, "offset")) Then levels[i].params.offset = { x = 0, y = 0 }
+      If Not(HaveItem(levels[i].params, "alpha" )) Then levels[i].params.alpha  = #NONE
+      If Not(HaveItem(levels[i].params, "align" )) Then levels[i].params.align  = #CENTER
 
       t_area:skinFitMax(levels[i].params.brush,
                         levels[i].params.offset,
                         levels[i].params.alpha,
                         levels[i].params.align)
+                        
     ;::: GFX.SkinType.FitMin ::::::::::::::::::::::::::::::::: skinFitMin :::
     ElseIf levels[i].type = GFX.SkinType_FitMin
-      If TB.Item.IsNil(levels[i].params, "brush" ) Then Return(False)
-      If TB.Item.IsNil(levels[i].params, "offset") Then levels[i].params.offset = { x = 0, y = 0 }
-      If TB.Item.IsNil(levels[i].params, "alpha" ) Then levels[i].params.alpha  = #NONE
-      If TB.Item.IsNil(levels[i].params, "align" ) Then levels[i].params.align  = #CENTER
-      If TB.Item.IsNil(levels[i].params, "border") Then levels[i].params.border = $FF000000
+      If Not(HaveItem(levels[i].params, "brush" )) Then Return(False)
+      If Not(HaveItem(levels[i].params, "offset")) Then levels[i].params.offset = { x = 0, y = 0 }
+      If Not(HaveItem(levels[i].params, "alpha" )) Then levels[i].params.alpha  = #NONE
+      If Not(HaveItem(levels[i].params, "align" )) Then levels[i].params.align  = #CENTER
+      If Not(HaveItem(levels[i].params, "border")) Then levels[i].params.border = $FF000000
 
       t_area:skinFitMin(levels[i].params.brush,
                         levels[i].params.offset,
                         levels[i].params.alpha,
                         levels[i].params.align,
                         levels[i].params.border)
+                        
     ;::: GFX.SkinType_Color ::::::::::::::::::::::::::::::::::: skinColor :::
     ElseIf levels[i].type = GFX.SkinType_Color
-      If TB.Item.IsNil(levels[i].params, "color") Then Return(False)
-      If TB.Item.IsNil(levels[i].params, "alpha") Then levels[i].params.alpha = #NONE
+      If Not(HaveItem(levels[i].params, "color")) Then Return(False)
+      If Not(HaveItem(levels[i].params, "alpha")) Then levels[i].params.alpha = #NONE
 
       t_area:skinColor(levels[i].params.color,
                        levels[i].params.alpha)
+                       
     ;::: GFX.SkinType_Bevel ::::::::::::::::::::::::::::::::::: skinBevel :::
     ElseIf levels[i].type = GFX.SkinType_Bevel
-      If TB.Item.IsNil(levels[i].params, "colors") Then levels[i].params.colors = { light = $EEEEEE, dark = $444444 }
-      If TB.Item.IsNil(levels[i].params, "aspect") Then levels[i].params.aspect = { fx = GFX.BevelFx_Raised, height = 1 }
-      If TB.Item.IsNil(levels[i].params, "type"  ) Then levels[i].params.type   = GFX.BevelType_Standard
+      If Not(HaveItem(levels[i].params, "colors")) Then levels[i].params.colors = { light = $EEEEEE, dark = $444444 }
+      If Not(HaveItem(levels[i].params, "aspect")) Then levels[i].params.aspect = { fx = GFX.BevelFx_Raised, height = 1 }
+      If Not(HaveItem(levels[i].params, "type"  )) Then levels[i].params.type   = GFX.BevelType_Standard
 
       t_area:skinBevel(levels[i].params.colors,
                        levels[i].params.aspect,
                        levels[i].params.type)
+                       
     ;::: GFX.SkinType_Gradient ::::::::::::::::::::::::::::: skinGradient :::
     ElseIf levels[i].type = GFX.SkinType_Gradient
-      If TB.Item.IsNil(levels[i].params, "color1") Then Return(False)
-      If TB.Item.IsNil(levels[i].params, "color2") Then Return(False)
-      If TB.Item.IsNil(levels[i].params, "alpha" ) Then levels[i].params.alpha = #NONE
-      If TB.Item.IsNil(levels[i].params, "angle" ) Then levels[i].params.angle = 0
+      If Not(HaveItem(levels[i].params, "color1")) Then Return(False)
+      If Not(HaveItem(levels[i].params, "color2")) Then Return(False)
+      If Not(HaveItem(levels[i].params, "alpha" )) Then levels[i].params.alpha = #NONE
+      If Not(HaveItem(levels[i].params, "angle" )) Then levels[i].params.angle = 0
 
       t_area:skinGradient(levels[i].params.color1,
                           levels[i].params.color2,
@@ -2401,35 +2589,38 @@ OUTPUT
 
     ;::: GFX.SkinType_Shades ::::::::::::::::::::::::::::::::: skinShades :::
     ElseIf levels[i].type = GFX.SkinType_Shades
-      If TB.Item.IsNil(levels[i].params, "colorlist") Then Return(False)
-      If TB.Item.IsNil(levels[i].params, "angle"    ) Then levels[i].params.angle = 0
+      If Not(HaveItem(levels[i].params, "colorlist")) Then Return(False)
+      If Not(HaveItem(levels[i].params, "angle"    )) Then levels[i].params.angle = 0
 
       t_area:skinShades(levels[i].params.ColorList,
                         levels[i].params.angle)
+              
     ;::: GFX.SkinType_VPattern ::::::::::::::::::::::::::::: skinVPattern :::
     ElseIf levels[i].type = GFX.SkinType_VPattern
-      If TB.Item.IsNil(levels[i].params, "brush" ) Then Return(False)
-      If TB.Item.IsNil(levels[i].params, "offset") Then levels[i].params.offset = { x = 0, y = 0 }
-      If TB.Item.IsNil(levels[i].params, "alpha" ) Then levels[i].params.alpha  = #NONE
+      If Not(HaveItem(levels[i].params, "brush" )) Then Return(False)
+      If Not(HaveItem(levels[i].params, "offset")) Then levels[i].params.offset = { x = 0, y = 0 }
+      If Not(HaveItem(levels[i].params, "alpha" )) Then levels[i].params.alpha  = #NONE
 
       t_area:skinVPattern(levels[i].params.Brush,
                           levels[i].params.offset,
                           levels[i].params.alpha)
+
     ;::: GFX.SkinType_HPattern ::::::::::::::::::::::::::::: skinHPattern :::
     ElseIf levels[i].type = GFX.SkinType_HPattern
-      If TB.Item.IsNil(levels[i].params, "brush" ) Then Return(False)
-      If TB.Item.IsNil(levels[i].params, "offset") Then levels[i].params.offset = { x = 0, y = 0 }
-      If TB.Item.IsNil(levels[i].params, "alpha" ) Then levels[i].params.alpha  = #NONE
+      If Not(HaveItem(levels[i].params, "brush" )) Then Return(False)
+      If Not(HaveItem(levels[i].params, "offset")) Then levels[i].params.offset = { x = 0, y = 0 }
+      If Not(HaveItem(levels[i].params, "alpha" )) Then levels[i].params.alpha  = #NONE
 
       t_area:skinHPattern(levels[i].params.Brush,
                           levels[i].params.offset,
                           levels[i].params.alpha)
+
     ;:: GFX.SkinType_VPattern3S ::::::::::::::::::::::::::: skinVPattern3S :::
     ElseIf levels[i].type = GFX.SkinType_VPattern3S
-      If TB.Item.IsNil(levels[i].params, "brush"  ) Then Return(False)
-      If TB.Item.IsNil(levels[i].params, "sectors") Then Return(False)
-      If TB.Item.IsNil(levels[i].params, "alpha"  ) Then levels[i].params.alpha  = #NONE
-      If TB.Item.IsNil(levels[i].params, "vadapt" ) Then levels[i].params.vadapt = False
+      If Not(HaveItem(levels[i].params, "brush"  )) Then Return(False)
+      If Not(HaveItem(levels[i].params, "sectors")) Then Return(False)
+      If Not(HaveItem(levels[i].params, "alpha"  )) Then levels[i].params.alpha  = #NONE
+      If Not(HaveItem(levels[i].params, "vadapt" )) Then levels[i].params.vadapt = False
 
       t_area:skinVPattern3S(levels[i].params.Brush,
                             levels[i].params.sectors,
@@ -2438,28 +2629,30 @@ OUTPUT
 
     ;::: GFX.SkinType_HPattern3S ::::::::::::::::::::::::: skinHPattern3S :::
     ElseIf levels[i].type = GFX.SkinType_HPattern3S
-      If TB.Item.IsNil(levels[i].params, "brush"  ) Then Return(False)
-      If TB.Item.IsNil(levels[i].params, "sectors") Then Return(False)
-      If TB.Item.IsNil(levels[i].params, "alpha"  ) Then levels[i].params.alpha  = #NONE
-      If TB.Item.IsNil(levels[i].params, "vadapt" ) Then levels[i].params.vadapt = False
+      If Not(HaveItem(levels[i].params, "brush"  )) Then Return(False)
+      If Not(HaveItem(levels[i].params, "sectors")) Then Return(False)
+      If Not(HaveItem(levels[i].params, "alpha"  )) Then levels[i].params.alpha  = #NONE
+      If Not(HaveItem(levels[i].params, "vadapt" )) Then levels[i].params.vadapt = False
 
       t_area:skinHPattern3S(levels[i].params.Brush,
                             levels[i].params.sectors,
                             levels[i].params.alpha,
                             levels[i].params.vadapt)
+                            
     ;::: GFX.SkinType_Pattern9S ::::::::::::::::::::::::::: skinPattern9S :::
     ElseIf levels[i].type = GFX.SkinType_Pattern9S
-      If TB.Item.IsNil(levels[i].params, "brush"  ) Then Return(False)
-      If TB.Item.IsNil(levels[i].params, "sectors") Then Return(False)
-      If TB.Item.IsNil(levels[i].params, "alpha"  ) Then levels[i].params.alpha  = #NONE
-      If TB.Item.IsNil(levels[i].params, "vadapt" ) Then levels[i].params.vadapt = False
+      If Not(HaveItem(levels[i].params, "brush"  )) Then Return(False)
+      If Not(HaveItem(levels[i].params, "sectors")) Then Return(False)
+      If Not(HaveItem(levels[i].params, "alpha"  )) Then levels[i].params.alpha  = #NONE
+      If Not(HaveItem(levels[i].params, "vadapt" )) Then levels[i].params.vadapt = False
 
       t_area:skinPattern9S(levels[i].params.Brush,
                            levels[i].params.sectors,
                            levels[i].params.alpha,
                            levels[i].params.vadapt)
 
-    EndIf
+    EndIf*/
+    
   Next
   
   Return(True)

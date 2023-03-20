@@ -6895,15 +6895,15 @@ NOTES
   NewArea.private.name = HL.GetRndName()
 
   ; Setup Area position
-  If TB.Item.Exists(options, "position")
-    If TB.Item.Exists(options.position, "x") Then NewArea.position.x = options.position.x
-    If TB.Item.Exists(options.position, "y") Then NewArea.position.y = options.position.y
+  If HaveItem(options, "position")
+    If HaveItem(options.position, "x") Then NewArea.position.x = options.position.x
+    If HaveItem(options.position, "y") Then NewArea.position.y = options.position.y
     
   EndIf
 
   ; Setup Area size
-  If TB.Item.Exists(options, "size")
-    If TB.Item.Exists(options.size, "w")
+  If HaveItem(options, "size")
+    If HaveItem(options.size, "w")
       If options.size.w > 0
         NewArea.size.w = options.size.w
         
@@ -6916,7 +6916,7 @@ NOTES
       
     EndIf
     
-    If TB.Item.Exists(options.size, "h")
+    If HaveItem(options.size, "h")
       If options.size.h > 0
         NewArea.size.h = options.size.h
         
@@ -6932,13 +6932,13 @@ NOTES
   EndIf
 
   ; Setup Multilayer skin (byRef)
-  If TB.Item.Exists(options, "skin") Then NewArea.skin = options.skin
+  If HaveItem(options, "skin") Then NewArea.skin = options.skin
 
   ; Setup Active flag
-  If TB.Item.Exists(options, "active") Then NewArea.active = options.active
+  If HaveItem(options, "active") Then NewArea.active = options.active
 
   ; Setup linked window
-  If TB.Item.Exists(options, "window")
+  If HaveItem(options, "window")
     Switch GetType(options.window)
       Case #STRING
         ;--- WINDOW NAME ---
@@ -6956,8 +6956,8 @@ NOTES
 
       Case #TABLE
         ;--- WINDOW OBJECT ---
-        If TB.Item.Exists(options.window, "private")
-          If TB.Item.Exists(options.window.private, "hwid")
+        If HaveItem(options.window, "private")
+          If HaveItem(options.window.private, "hwid")
             SelectDisplay(options.window.private.HWId, True)
             NewArea.window = options.window
             
@@ -6985,19 +6985,19 @@ NOTES
 
   Else
     ;--- NO WINDOW IDENTIFIER SPECIFIED ---
-    DBG.Console.Out("Using the currently active window.", DBG.Warning, HGui.AreaChannel)
+    ;DBG.Console.Out("Using the currently active window.", DBG.Warning, HGui.AreaChannel)
     SelectDisplay(HGui.ActiveWindow.private.HWId)
     NewArea.window = HGui.ActiveWindow
 
   EndIf
 
   ; Setup Events and callback functions
-  If TB.Item.Exists(options, "events")
-    If TB.Item.Exists(options.events, "onmouseover")    Then NewArea.events.onmouseover    = options.events.onmouseover
-    If TB.Item.Exists(options.events, "onmouseout" )    Then NewArea.events.onmouseout     = options.events.onmouseout
-    If TB.Item.Exists(options.events, "onmousedown")    Then NewArea.events.onmousedown    = options.events.onmousedown
-    If TB.Item.Exists(options.events, "onmouseup"  )    Then NewArea.events.onmouseup      = options.events.onmouseup
-    If TB.Item.Exists(options.events, "onrightmouseup") Then NewArea.events.onrightmouseup = options.events.onrightmouseup
+  If HaveItem(options, "events")
+    If HaveItem(options.events, "onmouseover")    Then NewArea.events.onmouseover    = options.events.onmouseover
+    If HaveItem(options.events, "onmouseout" )    Then NewArea.events.onmouseout     = options.events.onmouseout
+    If HaveItem(options.events, "onmousedown")    Then NewArea.events.onmousedown    = options.events.onmousedown
+    If HaveItem(options.events, "onmouseup"  )    Then NewArea.events.onmouseup      = options.events.onmouseup
+    If HaveItem(options.events, "onrightmouseup") Then NewArea.events.onrightmouseup = options.events.onrightmouseup
     
   EndIf
 
@@ -7063,27 +7063,27 @@ INPUT
 OUTPUT
   result : TRUE if there was no error otherwise FALSE
 ---------------------------------------*/
-  DBG.Console.Out(".Area:set() -> " .. self.private.name, DBG.OpenFunc, HGui.AreaChannel)
+  DBG.Console.Out(".Area:set()", DBG.OpenFunc, HGui.AreaChannel)
   
   If IsNil(offset)
     offset = { x = 0, y = 0 }
     
   Else
-    If TB.Item.IsNil(offset, "x") Then offset.x = 0
-    If TB.Item.IsNil(offset, "y") Then offset.y = 0
+    If Not(HaveItem(offset, "x")) Then offset.x = 0
+    If Not(HaveItem(offset, "y")) Then offset.y = 0
     
   EndIf
 
   ; Area position
-  If TB.Item.Exists(options, "position")
-    If TB.Item.Exists(options.position, "x") Then self.position.x = options.position.x
-    If TB.Item.Exists(options.position, "y") Then self.position.y = options.position.y
+  If HaveItem(options, "position")
+    If HaveItem(options.position, "x") Then self.position.x = options.position.x
+    If HaveItem(options.position, "y") Then self.position.y = options.position.y
     
   EndIf
 
   ; Area size
-  If TB.Item.Exists(options, "size")
-    If TB.Item.Exists(options.size, "w")
+  If HaveItem(options, "size")
+    If HaveItem(options.size, "w")
       If Int(options.size.w) => 1
         self.size.w = options.size.w
         
@@ -7095,7 +7095,7 @@ OUTPUT
       
     EndIf
     
-    If TB.Item.Exists(options.size, "h")
+    If HaveItem(options.size, "h")
       If Int(options.size.h) => 1
         self.size.h = options.size.h
         
@@ -7110,10 +7110,10 @@ OUTPUT
   EndIf
 
   ; Area skin
-  If TB.Item.Exists(options, "skin") Then self.skin = options.skin
+  If HaveItem(options, "skin") Then self.skin = options.skin
 
   ; Active flag
-  If TB.Item.Exists(options, "active")
+  If HaveItem(options, "active")
     If (self.active = True) And (Options.active = False) Then DeleteButton(self.private.button)
 
     self.active = options.active
@@ -7123,19 +7123,19 @@ OUTPUT
   SelectDisplay(self.window.private.HWId, True)
 
   ; Active area events
-  If TB.Item.Exists(options, "events")
-    If TB.Item.Exists(options.events, "onmouseover")    Then self.events.onmouseover = options.events.onmouseover
-    If TB.Item.Exists(options.events, "onmouseout" )    Then self.events.onmouseout  = options.events.onmouseout
-    If TB.Item.Exists(options.events, "onmousedown")    Then self.events.onmousedown = options.events.onmousedown
-    If TB.Item.Exists(options.events, "onmouseup"  )    Then self.events.onmouseup   = options.events.onmouseup
-    If TB.Item.Exists(options.events, "onrightmouseup") Then self.events.onrightmouseup = options.events.onrightmouseup
+  If HaveItem(options, "events")
+    If HaveItem(options.events, "onmouseover")    Then self.events.onmouseover = options.events.onmouseover
+    If HaveItem(options.events, "onmouseout" )    Then self.events.onmouseout  = options.events.onmouseout
+    If HaveItem(options.events, "onmousedown")    Then self.events.onmousedown = options.events.onmousedown
+    If HaveItem(options.events, "onmouseup"  )    Then self.events.onmouseup   = options.events.onmouseup
+    If HaveItem(options.events, "onrightmouseup") Then self.events.onrightmouseup = options.events.onrightmouseup
   EndIf
 
   ; Linked object
-  If HL.IsNotNil(object) Then self.object = object
+  If Not(IsNil(object)) Then self.object = object
 
   ; Callback UserData
-  If TB.Item.Exists(options, "userdata") Then self.userdata = options.userdata
+  If HaveItem(options, "userdata") Then self.userdata = options.userdata
 
   If self.active
     /* This code below necessary to trim the active area (button area) and limit
@@ -7149,7 +7149,7 @@ OUTPUT
 
     Local ox, oy, ow, oh, create = offset.x, 0, 0, 0, True
     
-    If TB.Item.Exists(self.Object, "islistviewheader")    
+    If HaveItem(self.Object, "islistviewheader")    
       ; This object is a LISTVIEW (column) HEADER
       Local TopBoxArea = self.Object.Father.TopBox.Area
       ; Managing the illustrated possiblities:
@@ -7183,7 +7183,7 @@ OUTPUT
         ow = (TopBoxArea.position.x+TopBoxArea.size.w) - (self.position.x+self.size.w+offset.x)
       EndIf
     
-    ElseIf TB.Item.Exists(self.Object, "isvirtualized")
+    ElseIf HaveItem(self.Object, "isvirtualized")
       ; This object is a VIRTUALIZED OBJECT
       If self.Object.IsVirtualized
         Local TopBoxArea = self.Object.VirtualRoot.Area
@@ -7246,7 +7246,7 @@ OUTPUT
 
     ; If exists a button field on this area object and if it have a valid id
     ; remove it.
-    If TB.Item.Exists(self.private, "button")
+    If HaveItem(self.private, "button")
       If GetType(self.private.button) <> #NUMBER Then DeleteButton(self.private.button)
     EndIf
 
@@ -7270,11 +7270,11 @@ OUTPUT
   EndIf
   
   ; Check if we need to recursively adjust all child objects
-  If TB.Item.Exists(options, "recurse")
+  If HaveItem(options, "recurse")
     If options.recurse
-      If TB.Item.Exists(self, "object")
-        If TB.Item.Exists(self.object, "childs")
-          If TB.Item.Exists(self.object.childs, "gadgets")
+      If HaveItem(self, "object")
+        If HaveItem(self.object, "childs")
+          If HaveItem(self.object.childs, "gadgets")
             Local i, v
             For i, v In Pairs(self.object.childs.gadgets)
               v.Area:set({ recurse = True })
@@ -7328,9 +7328,9 @@ Free the area object.
 OUTPUT
   result : TRUE if the area was successfully released.
 ---------------------------------------*/
-  DBG.Console.Out(".Area:free() : " .. self.private.name, DBG.OpenFunc, HGui.AreaChannel)
+  DBG.Console.Out(".Area:free()", Nil, HGui.AreaChannel)
   
-  ; Check if we have to remove the attached button
+  ; Check if we have to remove an attached button
   If self.active And GetType(self.private.button) <> #NUMBER
     ; Select the window where the button was created
     GFX.OutputDevice.Select(#DISPLAY, self.Window.Private.HWId)
@@ -7343,7 +7343,6 @@ OUTPUT
   ; Remove the area object
   HGui.Areas[self] = Nil
 
-  DBG.Console.Out(Nil, DBG.CloseFunc, HGui.AreaChannel)
   Return(True)
 
 EndFunction
@@ -7363,7 +7362,7 @@ OUTPUT
   areaObject : The found areaObject or FALSE if no area was found
   index : If the area was found return the object index in HGui.Areas table
 ---------------------------------------*/
-  DBG.Console.Out(".Area_FindByName() : " .. ToString(area_name), DBG.OpenFunc, HGui.AreaChannel)
+  DBG.Console.Out(".Area_FindByName()", DBG.OpenFunc, HGui.AreaChannel)
 
   Local i, v
   For i, v In Pairs(HGui.Areas)
@@ -7375,7 +7374,7 @@ OUTPUT
 
   Next
 
-  DBG.Console.Out("Not found!", DBG.CloseFunc, HGui.AreaChannel)
+  DBG.Console.Out(ToString(area_name) .. " not found!", DBG.CloseFunc, HGui.AreaChannel)
   Return(False)
 
 EndFunction
@@ -19390,23 +19389,30 @@ Function HGui.Debug.Enable(channels) ; *TriDoc*
   ; - channels
   ;  - main           True/False
   ;  - windows        True/False
+  ;  - areas          True/False
   ; ---------------------------------------------
   
   Local enable_main    = False
   Local enable_windows = False
+  Local enable_areas   = False
   
   If TB.Item.Exists(channels, "main")
     If channels.main Then enable_main = True
   EndIf
   
-  If TB.Iem.Exist(channels, "windows")
+  If TB.Item.Exists(channels, "windows")
     If channels.windows Then enable_windows = True
   EndIf
   
-  If enable_main Or enable_windows
+  If TB.Item.Exists(channels, "areas")
+    If channel.areas Then enable_area = True
+  EndIf
+  
+  If enable_main Or enable_windows Or enable_areas
     DBG.Console.Enable(True, True)
     If enable_main Then DBG.Console.AddChannel(HGui.DebugChannel)
     If enable_windows Then DBG.Console.AddChannel(HGui.WChannel)
+    If enable_areas Then DBG.Console.AddChannel(HGui.AreaChannel)
   EndIf
   
 EndFunction
