@@ -5,8 +5,8 @@
  * Dependancies : HELPERS, EASING Libraries                               *
  * PayPal Support : hijoe@tin.it                                          *
  * Patreon Support : https://www.patreon.com/Allanon71                    *
- * Version : 1.7                                                          *
- * Release : 27.10.2022                                                   *
+ * Version : 1.8                                                          *
+ * Release : 23.05.2023                                                   *
  *-------------------------------------------------------------------------
  *
  *   Tables library is an include file for Hollywood with many
@@ -50,6 +50,9 @@
  TB.PickRandom()
  
  :: CHANGE LOG ::
+ 23/05/2023
+ - Some optimizations and minor changes
+ 
  27/10/2022
  - Added TB.PickRandom()
  
@@ -64,13 +67,12 @@
 @INCLUDE "+Includes.hws"
 @INCLUDE #INC_HELPERS
 @INCLUDE #INC_EASING
-;@INCLUDE #INC_DEBUG
 
 Global TB = {}
        TB.Item    = {}
        TB.Convert = {}
-       TB.Version = "1.4"
-       TB.Build   = "02/05/2020"
+       TB.Version = "1.8"
+       TB.Build   = "23/05/2023"
 
 ;--| TODO |-------------------------------------------------------------
 ; POSSIBLE FEATURE IN TB.Count() -> Count also subitems using recursion.
@@ -78,18 +80,18 @@ Global TB = {}
 
 Function TB.Join(table1, table2)
 /***********************************************************************
-| table1 = TB.Join(table1, table2)
-|
-| Join 'table1' and 'table2', 'table1' will be modified directly adding
-| all 'table2' entries.
-| This function can be used only with numerical-indexed tables.
-| 
-| INPUT
-|   table1 : 'table1' to join
-|   table2 : 'table2' to join
-|
-| OUTPUT
-|   table1 : 'table1' with all the 'table2' entries added at the end
+table1 = TB.Join(table1, table2)
+
+Join 'table1' and 'table2', 'table1' will be modified directly adding
+all 'table2' entries.
+This function can be used only with numerical-indexed tables.
+ 
+INPUT
+  table1 : 'table1' to join
+  table2 : 'table2' to join
+
+OUTPUT
+  table1 : 'table1' with all the 'table2' entries added at the end
 ***********************************************************************/
   Local l1, l2 = ListItems(table1), ListItems(table2)-1
   
@@ -103,22 +105,22 @@ EndFunction
 
 Function TB.Item.IsNil(table, index)
 /************************************************************************
-| result = TB.Item.IsNil(table, index)
-|
-| Returns TRUE if 'index' doesn't exists in 'table' otherwise returns FALSE.
-| This function is usefull to test if there are undefined items within tables.
-| Even if the most recent version of Hollywood has the inbuilt function
-| HaveItem() to achieve the same goal (using Not operator), TB.Item.IsNil()
-| is able to test string indexes including lowercase and uppercase letters
-| while the Hollywood function can check only lowercase string indexes.
-| 
-| INPUT
-|   table : The table you need to check for the <index> key
-|   index : The index/key to check
-|
-| OUTPUT
-|   result : TRUE if 'index' is not defined in 'table', otherwise FALSE.
-|            FALSE will be returned also if 'table' is NIL.
+result = TB.Item.IsNil(table, index)
+
+Returns TRUE if 'index' doesn't exists in 'table' otherwise returns FALSE.
+This function is usefull to test if there are undefined items within tables.
+Even if the most recent version of Hollywood has the inbuilt function
+HaveItem() to achieve the same goal (using Not operator), TB.Item.IsNil()
+is able to test string indexes including lowercase and uppercase letters
+while the Hollywood function can check only lowercase string indexes.
+ 
+INPUT
+  table : The table you need to check for the <index> key
+  index : The index/key to check
+
+OUTPUT
+  result : TRUE if 'index' is not defined in 'table', otherwise FALSE.
+           FALSE will be returned also if 'table' is NIL.
 ************************************************************************/
   If GetType(table) = #NIL Then Return(True)
   If GetType(RawGet(table, index)) = #NIL Then Return(True) Else Return(False)
@@ -128,61 +130,63 @@ EndFunction
 
 Function TB.Item.Exists(table, index)
 /******************************************************************************
-| result = TB.Item.Exists(table, index)
-| 
-| Returns TRUE if 'index' is not NIL within 'table' otherwise returns FALSE.
-| This function is usefull to test if there are defined items within tables.
-| Even if the most recent version of Hollywood has the inbuilt function
-| HaveItem() to achieve the same goal, TB.Item.Exists() is able to test
-| string indexes including lowercase and uppercase letters while the
-| Hollywood function can check only lowercase string indexes.
-| 
-| INPUT
-|   table : The table you need to check for 'index' key
-|   index . The index to check
-| OUTPUT
-|   result : True if 'index' is defined within 'table'
+result = TB.Item.Exists(table, index)
+ 
+Returns TRUE if 'index' is not NIL within 'table' otherwise returns FALSE.
+This function is usefull to test if there are defined items within tables.
+Even if the most recent version of Hollywood has the inbuilt function
+HaveItem() to achieve the same goal, TB.Item.Exists() is able to test
+string indexes including lowercase and uppercase letters while the
+Hollywood function can check only lowercase string indexes.
+
+INPUT
+  table : The table you need to check for 'index' key
+  index . The index to check
+  
+OUTPUT
+  result : True if 'index' is defined within 'table'
 ******************************************************************************/
 
-   If GetType(table) = #NIL Then Return(False)
-   If GetType(RawGet(table, index)) = #NIL Then Return(False) Else Return(True)
+  If GetType(table) = #NIL Then Return(False)
+  If GetType(RawGet(table, index)) = #NIL Then Return(False) Else Return(True)
 
 EndFunction
 
 
 Function TB.PushUp(table, pos)
 /******************************************************************************
-| TB.PushUp(table, pos)
-| 
-| Move the item at position 'pos' from its current position to position 0 (to the
-| top of the table) and move all the rest down by one position.
-| 
-| INPUT
-|   table : Source table
-|   pos   : Index of the item to push up
-| NOTES
-|   This function is only for tables with consecutive numeric indexes starting
-|   from 0.
+TB.PushUp(table, pos)
+ 
+Move the item at position 'pos' from its current position to position 0 (to the
+top of the table) and move all the rest down by one position.
+ 
+INPUT
+  table : Source table
+  pos   : Index of the item to push up
+NOTES
+  This function is only for tables with consecutive numeric indexes starting
+  from 0.
 ******************************************************************************/
-   Local item = table[pos]
-   InsertItem(table, item, 0)
-   RemoveItem(table, pos+1)
+  Local item = table[pos]
+  InsertItem(table, item, 0)
+  RemoveItem(table, pos+1)
 
 EndFunction
 
+
 Function TB.PushDown(table, pos)
 /******************************************************************************
-| TB.PushUp(table, pos)
-| 
-| Move the item at position 'pos' from its current position to the bottom and 
-| move all the rest up by one position.
-| 
-| INPUT
-|   table : Source table
-|   pos   : Index of the item to push down
-| NOTES
-|   This function is only for tables with consecutive numeric indexes starting
-|   from 0.
+TB.PushUp(table, pos)
+ 
+Move the item at position 'pos' from its current position to the bottom and 
+move all the rest up by one position.
+ 
+INPUT
+  table : Source table
+  pos   : Index of the item to push down
+NOTES
+  This function is only for tables with consecutive numeric indexes starting
+  from 0.
 ******************************************************************************/
    Local item = table[pos]
    InsertItem(table, item)
@@ -190,69 +194,70 @@ Function TB.PushDown(table, pos)
 
 EndFunction
 
+
 Function TB.ShiftUp(table)
 /******************************************************************************
-| result = TB.ShiftUp(table)
-| 
-| Shifts all 'table' items up by one position, the first item will be placed at 
-| the last position.
-| 
-| INPUT
-|   table : Source table
-| OUTPUT
-|   result : Returns TRUE if 'table' was processed correctly
-| NOTES
-|   This function is for tables with consecutive numeric indexes starting from 0.
+result = TB.ShiftUp(table)
+ 
+Shifts all 'table' items up by one position, the first item will be placed at 
+the last position.
+ 
+INPUT
+  table : Source table
+OUTPUT
+  result : Returns TRUE if 'table' was processed correctly
+NOTES
+  This function is for tables with consecutive numeric indexes starting from 0.
 ******************************************************************************/
-   If GetType(table) <> #TABLE Then Return(False)
-   Local cnt = ListItems(table)-1
-   If cnt < 2 Then Return(False)
+  If GetType(table) <> #TABLE Then Return(False)
+  Local cnt = ListItems(table)-1
+  If cnt < 2 Then Return(False)
    
-   InsertItem(table, table[0])
-   RemoveItem(table, 0)
+  InsertItem(table, table[0])
+  RemoveItem(table, 0)
 
-   Return(True)
+  Return(True)
 
 EndFunction
 
 
 Function TB.ShiftDown(table)
 /******************************************************************************
-| result = TB.ShiftDown(table)
-| 
-| Shifts all 'table' items down by one position, the last item will be placed at 
-| the first position.
-| 
-| INPUT
-|   table : Source table
-| OUTPUT
-|   result : Returns TRUE if 'table' was processed correctly
-| NOTES
-|   This function is for tables with consecutive numeric indexes starting from 0.
+result = TB.ShiftDown(table)
+
+Shifts all 'table' items down by one position, the last item will be placed at 
+the first position.
+
+INPUT
+  table : Source table
+OUTPUT
+  result : Returns TRUE if 'table' was processed correctly
+NOTES
+  This function is for tables with consecutive numeric indexes starting from 0.
 ******************************************************************************/
-   If GetType(table) <> #TABLE Then Return(False)
-   Local cnt = ListItems(table)-1
-   If cnt < 2 Then Return(False)
+  If GetType(table) <> #TABLE Then Return(False)
+  Local cnt = ListItems(table)-1
+  If cnt < 2 Then Return(False)
    
-   InsertItem(table, table[cnt], 0)
-   RemoveItem(table, cnt+1)
+  InsertItem(table, table[cnt], 0)
+  RemoveItem(table, cnt+1)
    
-   Return(True)
+  Return(True)
 
 EndFunction
 
 Function TB.PickRandom(table)
 /******************************************************************************
-| result = TB.PickRandom(table)
-| 
-| Returns a random item from the given table
-| 
-| INPUT
-|   table : Source table
-| OUTPUT
-|   result : Returns a random item from the given table
-| NOTES
-|   This function is for tables with consecutive numeric indexes starting from 0.
+result = TB.PickRandom(table)
+ 
+Returns a random item from the given table
+ 
+INPUT
+  table : Source table
+OUTPUT
+  result : Returns a random item from the given table
+NOTES
+  This function is for tables with consecutive numeric indexes starting from 0.
 ******************************************************************************/
   Local c = ListItems(table)
   Local r = Rnd(c)
@@ -261,22 +266,20 @@ Function TB.PickRandom(table)
 
 EndFunction
 
+
 Function TB.Count(table)
 /******************************************************************************
-| count = TB.Count(table)
-| 
-| Return how many entries are stored in 'table'. This function is able to count 
-| any type of table with any type of index.
-| 
-| INPUT
-|   table : Source table
-| OUTPUT
-|   count : Returns the number of items in the table or -1 if an error was
-|           occurred.
+count = TB.Count(table)
+ 
+Return how many entries are stored in 'table'. This function is able to count 
+any type of table with any type of index.
+
+INPUT
+  table : Source table
+OUTPUT
+  count : Returns the number of items in the table or -1 if an error was
+          occurred.
 ******************************************************************************/
-  ; If IsNil(Table) Then Return(-1)
-  ; If GetType(Table) <> #TABLE Then Return(-1)
-   
   Local count, i, v = 0
 
   ; Scan the given table and count its entries
@@ -289,154 +292,149 @@ EndFunction
 
 Function TB.Merge(table1, table2, overwrite)
 /******************************************************************************
-| table1 = TB.Merge(table1, table2, overwrite)
-| 
-| Adds all 'table2' items to 'table1', note that 'table1'will be directly 
-| modified. 'overwrite' is used to specify if any existing 'table1' item should 
-| be overwritten by 'table2' items or not.
-| 
-| INPUT
-|   table1    : Target table
-|   table2    : Table to merge into 'table1'
-|   overwrite : Set to TRUE to overwrite existing items
-| OUTPUT
-|   table1 : The modified table (same as 'table1')
-| NOTE
-|   This function is fully recursive.
+table1 = TB.Merge(table1, table2, overwrite)
+
+Adds all 'table2' items to 'table1', note that 'table1'will be directly 
+modified. 'overwrite' is used to specify if any existing 'table1' item should 
+be overwritten by 'table2' items or not.
+
+INPUT
+  table1    : Target table
+  table2    : Table to merge into 'table1'
+  overwrite : Set to TRUE to overwrite existing items
+OUTPUT
+  table1 : The modified table (same as 'table1')
+NOTE
+  This function is fully recursive.
 ******************************************************************************/
-   If HL.IsNil(table1) Or HL.IsNil(table2) Then Return(table1)
-   If HL.IsNil(overwrite) Then overwrite = False
+  If IsNil(table1) Or IsNil(table2) Then Return(table1)
+  If IsNil(overwrite) Then overwrite = False
    
-   Local i, v = NextItem(table2)
-   While Not(HL.IsNil(i))
-      If TB.Item.IsNil(table1, i)
-         If GetType(v) = #TABLE
-            table1[i] = {}
-            TB.Merge(table1[i], v, overwrite)
-         Else
-            table1[i] = v
-         EndIf
+  Local i, v = NextItem(table2)
+  While Not(IsNil(i))
+    If TB.Item.IsNil(table1, i)
+      If GetType(v) = #TABLE
+        table1[i] = {}
+        TB.Merge(table1[i], v, overwrite)
       Else
-         If overwrite
-            If GetType(v) = #TABLE
-               TB.Merge(table1[i], v, overwrite)
-            Else
-               table1[i] = v
-            EndIf
-         EndIf
+        table1[i] = v
       EndIf
-      i, v = NextItem(table2, i)
-   Wend
+    Else
+      If overwrite
+        If GetType(v) = #TABLE
+          TB.Merge(table1[i], v, overwrite)
+        Else
+          table1[i] = v
+        EndIf
+      EndIf
+    EndIf
+    i, v = NextItem(table2, i)
+  Wend
    
-   Return(table1)
+  Return(table1)
+
 EndFunction
 
 
 Function TB.Item.Compare(record1, record2, greater, columns)
 /******************************************************************************
-| result = TB.Item.Compare(record1, record2, greater, columns)
-| 
-| This routine is used to compare two records (tables). The comparison is based 
-| on one or more fields (indexes), this fields must be specified in the 'columns'
-| table. 'greater' is a table with booleans and specify what kind of comparisons
-| must be performed: if TRUE means that the following check will be made:
-| > record1.field is greater then record2.field ?
-| This routine supports multilevel comparisons, just supply the field names in 
-| the 'columns' table and in the right order.
-| 
-| INPUT
-|   record1 : First record to compare
-|   record2 : Second record to compare
-|   greater : One or more comparison specification(s)
-|   columns : One or more field name(s)
-| OUTPUT
-|   result : Returns TRUE if the comparison is satisfied.
+result = TB.Item.Compare(record1, record2, greater, columns)
+
+This routine is used to compare two records (tables). The comparison is based 
+on one or more fields (indexes), this fields must be specified in the 'columns'
+table. 'greater' is a table with booleans and specify what kind of comparisons
+must be performed: if TRUE means that the following check will be made:
+> record1.field is greater then record2.field ?
+This routine supports multilevel comparisons, just supply the field names in 
+the 'columns' table and in the right order.
+
+INPUT
+  record1 : First record to compare
+  record2 : Second record to compare
+  greater : One or more comparison specification(s)
+  columns : One or more field name(s)
+OUTPUT
+  result : Returns TRUE if the comparison is satisfied.
 ******************************************************************************/
-   Local CCount = TB.Count(Columns) - 1
-   For Local c = 0 To CCount
-      Local CName = columns[c]
-      Local Desce = greater[c]
-      Local R1    = record1[CName]
-      Local R2    = record2[CName]
+  Local CCount = TB.Count(Columns) - 1
+  For Local c = 0 To CCount
+    Local CName = columns[c]
+    Local Desce = greater[c]
+    Local R1    = record1[CName]
+    Local R2    = record2[CName]
       
-      ; If items are equal continue the loop checking the next field
-      /* tentativo di ottimizzazione */
-         /* OLD WORKING CODE
-      If GetType(R1[CName]) = #STRING And GetType(R2[CName]) <> #STRING
-         R2[CName] = ToString(R2[CName])
-      ElseIf GetType(R1[CName]) <> #STRING And GetType(R2[CName]) = #STRING
-         R1[CName] = ToString(R1[CName])
-      EndIf */
-      If GetType(R1)=#STRING
-        If GetType(R2)<>#STRING Then R2 = ToString(R2)
-      ElseIf GetType(R2)=#STRING
-        If GetType(R1)<>#STRING Then R1 = ToString(R1)
-      ElseIf GetType(R1)=#TABLE Or GetType(R2)=#TABLE
-        ; Cannot compare tables
-        Return(False)
-      EndIf
+    If GetType(R1)=#STRING
+      If GetType(R2)<>#STRING Then R2 = ToString(R2)
+
+    ElseIf GetType(R2)=#STRING
+      If GetType(R1)<>#STRING Then R1 = ToString(R1)
+
+    ElseIf GetType(R1)=#TABLE Or GetType(R2)=#TABLE
+      ; Cannot compare tables
+      Return(False)
+
+    EndIf
       
-      If Desce
-         If R1 > R2 Then Return(True)
-         If R1 < R2 Then Return(False)
-      Else
-         If R1 < R2 Then Return(True)
-         If R1 > R2 Then Return(False)
-      EndIf
-   Next
+    If Desce
+      If R1 > R2 Then Return(True)
+      If R1 < R2 Then Return(False)
+    Else
+      If R1 < R2 Then Return(True)
+      If R1 > R2 Then Return(False)
+    EndIf
+
+  Next
    
-   Return(True)
+  Return(True)
 
 EndFunction
 
 
 Function TB.Sort(table, descending, column, associated, type)
 /******************************************************************************
-| sorted = TB.Sort(table, descending, column, associated, type)
-| 
-| Sort the given 'table' basing the sorting on 'columns'. 'table' must be composed
-| by subtables, like records, and indexed with numeric values. 'table' will be
-| directly modified while sorting items.
-| You can set sorting order setting 'descending' to TRUE or FALSE, 'column' can
-| be a field name or a table width field names we want to use to sort the 'table'.
-| 
-| INPUT
-|   table : The table we want to sort
-|   descending : To sort in descending order set this flag to TRUE, if you are
-|                are sorting the table using multiple column you have to provide
-|                a table with one flag for each column.
-|   column : Column name or a table of strings with columns names used for the
-|            sorting operation.
-|   associated : A table holding further tables associated with 'table', the
-|                subtable items will follow the sorting order of the master table.
-|                This argument is optional.
-|   type : Sort method, default = combsort
-|          Possible sorting algorhythms are:
-|          - combsort      - quicksort      - bubblesort
-|          - cocktailsort
-|          - circlesort (Right now this method must be reviewed and fixed)
-| OUTPUT
-|   sorted : The source table after the sorting process
+sorted = TB.Sort(table, descending, column, associated, type)
+
+Sort the given 'table' basing the sorting on 'columns'. 'table' must be composed
+by subtables, like records, and indexed with numeric values. 'table' will be
+directly modified while sorting items.
+You can set sorting order setting 'descending' to TRUE or FALSE, 'column' can
+be a field name or a table width field names we want to use to sort the 'table'.
+ 
+INPUT
+  table : The table we want to sort
+  descending : To sort in descending order set this flag to TRUE, if you are
+               are sorting the table using multiple column you have to provide
+               a table with one flag for each column.
+  column : Column name or a table of strings with columns names used for the
+           sorting operation.
+  associated : A table holding further tables associated with 'table', the
+               subtable items will follow the sorting order of the master table.
+               This argument is optional.
+  type : Sort method, default = combsort
+         Possible sorting algorhythms are:
+         - combsort      - quicksort      - bubblesort
+         - cocktailsort
+         - circlesort (Right now this method must be reviewed and fixed)
+OUTPUT
+  sorted : The source table after the sorting process
 ******************************************************************************/
 ; Source:
 ; --- http://www.vbforums.com/showthread.php?473677-VB6-Sorting-algorithms-%28sort-array-sorting-arrays%29 
 
-   Local entries = TB.Count(table) - 1
-   If HL.IsNil(type) Then type = "combsort"
-   If ListItems(table) <=2 Then type = "quicksort"
+  Local entries = TB.Count(table) - 1
+  If IsNil(type) Then type = "combsort"
+  If ListItems(table) <=2 Then type = "quicksort"
    
   ;"circlesort", "quicksort", "bubblesort", "cocktailsort"
    
-   If GetType(column)     <> #TABLE Then column = { column }
-   If GetType(descending) <> #TABLE Then descending = { descending }
+  If GetType(column)     <> #TABLE Then column = { column }
+  If GetType(descending) <> #TABLE Then descending = { descending }
 
-   ; Sorting loop
-   Local ass = True
-   If HL.IsNil(associated)
-      ass = False
-   EndIf
+  ; Sorting loop
+  Local ass = True
+  If IsNil(associated) Then ass = False
 
-   Switch type
+  Switch type
     Case "quicksort"
       For Local i = 0 To (entries - 1)
         For Local ii = (i + 1) To entries
@@ -540,10 +538,8 @@ Function TB.Sort(table, descending, column, associated, type)
 EndFunction
 
 Function TB.Sort_CircleSort(table, lo, hi, swaps, descending, column, associated)
-   Local ass = True
-   If HL.IsNil(associated)
-      ass = False
-   EndIf
+  Local ass = True
+  If IsNil(associated) Then ass = False
   
   If GetType(column)     <> #TABLE Then column = { column }
   If GetType(descending) <> #TABLE Then descending = { descending }
@@ -584,17 +580,17 @@ EndFunction
 
 Function TB.ReIndex(oldKey, newKey, source)
 /******************************************************************************
-| TB.ReIndex(oldKey, newKey, source)
-| 
-| For the given 'source' table, change the current index with the given column.
-| A new table will be generated and returned.
-| 
-| INPUT
-|   oldKey : Old index name
-|   newKey : New index name (column name)
-|   source : Source table
-| OUTPUT
-|   reindexed : Reindexed table
+TB.ReIndex(oldKey, newKey, source)
+
+For the given 'source' table, change the current index with the given column.
+A new table will be generated and returned.
+
+INPUT
+  oldKey : Old index name
+  newKey : New index name (column name)
+  source : Source table
+OUTPUT
+  reindexed : Reindexed table
 *******************************************************************************/
   Local newTable = {}
   For i, v In Pairs(source)
@@ -602,31 +598,31 @@ Function TB.ReIndex(oldKey, newKey, source)
     newTable[v[newKey]][oldKey] = i
     newTable[v[newKey]][newKey] = Nil
   Next
+  
   Return(newTable)
+  
 EndFunction
 
 Function TB.Item.DeepFind(table, keyword, recflag)
 /******************************************************************************
-| subset = TB.Item.DeepFind(table, keyword)
-|
-| Returns a subset of the given 'table' if any of its fields match the given
-| 'keyword'. 'keyword' can contain matching patterns.
-|
-| INPUT
-|   table : Source table
-|   keyword : Value
-|   recflag : Is a flag used internally when recursion is used
-|
-| OUTPUT
-|   subset : A table with all 'table' items with at least one matching field.
-|            the original index will be preserved.
-|
-| NOTE
-|   For string values you can use pattern matching conventions as follow:
-|    *  : Matches all characters.                
-|    ?  : Matches just a single character.
-|    #  : Matches all numbers. 
-|    [] : Matches one or several characters or a range of characters
+subset = TB.Item.DeepFind(table, keyword)
+
+Returns a subset of the given 'table' if any of its fields match the given
+'keyword'. 'keyword' can contain matching patterns.
+
+INPUT
+  table : Source table
+  keyword : Value
+  recflag : Is a flag used internally when recursion is used
+OUTPUT
+  subset : A table with all 'table' items with at least one matching field.
+           the original index will be preserved.
+NOTE
+  For string values you can use pattern matching conventions as follow:
+   *  : Matches all characters.                
+   ?  : Matches just a single character.
+   #  : Matches all numbers. 
+   [] : Matches one or several characters or a range of characters
 ******************************************************************************/
   
   Local subset = {}
@@ -687,33 +683,34 @@ Function TB.Item.DeepFind(table, keyword, recflag)
   
 EndFunction
 
+
 Function TB.Item.Find(table, value, caseSensitive, exactString)
 /******************************************************************************
-| found, index = TB.Item.Find(table, value, caseSensitive, exactString)
-| 
-| Search in 'table' an item with the value equal to 'value'. The search will be 
-| performed only on the first table level (subtables  will not be scanned).
-| 'value' can be of any type.
-| 
-| INPUT
-|   table : Source table
-|   value : Value to find
-|   caseSensitive : Set to TRUE for case sensitive searches (strings)
-|   exactString : Set to TRUE to match for the exact value, in this case casing
-|                 will be ignored.
-| OUTPUT
-|   found : TRUE if a result have been found
-|   index : Index of the founded item
-| NOTE
-|   Only the first occurence will be returned. For string values you can use
-|   pattern matching conventions as follow:
-|    *  : Matches all characters.                
-|    ?  : Matches just a single character.
-|    #  : Matches all numbers. 
-|    [] : Matches one or several characters or a range of characters
+found, index = TB.Item.Find(table, value, caseSensitive, exactString)
+
+Search in 'table' an item with the value equal to 'value'. The search will be 
+performed only on the first table level (subtables  will not be scanned).
+'value' can be of any type.
+
+INPUT
+  table : Source table
+  value : Value to find
+  caseSensitive : Set to TRUE for case sensitive searches (strings)
+  exactString : Set to TRUE to match for the exact value, in this case casing
+                will be ignored.
+OUTPUT
+  found : TRUE if a result have been found
+  index : Index of the founded item
+NOTE
+  Only the first occurence will be returned. For string values you can use
+  pattern matching conventions as follow:
+   *  : Matches all characters.                
+   ?  : Matches just a single character.
+   #  : Matches all numbers. 
+   [] : Matches one or several characters or a range of characters
 ******************************************************************************/
-   Local found = False
-   Local index = -1
+  Local found = False
+  Local index = -1
    
   For i, v In Pairs(table)
     If GetType(table[i]) = GetType(value)
@@ -758,125 +755,126 @@ EndFunction
 
 Function TB.TrimSpaces(table, recursive)
 /******************************************************************************
-| table = TB.TrimSpaces(table, recursive)
-| 
-| Remove from any string entries in the given 'table' any trailing or leading 
-| spaces. The source 'table' will be directly modified.
-| 
-| INPUT
-|   table : The table we want to process
-|   recursive : Set to TRUE to process the table recursivly
-| OUTPUT
-|   table : Processed source 'table'
-******************************************************************************/
-   If HL.IsNil(recursive) Then recursive = False
-   
-   ; Scan the table
-   Local i, v = NextItem(table)
-   While GetType(i) <> #NIL
-      ; Trim spaces from string items
-      If GetType(v) = #STRING
-         cleaned = TrimStr(v, " ", False)
-         cleaned = TrimStr(cleaned, " ", True)
-         table[i] = cleaned
-      ElseIf GetType(v) = #TABLE
-         If recursive Then TB.TrimSpaces(v, recursive)
-      EndIf
+table = TB.TrimSpaces(table, recursive)
 
-      i, v = NextItem(table, i)
+Remove from any string entries in the given 'table' any trailing or leading 
+spaces. The source 'table' will be directly modified.
+
+INPUT
+  table : The table we want to process
+  recursive : Set to TRUE to process the table recursivly
+OUTPUT
+  table : Processed source 'table'
+******************************************************************************/
+  If IsNil(recursive) Then recursive = False
+   
+  ; Scan the table
+  Local i, v = NextItem(table)
+  While GetType(i) <> #NIL
+    ; Trim spaces from string items
+    If GetType(v) = #STRING
+      cleaned = TrimStr(v, " ", False)
+      cleaned = TrimStr(cleaned, " ", True)
+      table[i] = cleaned
+    ElseIf GetType(v) = #TABLE
+      If recursive Then TB.TrimSpaces(v, recursive)
+    EndIf
+
+    i, v = NextItem(table, i)
    Wend
    
-   Return(Table)
+  Return(Table)
 EndFunction
 
 
 Function TB.ReplaceChars(table, chars, replacer, recursive, casing)
 /******************************************************************************
-| table = TB.ReplaceChars(table, chars, replacer, recursive)
-| 
-| Scans 'table' for each string entry and replaces any occurrencies of 'chars' 
-| with the string 'replacer'. Set 'recursive' to TRUE if you want to scan 'table'
-| recusively.
-| 
-| INPUT
-|   table : The table to process
-|   chars : String to replace with 'replacer'
-|   replacer : String that will replace 'chars'
-|   recursive : Set to TRUE to process 'table' recursively
-|   casing : True for case sensitive (default false)
-| OUTPUT
-|   table : Processed source 'table'
-| NOTE
-|   Non-string items will be skipped
+table = TB.ReplaceChars(table, chars, replacer, recursive)
+
+Scans 'table' for each string entry and replaces any occurrencies of 'chars' 
+with the string 'replacer'. Set 'recursive' to TRUE if you want to scan 'table'
+recusively.
+
+INPUT
+  table : The table to process
+  chars : String to replace with 'replacer'
+  replacer : String that will replace 'chars'
+  recursive : Set to TRUE to process 'table' recursively
+  casing : True for case sensitive (default false)
+OUTPUT
+  table : Processed source 'table'
+NOTE
+  Non-string items will be skipped
 ******************************************************************************/
-   If HL.IsNil(recursive) Then recursive = False
-   If HL.IsNil(casing) Then casing = False
+  If IsNil(recursive) Then recursive = False
+  If IsNil(casing) Then casing = False
 
-   ; Scan the source table
-   Local i, v = NextItem(table)
-   While GetType(i) <> #NIL
-      ; Process string items
-      If GetType(v) = #STRING
-         table[i] = ReplaceStr(v, chars, replacer, casing)
-      ElseIf GetType(v) = #TABLE
-         If recursive Then TB.ReplaceChars(v, chars, replacer, recursive, casing)
-      EndIf
+  ; Scan the source table
+  Local i, v = NextItem(table)
+  While GetType(i) <> #NIL
+    ; Process string items
+    If GetType(v) = #STRING
+      table[i] = ReplaceStr(v, chars, replacer, casing)
+    ElseIf GetType(v) = #TABLE
+      If recursive Then TB.ReplaceChars(v, chars, replacer, recursive, casing)
+    EndIf
 
-      i, v = NextItem(table, i)
-   Wend
+    i, v = NextItem(table, i)
+  Wend
 
-   Return(table)
+  Return(table)
 EndFunction
 
 
 Function TB.Compare(table1, table2, compare_funcs)
 /******************************************************************************
-| result = TB.Compare(table1, table2, compare_funcs)
-| 
-| Compare 'table1' and 'table2' and returns TRUE if they are equal.
-| Set 'compare_funcs' to TRUE if you want to compare function entries too. The
-| comparisons are fully recursive.
-| 
-| INPUT
-|   table1 : The first table to compare
-|   table2 : The second table to compare
-|   compare_func : Set to TRUE to compare also function fields
-| OUTPUT
-|   result : The result of the comparison: TRUE or FALSE
+result = TB.Compare(table1, table2, compare_funcs)
+
+Compare 'table1' and 'table2' and returns TRUE if they are equal.
+Set 'compare_funcs' to TRUE if you want to compare function entries too. The
+comparisons are fully recursive.
+
+INPUT
+  table1 : The first table to compare
+  table2 : The second table to compare
+  compare_func : Set to TRUE to compare also function fields
+OUTPUT
+  result : The result of the comparison: TRUE or FALSE
 ******************************************************************************/
-   If GetType(table1) <> #TABLE Or GetType(table2) <> #TABLE Then Return(False)
+  If GetType(table1) <> #TABLE Or GetType(table2) <> #TABLE Then Return(False)
 
-   Local table2copy = CopyTable(table2)
-   Local result     = True
-
-   For i, v In Pairs(table1)
-      If TB.Item.IsNil(table2, i)
-         ; Index of table1 not found on table2
-         Return(False)
-      ElseIf GetType(v) <> GetType(table2[i])
-         ; Item type of table1 different from item type of table2
-         Return(False)
-      ElseIf GetType(v) = #TABLE
-         ; If items are tables compares them
-         result = TB.Compare(v, table2[i], compare_funcs)
-         If result = False Then Return(False)
-      ElseIf GetType(v) = #FUNCTION
-         If compare_funcs
-            ; If we have to compare functions, do it
-            If v <> table2[i] Then Return(False)
-         Else
-            ; Skip function comparison
-         EndIf
-      ElseIf v <> table2[i]
-         ; Items are not equal
-         Return(False)
+  Local table2copy = CopyTable(table2)
+  Local result     = True
+  Local i, v
+  
+  For i, v In Pairs(table1)
+    If TB.Item.IsNil(table2, i)
+      ; Index of table1 not found on table2
+      Return(False)
+    ElseIf GetType(v) <> GetType(table2[i])
+      ; Item type of table1 different from item type of table2
+      Return(False)
+    ElseIf GetType(v) = #TABLE
+      ; If items are tables compares them
+      result = TB.Compare(v, table2[i], compare_funcs)
+      If result = False Then Return(False)
+    ElseIf GetType(v) = #FUNCTION
+      If compare_funcs
+        ; If we have to compare functions, do it
+        If v <> table2[i] Then Return(False)
+      Else
+        ; Skip function comparison
       EndIf
+    ElseIf v <> table2[i]
+      ; Items are not equal
+      Return(False)
+    EndIf
 
-      ; Items are equal, remove them from the control table
-      table2copy[i] = Nil
-   Next
+    ; Items are equal, remove them from the control table
+    table2copy[i] = Nil
+  Next
 
-   If TB.Count(table2copy) <> 0 Then Return(False) Else Return(True)
+  If TB.Count(table2copy) <> 0 Then Return(False) Else Return(True)
 
 EndFunction
 
@@ -889,70 +887,69 @@ Compare 'table1' and 'table2' and returns a score. Set 'compare_funcs' to TRUE
 if you want to compare function entries too. The comparisons are recursive.
 -------------------------------------------------------------------------------
 INPUT
-  table1 => The first table to compare
-  table2 => The second table to compare
-  compare_func => Set to TRUE to compare also function fields
-  count I> This argument is used internally to handle recursive calls
-  equals I> This argument is used internally to handle recursive calls  
+  table1 : The first table to compare
+  table2 : The second table to compare
+  compare_func : Set to TRUE to compare also function fields
+  count I : This argument is used internally to handle recursive calls
+  equals I : This argument is used internally to handle recursive calls  
 OUTPUT
-  score => The resulting score between 0 and 1 where 1 means identical tables.
-  compared => Count of the compared items
-  equals => Count of the identical items
+  score : The resulting score between 0 and 1 where 1 means identical tables.
+  compared : Count of the compared items
+  equals : Count of the identical items
 ******************************************************************************/
-   If HL.IsNil(count ) Then count  = 0
-   If HL.IsNil(equals) Then equals = 0
+  If IsNil(count ) Then count  = 0
+  If IsNil(equals) Then equals = 0
 
-   If GetType(table1) <> #TABLE Or GetType(table2) <> #TABLE Then Return(0)
+  If GetType(table1) <> #TABLE Or GetType(table2) <> #TABLE Then Return(0)
 
-   Local table2copy = CopyTable(table2)
-   Local result     = 0
+  Local table2copy = CopyTable(table2)
+  Local result     = 0
 
-   For i, v In Pairs(table1)
-      If TB.Item.IsNil(table2, i)
-         ; Index of table1 not found on table2
-         count = count + 1
-      ElseIf GetType(v) <> GetType(table2[i])
-         ; Item type of table1 different from item type of table2
-         count = count + 1
-      ElseIf GetType(v) = #TABLE
-         ; If items are tables compares them
-         If v = table2[i]
-            ; Same table
-            count = count + 1
-            equals = equals + 1
-         Else
-            r1, count1, equals1 = TB.CompareScore(v, table2[i], compare_funcs, count, equals)
-            r = r + 1
-            count = count + count1
-            equals = equals + equals1
-         EndIf
-      ElseIf GetType(v) = #FUNCTION
-         If compare_funcs
-            ; If we have to compare functions, do it
-            If v = table2[i]
-               equals = equals + 1
-               count  = count + 1
-            EndIf
-         Else
-            ; Skip function comparison
-         EndIf
-      ElseIf v <> table2[i]
-         ; Items are not equal
-         count = count + 1
+  For i, v In Pairs(table1)
+    If TB.Item.IsNil(table2, i)
+      ; Index of table1 not found on table2
+      count = count + 1
+    ElseIf GetType(v) <> GetType(table2[i])
+      ; Item type of table1 different from item type of table2
+      count = count + 1
+    ElseIf GetType(v) = #TABLE
+      ; If items are tables compares them
+      If v = table2[i]
+        ; Same table
+        count = count + 1
+        equals = equals + 1
       Else
-         ; Items are equal, remove them from the control table
-         table2copy[i] = Nil
-         count  = count  + 1
-         equals = equals + 1
+        r1, count1, equals1 = TB.CompareScore(v, table2[i], compare_funcs, count, equals)
+        r = r + 1
+        count = count + count1
+        equals = equals + equals1
       EndIf
+    ElseIf GetType(v) = #FUNCTION
+      If compare_funcs
+        ; If we have to compare functions, do it
+        If v = table2[i]
+          equals = equals + 1
+          count  = count + 1
+        EndIf
+      Else
+        ; Skip function comparison
+      EndIf
+    ElseIf v <> table2[i]
+      ; Items are not equal
+      count = count + 1
+    Else
+      ; Items are equal, remove them from the control table
+      table2copy[i] = Nil
+      count  = count  + 1
+      equals = equals + 1
+    EndIf
 
-   Next
+  Next
 
-   Local result = 0
-   If count > 0
-      result = equals/count
-   EndIf
-   Return(result, count, equals)
+  Local result = 0
+  If count > 0 Then result = equals/count
+
+  Return(result, count, equals)
 
 EndFunction
 
@@ -967,12 +964,12 @@ to TRUE otherwise modify 'source' directly.
 The process is recursive.
 -------------------------------------------------------------------------------
 INPUT
-  source => The source table (the one we need to update)
-  changes => The table of changes
-  returnsNew => Set to TRUE to obtain a new table instead of modify directly the
+  source : The source table (the one we need to update)
+  changes : The table of changes
+  returnsNew : Set to TRUE to obtain a new table instead of modify directly the
              'source' table.
 OUTPUT
-  result => Nil in case of error or the new, updated table
+  result : Nil in case of error or the new, updated table
 ******************************************************************************/
   Local NewTable = {}
 
@@ -1034,26 +1031,28 @@ Converts all 'table' items into a string using 'separator' as delimiter between
 each item. Returns the resulting string.
 -------------------------------------------------------------------------------
 INPUT
-  table => The table of strings to convert
-  separator => The character to use as a separator (one character)
+  table : The table of strings to convert
+  separator : The character to use as a separator (one character)
 OUTPUT
-  result => The resulting string
+  result : The resulting string
 NOTE
   This function is usable on tables of strings with consecutive numeric indexes
   starting from 0.
 ******************************************************************************/
-   Local result = ""
-   Local first = True
-   For i, v In IPairs(table)
-      If Not(first)
-         result = result .. separator .. v
-      Else
-         result = v
-         first = False
-      EndIf
-   Next
+  Local result = ""
+  Local first = True
+  Local i, v
+  
+  For i, v In IPairs(table)
+    If Not(first)
+      result = result .. separator .. v
+    Else
+      result = v
+      first = False
+    EndIf
+  Next
 
-   Return(result)
+  Return(result)
 
 EndFunction
 
@@ -1067,18 +1066,20 @@ Converts the given 'string' into a table splitting its items using the provided
 Leading spaces will be trimmed out from the resulting items.
 -------------------------------------------------------------------------------
 INPUT
-  string => The string to split
-  separator => The items delimiter (one character)
+  string : The string to split
+  separator : The items delimiter (one character)
 OUTPUT
-  result => The resulting table
+  result : The resulting table
 ******************************************************************************/
-   Local result = SplitStr(string, separator)
-   For i, v In IPairs(result)
-      result[i] = TrimStr(result[i], " ", False)
-      result[i] = TrimStr(result[i], " ", True)
-   Next
+  Local result = SplitStr(string, separator)
+  Local i, v
+  
+  For i, v In IPairs(result)
+    result[i] = TrimStr(result[i], " ", False)
+    result[i] = TrimStr(result[i], " ", True)
+  Next
 
-   Return(result)
+  Return(result)
 
 EndFunction
 
@@ -1093,35 +1094,29 @@ is delimited by 'startIndex' and 'endIndex', the values range is delimited by
 supported modes have a look at the Easing library.
 -------------------------------------------------------------------------------
 INPUT
-  source => The table we want to fill with values
-  startIndex => Starting table's index
-  endIndex => Ending table's index
-  startValue => Starting value
-  endValue => Ending value
-  mode => Interpolation mode
+  source : The table we want to fill with values
+  startIndex : Starting table's index
+  endIndex : Ending table's index
+  startValue : Starting value
+  endValue : Ending value
+  mode : Interpolation mode
 OUTPUT
-  source => The source table modified
+  source : The source table modified
 NOTE
   This function is only for tables indexed with numbers. With this function
   you can easily precalculate paths for your moving objects.
 ******************************************************************************/
-   If HL.IsNil(mode) Then mode = "linear"
-   mode = LowerStr(mode)
-   Local efunc = getEasingFunction(mode)
+  If IsNil(mode) Then mode = "linear"
+  mode = LowerStr(mode)
+  Local efunc = getEasingFunction(mode)
 
-   If HL.IsNil(source) Then source = {}
+  If IsNil(source) Then source = {}
 
-   ;Local steps = EndIndex - StartIndex
-   ;Local valueStep = (EndValue - StartValue)/steps
+  For Local i = StartIndex To EndIndex
+    Source[i] = efunc(i - startIndex, startValue, endValue - startValue, endIndex - startIndex)
+  Next
 
-   ;Local startingValue = StartValue
-   For Local i = StartIndex To EndIndex
-      Source[i] = efunc(i - startIndex, startValue, endValue - startValue, endIndex - startIndex)
-      ;Source[i] = startingValue
-      ;startingValue = startingValue + valueStep
-   Next
-
-   Return(Source)
+  Return(Source)
 
 EndFunction
 
@@ -1133,22 +1128,22 @@ source = TB.Fill(Source, StartIndex, EndIndex, Value)
 Simple function to fill/initialize a table range with a value.
 -------------------------------------------------------------------------------
 INPUT
-  source => The table we want to fill with <value>
-  startIndex => Starting table's index
-  endIndex => Ending table's index
-  value => The value used to fill the table <source>
+  source : The table we want to fill with <value>
+  startIndex : Starting table's index
+  endIndex : Ending table's index
+  value : The value used to fill the table <source>
 OUTPUT
-  source => The source table modified
+  source : The source table modified
 NOTE
   This function is only for linear tables indexed with numbers.
 ******************************************************************************/
-   If HL.IsNil(source) Then source = {}
+  If IsNil(source) Then source = {}
 
-   For Local i = StartIndex To EndIndex
-      Source[i] = Value
-   Next
+  For Local i = StartIndex To EndIndex
+    Source[i] = Value
+  Next
 
-   Return(Source)
+  Return(Source)
 
 EndFunction
 
@@ -1161,28 +1156,33 @@ Use this function to copy tables recursively, you can skip functions setting
 'skipFunc' to TRUE.
 -------------------------------------------------------------------------------
 INPUT
-  source => Source table too copy
-  skipFunc => Set to TRUE to exclude functions from the copy
+  source : Source table too copy
+  skipFunc : Set to TRUE to exclude functions from the copy
 OUTPUT
-  result => Copied table
+  result : Copied table
 ******************************************************************************/
-   If HL.IsNil(SkipFunc) Then SkipFunc = False
+  If IsNil(SkipFunc) Then SkipFunc = False
 
-   Local Result = {}
-   For i, v In Pairs(Source)
-      If GetType(v) = #TABLE
-         Result[i] = TB.Copy(v, SkipFunc)
+  Local Result = {}
+  Local i, v
+  
+  For i, v In Pairs(Source)
+    If GetType(v) = #TABLE
+      Result[i] = TB.Copy(v, SkipFunc)
 
-      ElseIf GetType(v) = #FUNCTION And Not(SkipFunction)
-         Result[i] = v
-      Else
-         Result[i] = v
-      EndIf
-   Next
+    ElseIf GetType(v) = #FUNCTION And Not(SkipFunction)
+      Result[i] = v
+  
+    Else
+      Result[i] = v
+    
+    EndIf
+  Next
 
-   Return(Result)
+  Return(Result)
 
 EndFunction
+
 
 Function TB.TEST_ItemCompare()
   ; Compares one or more fields of two records, if the comparison is
