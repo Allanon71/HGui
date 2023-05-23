@@ -1888,6 +1888,9 @@ EXAMPLE
       EndIf
     Next
 
+    ; Missing IMAGE     TODO
+    ; Missing CANVASS   TODO
+
     ;:::::::::::::::::::
     ;::: ALL CLASSES :::
     ;:::::::::::::::::::
@@ -1902,12 +1905,24 @@ EXAMPLE
                   ... }
         Così posso passare anche parziali
       */
-      
-      HGui.ThemeGlobal_BoxGadget(Theme)
-      HGui.ThemeGlobal_VDividerGadget(Theme)
-      HGui.ThemeGlobal_HDividerGadget(Theme)
-      HGui.ThemeGlobal_LabelGadget(Theme)
-      HGui.ThemeGlobal_GroupGadget(Theme)
+      If HaveItem(Theme, "box")      Then HGui.Theme.SetGlobalTheme(#HGUI_BOX_GADGET, Theme.Box)
+      If HaveItem(Theme, "vdivider") Then HGui.Theme.SetGlobalTheme(#HGUI_VDIVIDER_GADGET, Theme.VDivider)
+      If HaveItem(Theme, "hdivider") Then HGui.Theme.SetGlobalTheme(#HGUI_HDIVIDER_GADGET, Theme.HDivider)
+      If HaveItem(Theme, "slabel")   Then HGui.Theme.SetGlobalTheme(#HGUI_VDIVIDER_GADGET, Theme.sLabel)
+      If HaveItem(Theme, "group")    Then HGui.Theme.SetGlobalTheme(#HGUI_GROUP_GADGET, Theme.Group)
+      If HaveItem(Theme, "knob")     Then HGui.Theme.SetGlobalTheme(#HGUI_KNOB_GADGET, Theme.Knob)
+      If HaveItem(Theme, "button")   Then HGui.Theme.SetGlobalTheme(#HGUI_BUTTON_GADGET, Theme.Button)
+      If HaveItem(Theme, "dropdown") Then HGui.Theme.SetGlobalTheme(#HGUI_DROPDOWN_GADGET, Theme.DropDown)
+      If HaveItem(Theme, "listview") Then HGui.Theme.SetGlobalTheme(#HGUI_LISTVIEW_GADGET, Theme.Listview)
+      If HaveItem(Theme, "treeview") Then HGui.Theme.SetGlobalTheme(#HGUI_TREEVIEW_GADGET, Theme.Treeview)
+      If HaveItem(Theme, "slider")   Then HGui.Theme.SetGlobalTheme(#HGUI_SLIDER_GADGET, Theme.Slider)
+      If HaveItem(Theme, "virtual")  Then HGui.Theme.SetGlobalTheme(#HGUI_VIRTUAL_GADGET, Theme.Virtual)
+      If HaveItem(Theme, "text")     Then HGui.Theme.SetGlobalTheme(#HGUI_TEXT_GADGET, Theme.Text)
+      If HaveItem(Theme, "progressbar") Then HGui.Theme.SetGlobalTheme(#HGUI_PROGRESSBAR_GADGET, Theme.Progressbar)
+      If HaveItem(Theme, "switch")  Then HGui.Theme.SetGlobalTheme(#HGUI_SWITCH_GADGET, Theme["switch"])
+      If HaveItem(Theme, "scrollbar") Then HGui.Theme.SetGlobalTheme(#HGUI_SCROLLBAR_GADGET, Theme.Scrollbar)
+      ; Missing IMAGE     TODO
+      ; Missing CANVASS   TODO
       
     Default
       DBG.Console.Out("Gadget class not yet supported! -> " .. ToString(GadgetType), DBG.Warning, HGui.DebugChannel)
