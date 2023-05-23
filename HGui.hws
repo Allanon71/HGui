@@ -277,6 +277,66 @@ EndFunction
 ;::: THEME DEFINITION :::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 ;::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
+Function HGui.Theme.Export(filename)
+  ; Export the current theme to the given filename, if the filename exists
+  ; it will be overwritten.
+  ; -----
+  
+  ; Build the table to export
+  Local expTbl, HGT = {}, HGui.Theme
+  expTbl = 
+    { WindowBG    = HGT.WindowBG,
+      Tip         = HGT.Tip,
+      Root        = HGT.Root,
+      Menu        = HGT.Menu,
+      Submenu     = HGT.Submenu,
+      Empty       = HGT.Empty,
+      SysRequest  = HGT.SysRequest,
+      ["box"]     = HGT.Box,
+      HDivider    = HGT.HDivider,
+      VDivider    = HGT.VDivider,
+      sLabel      = HGT.sLabel,
+      Group       = HGT.Group,
+      Knob        = HGT.Knob,
+      Button      = HGT.Button,
+      DropDown    = HGT.DropDown,
+      Listview    = HGT.Listview,
+      Treeview    = HGT.Treeview,
+      Scrollbar   = HGT.Scrollbar,
+      Slider      = HGT.Slider,
+      Progressbar = HGT.Progressbar,
+      ["switch"]  = HGT["Switch"],
+      Virtual     = HGT.Virtual,
+      Text        = HGT.Text
+      }
+  
+  Local serialized = SerializeTable(expTbl)
+  StringToFile(serialized, filename)
+  
+EndFunction
+
+Function HGui.Theme.Import(filename, apply)
+  ; Import a theme, if apply is not specified or is set to False
+  ; the theme will be only loaded to the theme table otherwise
+  ; it will be also applied to existing gadgets.
+  ; -----
+  If Exists(filename)
+    Local serialized = FileToString(filename)
+    Local impTbl = DeserializeTable(serialized)
+    
+    ; Setup the theme with the loaded values
+    TB.Set(HGui.Theme, impTbl, False)
+    
+    ; Check if we have to apply the loaded theme
+    If apply
+      HGui.Theme.SetGlobalTheme(#ALL, HGui.Theme)
+    
+    EndIf
+    
+  EndIf
+  
+EndFunction
+
 Function HGui.Theme.Generate_SkinColor(color) ; *TriDoc*
 /******************************************************************************
 skin = HGui.Theme.Generate_SkinColor(color)
