@@ -305,7 +305,7 @@ Function HGui.Theme.Export(filename)
       Scrollbar   = HGT.Scrollbar,
       Slider      = HGT.Slider,
       Progressbar = HGT.Progressbar,
-      ["switch"]  = HGT["Switch"],
+      ["switch"]  = HGT["switch"],
       Virtual     = HGT.Virtual,
       Text        = HGT.Text
       }
@@ -19625,7 +19625,6 @@ EndFunction
 
 ;------------------------------------------------------------------------------
 ;------------------------------------------------------------------------------
-
 
 
 /*
