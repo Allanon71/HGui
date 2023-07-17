@@ -2283,7 +2283,7 @@ G2D._skinValidator =
         If Not(HaveItem(skinLayer.params, "brush" )) Then Return(False)
         If Not(HaveItem(skinLayer.params, "offset")) Then skinLayer.params.offset = { x = 0, y = 0 }
         If Not(HaveItem(skinLayer.params, "alpha" )) Then skinLayer.params.alpha  = #NONE
-        If Not(HaveItem(skinLayer.params, "size"  )) Then size = skinLayer.params.size
+        If     HaveItem(skinLayer.params, "size") Then size = skinLayer.params.size
 
         t_area:skinPattern(
           skinLayer.params.brush,
